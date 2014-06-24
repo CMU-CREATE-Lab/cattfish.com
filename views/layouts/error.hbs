@@ -1,10 +1,17 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
 <head>
-   <title>Computer says no...</title>
-   <link href="stylesheets/main.css" rel="stylesheet">
+   <meta charset="utf-8">
+   <title>CATTfish: Computer says no...</title>
+   <link href="/stylesheets/fonts/OpenSans/OpenSans.css" rel="stylesheet" type="text/css"/>
+   <link href="/stylesheets/main.css" rel="stylesheet" type="text/css"/>
+   <script src="/lib/jquery/jquery-1.11.1.min.js"></script>
 </head>
 <body>
-{{{body}}}
+{{> header}}
+<div class="container" style="background: rgba(255, 255, 255, .8); padding:15px; margin-bottom:15px">
+   {{{body}}}
+</div>
+{{> footer}}
 </body>
 </html>
