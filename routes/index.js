@@ -4,7 +4,7 @@ var passport = require('passport');
 var log = require('log4js').getLogger();
 
 router.get('/', function(req, res) {
-   res.render('index', { title : "cattfish.com", name : 'cattfish.com'});
+   res.render('index', { title : "cattfish.com"});
 });
 
 router.get('/register', function(req, res) {

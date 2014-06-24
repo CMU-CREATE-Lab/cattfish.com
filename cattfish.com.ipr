@@ -223,6 +223,10 @@
           <option name="FOR_BRACE_FORCE" value="3" />
           <option name="PARENT_SETTINGS_INSTALLED" value="true" />
         </codeStyleSettings>
+        <codeStyleSettings language="HOCON">
+          <option name="KEEP_BLANK_LINES_BEFORE_RBRACE" value="0" />
+          <option name="PARENT_SETTINGS_INSTALLED" value="true" />
+        </codeStyleSettings>
         <codeStyleSettings language="HTML">
           <indentOptions>
             <option name="INDENT_SIZE" value="3" />
@@ -386,6 +390,28 @@
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true">
     <output url="file://$PROJECT_DIR$/out" />
+  </component>
+  <component name="ProjectTasksOptions">
+    <TaskOptions isEnabled="true">
+      <option name="arguments" value="$FileName$ $FileNameWithoutExtension$.css" />
+      <option name="checkSyntaxErrors" value="false" />
+      <option name="description" value="Compiles .scss files into .css files" />
+      <option name="exitCodeBehavior" value="ERROR" />
+      <option name="fileExtension" value="scss" />
+      <option name="immediateSync" value="true" />
+      <option name="name" value="SCSS" />
+      <option name="output" value="$FileNameWithoutExtension$.css" />
+      <option name="outputFilters">
+        <array />
+      </option>
+      <option name="outputFromStdout" value="false" />
+      <option name="passParentEnvs" value="true" />
+      <option name="program" value="$PROJECT_DIR$/node_modules/node-sass/bin/node-sass" />
+      <option name="scopeName" value="Project Files" />
+      <option name="trackOnlyRoot" value="true" />
+      <option name="workingDir" value="$FileDir$" />
+      <envs />
+    </TaskOptions>
   </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />

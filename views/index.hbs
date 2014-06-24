@@ -1,15 +1,115 @@
-<p>Welcome to {{name}}! {{#if isAuthenticated}}User: {{user.username}}{{/if}}</p>
-{{#if flashMessages}}
-   {{#if flashMessages.info}}
-      <b>{{flashMessages.info}}</b>
-   {{/if}}
-   {{#if flashMessages.error}}
-      <b>{{flashMessages.error}}</b>
-   {{/if}}
-{{/if}}
-{{#if isAuthenticated}}
-   <a href="/logout">Log Out</a>
-{{else}}
-   <a href="/register">Register</a> |
-   <a href="/login">Log In</a>
-{{/if}}
+<div id="header">
+   <div class="container">
+      <div id="navigation">
+         <ul>
+            <li><a href="#">Log in</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Shop</a></li>
+            <li><a href="#">Public Data</a></li>
+            <li><span class="nav_selected">home</span></li>
+         </ul>
+      </div>
+      <div id="logo_container">
+         {{!--<a href="#"><img class="logo" src="images/logo.png" alt="CATTfish and Flamingo Water sensor"/></a>--}}
+      </div>
+   </div>
+</div>
+<div class="container hero_image">
+   <div id="hero_text">
+      <h1>CATTfish</h1>
+      <span>
+         The new way to track your<br/>
+         water quality at home.
+      </span>
+   </div>
+</div>
+<div class="container main_body">
+   <div id="intro" class="centered">
+      <div class="title">Home Water Sensor</div>
+      <p>
+         CATTfish provides a simple and easy
+         way to track water quality at home.
+         Try one now for peace of mind and
+         long term tracking of your family's water.
+      </p>
+   </div>
+   <div>
+      <h1 class="section">How does it work?</h1>
+   </div>
+   <div>
+      <div id="videos">
+         <div class="video_thumbnail" style="float:right">
+            <a href="#">
+               <img src="images/placeholder.png"/><br/>
+               Uploading your data
+            </a>
+         </div>
+         <div class="video_thumbnail" style="float:left">
+            <a href="#">
+               <img src="images/placeholder.png"/><br/>
+               Introduction to CATTfish
+            </a>
+         </div>
+         <div class="video_thumbnail centered">
+            <a href="#">
+               <img src="images/placeholder.png"/><br/>
+               Setting up your CATTfish
+            </a>
+         </div>
+      </div>
+   </div>
+   <div>
+      <h1 class="section">What is CATTFish?</h1>
+   </div>
+   <div>
+      <div id="what_is" class="centered">
+         <p>CATTfish was created by the CREATE Lab at Carnegie Mellon University. In 2014, a
+            new venture, MellonHead Labs, was formed to bring this innovative environmental sensing
+            product to market. The sensor is used by both citizens and industry to track water
+            quality changes over long periods of time and large geographic areas. Cloud based
+            visualization of large data sets allows easy interpretation of results.</p>
+      </div>
+   </div>
+   <div>
+      <h1 class="section">Buy now</h1>
+   </div>
+   <div>
+      <div id="products">
+         <div class="product_thumbnail" style="float:right">
+            <a href="#">
+               <img src="images/placeholder.png"/><br/>
+               CATTFish Sensor
+            </a>
+         </div>
+         <div class="product_thumbnail" style="float:left">
+            <a href="#">
+               <img src="images/placeholder.png"/><br/>
+               CATTfish Kit
+            </a>
+         </div>
+         <div class="product_thumbnail centered">
+            <a href="#">
+               <img src="images/placeholder.png"/><br/>
+               CATTfish Display
+            </a>
+         </div>
+      </div>
+   </div>
+</div>
+<div id="footer">
+   <div id="sections">
+      <a href="#">Home</a>
+      <a href="#">Public Data</a>
+      <a href="#">Shop</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+      <a href="#">Terms &amp; Conditions</a>
+   </div>
+   <p><strong>MellonHead Labs</strong><br/>
+      3117 Washington Pike, STE 600<br/>
+      Pittsburgh, PA 15017<br/>
+      412-942-9001<br/>
+      <a href="mailto:info@cattfish.com">info@CATTfish.com</a>
+   </p>
+</div>
