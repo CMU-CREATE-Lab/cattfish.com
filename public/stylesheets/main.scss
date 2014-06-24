@@ -86,20 +86,43 @@ a:hover, a:focus {
          float: right;
          text-transform: uppercase;
 
-         a, span.nav_selected {
+         a, .nav_selected {
             color: #5b5f6c;
             text-decoration: none;
             padding: 14px;
             float: left;
          }
 
-         a:hover, span.nav_selected {
+         a:hover, .nav_selected {
             color: #ffffff;
             background: #2e68a3;
          }
       }
    }
+}
 
+// =====================================================================================================================
+// Footer
+// =====================================================================================================================
+
+#footer {
+   color: #e1ebda;
+   font-size: 12px;
+   text-align: center;
+
+
+   #sections a {
+      margin-left: 15px;
+      margin-right: 15px;
+   }
+
+   p {
+      margin: 30px 0px;
+   }
+
+   a {
+      color: #e1ebda;
+   }
 }
 
 // =====================================================================================================================
@@ -199,26 +222,3 @@ a:hover, a:focus {
    }
 }
 
-// =====================================================================================================================
-// Footer
-// =====================================================================================================================
-
-#footer {
-   color: #e1ebda;
-   font-size: 12px;
-   text-align: center;
-
-
-   #sections a {
-      margin-left: 15px;
-      margin-right: 15px;
-   }
-
-   p {
-      margin: 30px 0px;
-   }
-
-   a {
-      color: #e1ebda;
-   }
-}

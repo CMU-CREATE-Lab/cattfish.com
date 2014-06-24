@@ -1,0 +1,17 @@
+<div id="header">
+   <div class="container">
+      <div id="navigation">
+         <ul>
+            <li><a href="#">Log in</a></li>
+            <li><a href="/contact" {{#ifEqual section "contact"}}class="nav_selected"{{/ifEqual}}>Contact</a></li>
+            <li><a href="/about" {{#ifEqual section "about"}}class="nav_selected"{{/ifEqual}}>About</a></li>
+            <li><a href="#">Shop</a></li>
+            <li><a href="/data" {{#ifEqual section "data"}}class="nav_selected"{{/ifEqual}}>Public Data</a></li>
+            <li><a href="/" {{#ifEqual section "home"}}class="nav_selected"{{/ifEqual}}>home</a></li>
+         </ul>
+      </div>
+      <div id="logo_container">
+         {{!--<a href="#"><img class="logo" src="images/logo.png" alt="CATTfish and Flamingo Water sensor"/></a>--}}
+      </div>
+   </div>
+</div>
