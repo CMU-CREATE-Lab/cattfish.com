@@ -1,0 +1,46 @@
+<script language="JavaScript" type="text/javascript">
+   function submitRegistration() {
+      var user = {
+         username: $("#username").val(),
+         password: $("#password").val(),
+         email: $("#email").val()
+
+      };
+      $.ajax({
+        type: "POST",
+        url: "/api/v1/users",
+        data: user,
+        success: function(data, status){
+           console.log("SUCCESS!: " + JSON.stringify(data, null, 3));
+        },
+        error: function(jqXHR, textStatus, errorThrown){
+           console.log("ERROR: " + errorThrown + ": " + JSON.stringify(jqXHR.responseJSON, null, 3));
+           console.log(jqXHR);
+        },
+        dataType: "json"
+      });
+   }
+</script>
+<h1>Sign Up</h1>
+{{#if flashMessages}}
+   {{#if flashMessages.info}}
+      <b>{{flashMessages.info}}</b>
+   {{/if}}
+   {{#if flashMessages.error}}
+      <b>{{flashMessages.error}}</b>
+   {{/if}}
+{{/if}}
+<form>
+   <p>
+      <input type="text" id="username" name="username" placeholder="Username"/>
+   </p>
+   <p>
+      <input type="password" id="password" name="password" placeholder="Password"/>
+   </p>
+   <p>
+      <input type="text" id="email" name="email" placeholder="Email Address"/>
+   </p>
+   <p>
+      <input type="button" value="Sign Up" onclick="submitRegistration()"/>
+   </p>
+</form>

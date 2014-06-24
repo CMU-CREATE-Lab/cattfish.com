@@ -1,0 +1,15 @@
+<p>Welcome to {{name}}! {{#if isAuthenticated}}User: {{user.username}}{{/if}}</p>
+{{#if flashMessages}}
+   {{#if flashMessages.info}}
+      <b>{{flashMessages.info}}</b>
+   {{/if}}
+   {{#if flashMessages.error}}
+      <b>{{flashMessages.error}}</b>
+   {{/if}}
+{{/if}}
+{{#if isAuthenticated}}
+   <a href="/logout">Log Out</a>
+{{else}}
+   <a href="/register">Register</a> |
+   <a href="/login">Log In</a>
+{{/if}}
