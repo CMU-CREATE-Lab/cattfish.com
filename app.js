@@ -39,8 +39,18 @@ mongoose.connection.on("connected", function() {
                                                 extname : '.hbs',
                                                 defaultLayout : 'main',
                                                 layoutsDir : path.join(viewsDir, "layouts"),
-                                                partialsDir : path.join(viewsDir, "partials")
+                                                partialsDir : path.join(viewsDir, "partials"),
+                                                helpers : {
+                                                   // Got this from http://stackoverflow.com/a/9405113
+                                                   ifEqual : function(v1, v2, options) {
+                                                      if (v1 === v2) {
+                                                         return options.fn(this);
+                                                      }
+                                                      return options.inverse(this);
+                                                   }
+                                                }
                                              });
+
    app.engine('hbs', handlebars.engine);
    app.set('view engine', '.hbs');
    app.set('view cache', app.get('env') === 'production');           // only cache views in production
