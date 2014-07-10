@@ -6,7 +6,7 @@ module.exports.UserSchema = {
    "properties" : {
       "username" : {
          "type" : "string",
-         "minLength" : 5
+         "minLength" : 4
       },
       "password" : {
          "type" : "string",
@@ -14,7 +14,7 @@ module.exports.UserSchema = {
       },
       "email" : {
          "type" : "string",
-         "minLength" : 5,
+         "minLength" : 6,
          "format" : "email"
       }
    },
