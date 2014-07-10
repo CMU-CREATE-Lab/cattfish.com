@@ -14,7 +14,7 @@ config.defaults({
                    },
                    "oauth" : {
                       "tokenURL" : "OAUTH2_TOKEN_SERVER_URL",
-                      "clientID" : "YOUR_OAUTH2_CLIENT_ID",
+                      "clientId" : "YOUR_OAUTH2_CLIENT_ID",
                       "clientSecret" : "YOUR_OAUTH2_CLIENT_SECRET"
                    },
                    "database" : {
