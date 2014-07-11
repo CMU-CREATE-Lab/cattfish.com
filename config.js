@@ -1,6 +1,11 @@
 var config = require('nconf');
+var log = require('log4js').getLogger();
 
-config.argv().env().file({ file : './config.json' });
+var nodeEnvironment = process.env.NODE_ENV || "development";
+var configFile = './config-' + nodeEnvironment + '.json';
+log.info("Using config file: " + configFile);
+
+config.argv().env().file({ file : configFile });
 
 config.defaults({
                    "server" : {
@@ -10,6 +15,7 @@ config.defaults({
                       "apiRootUrl" : "ESDR_API_ROOT_URL"
                    },
                    "cookie" : {
+                      "name" : "sid",
                       "secret" : "YOUR_COOKIE_SECRET"
                    },
                    "oauth" : {
@@ -18,18 +24,13 @@ config.defaults({
                       "clientSecret" : "YOUR_OAUTH2_CLIENT_SECRET"
                    },
                    "database" : {
-                      "url" : "mongodb://localhost/cattfish",
-                      "options" : {
-                         "server" : {
-                            "socketOptions" : {
-                               "keepAlive" : 1
-                            }
-                         },
-                         "replset" : {
-                            "socketOptions" : {
-                               "keepAlive" : 1
-                            }
-                         }
+                      "host" : "DATABASE_HOST",
+                      "port" : "3306",
+                      "database" : "DATABASE_NAME",
+                      "username" : "USERNAME",
+                      "password" : "PASSWORD",
+                      "pool" : {
+                         "connectionLimit" : 10
                       }
                    }
                 });

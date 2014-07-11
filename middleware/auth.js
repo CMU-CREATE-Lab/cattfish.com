@@ -27,20 +27,21 @@ module.exports = function(UserModel) {
                try {
                   var jsonResponse = JSON.parse(body);
                   if (response.statusCode === 200 && jsonResponse.access_token) {
+                     var tokens = jsonResponse;
                      log.debug("   ESDR oauth for user [" + username + "] successful!");
-                     var update = {
+                     var user = {
                         username : username,
-                        lastLogin: Date.now(),
-                        tokens : {
-                           accessToken : jsonResponse.access_token,
-                           accessTokenExpiration : new Date(new Date().getTime() + (jsonResponse.expires_in * 1000)),
-                           refreshToken : jsonResponse.refresh_token
-                        }
+                        lastLogin: new Date(),
+                        accessToken : tokens.access_token,
+                        refreshToken : tokens.refresh_token,
+                        accessTokenExpiration : new Date(new Date().getTime() + (tokens.expires_in * 1000))
                      };
-                     UserModel.findOneAndUpdate({username : username}, update, {upsert : true}, function(err, user) {
+                     UserModel.createOrUpdateTokens(user, function(err, result) {
                         if (err) {
                            return done(err, false);
                         }
+                        // need to add the ID so we can store it in the session
+                        user.id = result.insertId;
                         return done(null, user);
                      });
                   }

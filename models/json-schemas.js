@@ -1,7 +1,7 @@
-module.exports.UserSchema = {
+module.exports.CreateUserSchema = {
    "$schema" : "http://json-schema.org/draft-04/schema#",
    "title" : "User",
-   "description" : "An ESDR user",
+   "description" : "An ESDR/CATTfish user",
    "type" : "object",
    "properties" : {
       "username" : {

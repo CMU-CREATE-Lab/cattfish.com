@@ -1,3 +1,36 @@
+<script language="JavaScript" type="text/javascript">
+
+   $(document).ready(function() {
+      // set focus on first form element (got this from http://stackoverflow.com/a/279153/703200)
+      $('form:first *:input[type!=hidden]:first').focus();
+   });
+
+   function submitLogin() {
+      var user = {
+         username : $("#username").val(),
+         password : $("#password").val()
+      };
+      $.ajax({
+                type : "POST",
+                url : "/login",
+                dataType : "json",
+                data : user,
+                success : function(data, status) {
+                   console.log("LOGIN SUCCESS!: " + JSON.stringify(data, null, 3));
+                   window.location.href = "/";
+                },
+                error : function(jqXHR, textStatus, errorThrown) {
+                   if (jqXHR.status == 401) {
+                      console.log("Invalid username and/or password.");
+                   }
+                   else {
+                      console.log("ERROR: [" + textStatus + "]:" + errorThrown + ": " + JSON.stringify(jqXHR.responseJSON, null, 3));
+                   }
+                }
+             });
+   }
+</script>
+
 {{#if flashMessages}}
    {{#if flashMessages.info}}
       <b>{{flashMessages.info}}</b>
@@ -6,16 +39,19 @@
       <b>{{flashMessages.error}}</b>
    {{/if}}
 {{/if}}
-<form action="/login" method="post">
+<form onsubmit="submitLogin(); return false;">
    <div>
       <label>Username:</label>
-      <input type="text" name="username"/>
+      <input type="text" id="username" name="username"/>
    </div>
    <div>
       <label>Password:</label>
-      <input type="password" name="password"/>
+      <input type="password" id="password" name="password"/>
    </div>
    <div>
       <input type="submit" value="Log In"/>
    </div>
 </form>
+<script language="JavaScript" type="text/javascript">
+
+</script>

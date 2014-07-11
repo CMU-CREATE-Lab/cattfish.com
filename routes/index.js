@@ -4,19 +4,19 @@ var passport = require('passport');
 var log = require('log4js').getLogger();
 
 router.get('/', function(req, res) {
-   res.render('index', { title : "CATTfish", section: "home"});
+   res.render('index', { title : "CATTfish", section : "home"});
 });
 
 router.get('/about', function(req, res) {
-   res.render('about', { title : "CATTfish: About", section: "about"});
+   res.render('about', { title : "CATTfish: About", section : "about"});
 });
 
 router.get('/contact', function(req, res) {
-   res.render('contact', { title : "CATTfish: Contact", section: "contact"});
+   res.render('contact', { title : "CATTfish: Contact", section : "contact"});
 });
 
 router.get('/data', function(req, res) {
-   res.render('data', { title : "CATTfish: Data", section: "data"});
+   res.render('data', { title : "CATTfish: Data", section : "data"});
 });
 
 router.get('/register', function(req, res) {
@@ -27,13 +27,26 @@ router.get('/login', function(req, res) {
    res.render('login', { title : 'CATTfish: Login' });
 });
 
-router.post('/login', passport.authenticate('local',
-                                            {
-                                               successRedirect : '/',
-                                               failureRedirect : '/login',
-                                               failureFlash : true
-                                            }
-));
+router.post('/login', function(req, res, next) {
+   passport.authenticate('local', function(err, user, info) {
+      if (err) {
+         return next(err);
+      }
+      if (!user) {
+         return res.jsendClientError("Login failed", null, 401);
+      }
+      req.logIn(user, function(err) {
+         if (err) {
+            return next(err);
+         }
+         return res.jsendSuccess({
+                                    username : user.username,
+                                    accessToken : user.accessToken,
+                                    accessTokenExpiration : user.accessTokenExpiration
+                                 });
+      });
+   })(req, res, next);
+});
 
 router.get('/logout', function(req, res) {
    if (req.user) {

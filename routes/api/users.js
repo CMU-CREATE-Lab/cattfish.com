@@ -3,7 +3,7 @@ var router = express.Router();
 var request = require('request');
 var JaySchema = require('jayschema');
 var config = require('../../config');
-var UserSchema = require('../../models/json-schemas').UserSchema;
+var CreateUserSchema = require('../../models/json-schemas').CreateUserSchema;
 var log = require('log4js').getLogger();
 
 var jsonValidator = new JaySchema();
@@ -15,10 +15,12 @@ module.exports = function(UserModel) {
       var user = req.body;
 
       // validate JSON (asynchronously)
-      jsonValidator.validate(user, UserSchema, function(err1) {
+      jsonValidator.validate(user, CreateUserSchema, function(err1) {
          if (err1) {
-            return res.jsendClientError(err1);
+            return res.jsendClientError("Validation failure", err1);
          }
+
+         // TODO: handle case where user already exists in ESDR.  That's OK if all fields match!
 
          log.debug("Received POST to create user [" + user.username + "]. Delegating to ESDR...");
 
