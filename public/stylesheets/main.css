@@ -41,6 +41,17 @@ a {
 a:hover, a:focus {
   text-decoration: underline; }
 
+.form_messages {
+  display: none;
+  border: 1px solid #A75B4E;
+  background: #FAD3C4;
+  border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  color: black;
+  padding: 5px;
+  font-size: 12px; }
+
 #header {
   background: #f4f6ee;
   border-bottom: 1px solid #dce2e2;
@@ -52,23 +63,53 @@ a:hover, a:focus {
     #header #logo_container .logo {
       margin-top: 6px; }
   #header #navigation {
+    position: relative;
     float: right;
-    padding-right: 15px; }
-    #header #navigation ul {
-      list-style-type: none;
-      margin: 0;
-      padding: 0; }
-    #header #navigation li {
+    padding-right: 15px;
+    text-decoration: none; }
+    #header #navigation a {
+      color: #5b5f6c; }
+    #header #navigation a:hover {
+      color: white; }
+    #header #navigation .navigation_item {
+      padding: 14px;
+      color: #5b5f6c;
       float: right;
-      text-transform: uppercase; }
-      #header #navigation li a, #header #navigation li .nav_selected {
-        color: #5b5f6c;
+      text-transform: uppercase;
+      cursor: pointer; }
+    #header #navigation .navigation_item_selected {
+      color: white;
+      background: #2e68a3; }
+    #header #navigation #login_popup {
+      position: absolute;
+      right: 15px;
+      top: 50px;
+      color: white;
+      background-color: #2e68a3;
+      padding: 10px;
+      display: none; }
+      #header #navigation #login_popup a {
+        color: white;
+        text-decoration: underline; }
+      #header #navigation #login_popup #login_form #login_messages {
+        margin-bottom: 10px; }
+      #header #navigation #login_popup #login_form input {
+        width: 300px;
+        font-size: larger; }
+      #header #navigation #login_popup #login_form .login_form_links {
+        position: relative;
+        margin-top: 10px; }
+      #header #navigation #login_popup #login_form input[type="submit"] {
+        background: none;
+        border: none;
+        color: white;
         text-decoration: none;
-        padding: 14px;
-        float: left; }
-      #header #navigation li a:hover, #header #navigation li .nav_selected {
-        color: #ffffff;
-        background: #2e68a3; }
+        cursor: pointer;
+        width: auto;
+        position: relative;
+        font-size: medium;
+        margin: 0;
+        padding: 0; }
 
 #footer {
   color: #e1ebda;
@@ -85,7 +126,7 @@ a:hover, a:focus {
 .hero_image {
   background: #314b5c url("../images/heroImage.jpg") no-repeat scroll 0 0;
   background-size: 1020px;
-  color: #ffffff;
+  color: white;
   height: 440px; }
   .hero_image #hero_text {
     padding-top: 210px;

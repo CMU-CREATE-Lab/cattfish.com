@@ -1,14 +1,67 @@
+<script language="JavaScript" type="text/javascript">
+
+   $(document).ready(function() {
+      var selectedSectionNavElementId = "nav_" + "{{section}}";
+
+
+      // highlight the selected section
+      $("#" + selectedSectionNavElementId).addClass("navigation_item_selected")
+
+      // define the actions for the navigation buttons
+      var navActions = {
+         nav_home : "/",
+         nav_data : "/data",
+         nav_shop : function() {
+            // TODO
+            alert("Not yet implemented");
+         },
+         nav_about : "/about",
+         nav_contact : "/contact",
+         nav_login : function() {
+            var loginPopup = $("#login_popup");
+
+            // toggle visibility
+            loginPopup.toggle();
+
+            // if visible, set focus to the email field
+            if (loginPopup.is(":visible")) {
+               loginPopup.find("#email").focus();
+            }
+         }
+      };
+
+      // add event handlers to the nav items
+      $(".navigation_item")
+            .mouseover(function() {
+                          $(this).addClass("navigation_item_selected");
+                       })
+            .mouseout(function() {
+                         // only remove the class if we're not mousing out of the Log In button and the login popup
+                         // is visible AND this isn't the button for the currently selected secion
+                         if (!(this.id == "nav_login" && $("#login_popup").is(":visible")) && selectedSectionNavElementId != this.id) {
+                            $(this).removeClass("navigation_item_selected");
+                         }
+                      })
+            .click(function() {
+                      var navAction = navActions[this.id];
+                      if (typeof navAction === 'function') {
+                         navAction();
+                      } else {
+                         window.location.href = navAction;
+                      }
+                   });
+   });
+</script>
 <div id="header">
    <div class="container">
-      <div id="navigation">
-         <ul>
-            <li><a href="#">Log in</a></li>
-            <li><a href="/contact" {{#ifEqual section "contact"}}class="nav_selected"{{/ifEqual}}>Contact</a></li>
-            <li><a href="/about" {{#ifEqual section "about"}}class="nav_selected"{{/ifEqual}}>About</a></li>
-            <li><a href="#">Shop</a></li>
-            <li><a href="/data" {{#ifEqual section "data"}}class="nav_selected"{{/ifEqual}}>Public Data</a></li>
-            <li><a href="/" {{#ifEqual section "home"}}class="nav_selected"{{/ifEqual}}>home</a></li>
-         </ul>
+      <div id="navigation" class="noselect">
+         <div id="nav_login" class="navigation_item">Log in</div>
+         <div id="nav_contact" class="navigation_item">Contact</div>
+         <div id="nav_about" class="navigation_item">About</div>
+         <div id="nav_shop" class="navigation_item">Shop</div>
+         <div id="nav_data" class="navigation_item">Public Data</div>
+         <div id="nav_home" class="navigation_item">Home</div>
+         {{> login_popup}}
       </div>
       <div id="logo_container">
          {{!--<a href="#"><img class="logo" src="images/logo.png" alt="CATTfish and Flamingo Water sensor"/></a>--}}
