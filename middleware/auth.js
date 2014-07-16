@@ -6,11 +6,7 @@ var config = require('../config');
 
 module.exports = function(UserModel) {
 
-   passport.use(new LocalStrategy({
-                                     usernameField : 'email',
-                                     passwordField : 'password'
-                                  },
-                                  function(username, password, done) {
+   passport.use(new LocalStrategy(function(username, password, done) {
                                      log.debug("Oauth to ESDR for login of user [" + username + "]");
                                      var url = config.get("oauth:tokenUrl");
                                      request.post(url, {
