@@ -122,6 +122,8 @@ Database.create(function(err, db) {
 
          // configure routing
          app.use('/api/v1/users', require('./routes/api/users')(db.users));
+         app.use('/login', require('./routes/login'));
+         app.use('/logout', require('./routes/logout'));
          app.use('/', require('./routes/index'));
 
          // ERROR HANDLERS ---------------------------------------------------------------------------------------------

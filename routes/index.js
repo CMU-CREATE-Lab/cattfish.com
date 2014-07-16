@@ -1,7 +1,5 @@
 var express = require('express');
 var router = express.Router();
-var passport = require('passport');
-var log = require('log4js').getLogger();
 
 router.get('/', function(req, res) {
    res.render('index', { title : "CATTfish", section : "home"});
@@ -21,39 +19,6 @@ router.get('/data', function(req, res) {
 
 router.get('/register', function(req, res) {
    res.render('register', { title : "CATTfish: Register"});
-});
-
-router.get('/login', function(req, res) {
-   res.render('login', { title : 'CATTfish: Login' });
-});
-
-router.post('/login', function(req, res, next) {
-   passport.authenticate('local', function(err, user, info) {
-      if (err) {
-         return next(err);
-      }
-      if (!user) {
-         return res.jsendClientError("Login failed", null, 401);
-      }
-      req.logIn(user, function(err) {
-         if (err) {
-            return next(err);
-         }
-         return res.jsendSuccess({
-                                    username : user.username,
-                                    accessToken : user.accessToken,
-                                    accessTokenExpiration : user.accessTokenExpiration
-                                 });
-      });
-   })(req, res, next);
-});
-
-router.get('/logout', function(req, res) {
-   if (req.user) {
-      log.debug("Logout: destroying session for user: " + req.user.username);
-   }
-   req.logout();
-   res.redirect('/');
 });
 
 module.exports = router;
