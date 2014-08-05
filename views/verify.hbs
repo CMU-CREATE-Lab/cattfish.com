@@ -1,0 +1,36 @@
+<script language="JavaScript" type="text/javascript">
+   $(document).ready(function() {
+
+      var handleVerificationSuccess = function() {
+         $("#verificationResult").text("Your account is verified.  You may now log in.")
+      };
+
+      var handleVerificationFailure = function() {
+         $("#verificationResult").text("Sorry, we could not verify the account.")
+      };
+
+      var verificationToken = "{{verificationToken}}";
+      if (verificationToken && verificationToken.length > 0) {
+         $.ajax({
+                   type : "GET",
+                   url : "/api/v1/users/" + verificationToken + "/verify",
+                   dataType : "json",
+                   success : function(response, status) {
+                      if (response && response.data && response.data.isVerified) {
+                         handleVerificationSuccess();
+                      }
+                      else {
+                         handleVerificationFailure();
+                      }
+                   },
+                   error : handleVerificationFailure
+                });
+      }
+      else {
+         handleVerificationFailure();
+      }
+   });
+
+</script>
+<h1>Account Verification</h1>
+<div id="verificationResult"></div>

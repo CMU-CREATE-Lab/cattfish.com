@@ -74,9 +74,9 @@ Database.create(function(err, db) {
 
          // setup middleware
          app.use(favicon(path.join(__dirname, 'public/favicon.ico')));     // favicon serving
-         app.use(requestLogger('dev'));      // request logging
          app.use(compress());                // enables gzip compression
          app.use(express.static(path.join(__dirname, 'public')));          // static file serving
+         app.use(requestLogger('dev'));      // request logging
          app.use(bodyParser.urlencoded({ extended : true }));     // form parsing
          app.use(bodyParser.json());         // json body parsing
          app.use(function(error, req, res, next) { // function MUST have arity 4 here!

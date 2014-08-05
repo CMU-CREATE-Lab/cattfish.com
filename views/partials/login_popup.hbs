@@ -17,15 +17,15 @@
 
    function submitLogin() {
       var user = {
-         username : $("#username").val().trim(),
-         password : $("#password").val()
+         email : $("#loginEmail").val().trim(),
+         password : $("#loginPassword").val()
       };
       console.log(user);
 
       // perform simple validation
       var messages = [];
-      if (user.username.length <= 0) {
-         messages.push("Username is required.");
+      if (user.email.length <= 0) {
+         messages.push("Email address is required.");
       }
       if (user.password.length <= 0) {
          messages.push("Password is required.");
@@ -48,7 +48,7 @@
                    },
                    error : function(jqXHR, textStatus, errorThrown) {
                       if (jqXHR.status == 401) {
-                         messages.push("Invalid username and/or password.");
+                         messages.push("Invalid email and/or password.  Make sure you verified your account.");
                       }
                       else {
                          messages.push("Login failed.");
@@ -66,10 +66,10 @@
 <div id="login_popup">
    <form id="login_form" onsubmit="submitLogin(); return false;">
       <div id="login_messages" class="form_messages"></div>
-      <div><label for="username">Username</label></div>
-      <div><input type="text" id="username" name="username"/></div>
-      <div><label for="password">Password</label></div>
-      <div><input type="password" id="password" name="password"/></div>
+      <div><label for="loginEmail">Email address</label></div>
+      <div><input type="text" id="loginEmail" name="loginEmail"/></div>
+      <div><label for="loginPassword">Password</label></div>
+      <div><input type="password" id="loginPassword" name="loginPassword"/></div>
       <div class="login_form_links" style="text-align: right">
 
          <input type="submit" value="Log In &raquo;">

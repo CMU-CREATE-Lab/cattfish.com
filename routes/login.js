@@ -15,7 +15,7 @@ router.post('/', function(req, res, next) {
             return next(err);
          }
          return res.jsendSuccess({
-                                    username : user.username,
+                                    email : user.email,
                                     accessToken : user.accessToken,
                                     accessTokenExpiration : user.accessTokenExpiration
                                  });

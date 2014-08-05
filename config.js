@@ -9,6 +9,7 @@ config.argv().env().file({ file : configFile });
 
 config.defaults({
                    "server" : {
+                      "url" : "http://localhost:3333",
                       "port" : 3333
                    },
                    "esdr" : {
@@ -20,6 +21,7 @@ config.defaults({
                    },
                    "oauth" : {
                       "tokenURL" : "OAUTH2_TOKEN_SERVER_URL",
+                      "clientDisplayName" : "YOUR_OAUTH2_CLIENT_DISPLAY_NAME",
                       "clientId" : "YOUR_OAUTH2_CLIENT_ID",
                       "clientSecret" : "YOUR_OAUTH2_CLIENT_SECRET"
                    },

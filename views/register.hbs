@@ -6,59 +6,36 @@
 
    function submitRegistration() {
       var user = {
-         username : $("#username").val(),
-         password : $("#password").val(),
-         email : $("#email").val()
-
+         email : $("#email").val(),
+         password : $("#password").val()
       };
-      $.ajax({
-                type : "POST",
-                url : "/api/v1/users",
-                dataType : "json",
-                data : user,
-                success : function(data, status) {
-                   console.log("CREATE USER SUCCESS!: " + JSON.stringify(data, null, 3));
-                   $.ajax({
-                             type : "POST",
-                             url : "/login",
-                             dataType : "json",
-                             data : {
-                                username : user.username,
-                                password : user.password
-                             },
-                             success : function(data, status) {
-                                console.log("LOGIN SUCCESS!: " + JSON.stringify(data, null, 3));
-                             },
-                             error : function(jqXHR, textStatus, errorThrown) {
-                                console.log("ERROR: " + errorThrown + ": " + JSON.stringify(jqXHR.responseJSON, null, 3));
-                                console.log(jqXHR);
-                             }
-                          });
-                },
-                error : function(jqXHR, textStatus, errorThrown) {
-                   console.log("ERROR: " + errorThrown + ": " + JSON.stringify(jqXHR.responseJSON, null, 3));
-                }
-             });
+      console.log("About to register user: " + JSON.stringify(user, null, 3));
+      superagent
+            .post("/api/v1/users")
+            .send(user)
+            .end(function(err, res) {
+                    if (res.status == 201) {
+                       console.log("CREATE USER SUCCESS!: " + JSON.stringify(res.body, null, 3));
+                    }
+                    else if (res.status == 400) {
+                       console.log("VALIDATION ERROR!: " + JSON.stringify(res.body, null, 3));
+                    }
+                    else if (res.status == 409) {
+                       console.log("USER EXISTS!: " + JSON.stringify(res.body, null, 3));
+                    }
+                    else {
+                       console.log("CREATE USER FAILURE!: " + JSON.stringify(res.body, null, 3));
+                    }
+                 });
    }
 </script>
 <h1>Sign Up</h1>
-{{#if flashMessages}}
-   {{#if flashMessages.info}}
-      <b>{{flashMessages.info}}</b>
-   {{/if}}
-   {{#if flashMessages.error}}
-      <b>{{flashMessages.error}}</b>
-   {{/if}}
-{{/if}}
 <form onsubmit="submitRegistration(); return false;">
    <p>
-      <input type="text" id="username" name="username" placeholder="Username"/>
+      <input type="text" id="email" name="email" placeholder="Email address"/>
    </p>
    <p>
       <input type="password" id="password" name="password" placeholder="Password"/>
-   </p>
-   <p>
-      <input type="text" id="email" name="email" placeholder="Email Address"/>
    </p>
    <p>
       <input type="submit" value="Sign Up"/>

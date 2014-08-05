@@ -1,12 +1,13 @@
 {
    "esdr" : {
-      "apiRootUrl" : "http://esdr.dev/api/v1"
+      "apiRootUrl" : "http://localhost:3000/api/v1"
    },
    "cookie" : {
       "secret" : "I Dig A Pygmy by Charles Hawtrey and the Deaf Aids. Phase one, in which Doris gets her oats."
    },
    "oauth" : {
-      "tokenUrl" : "http://esdr.dev/oauth/token",
+      "tokenUrl" : "http://localhost:3000/oauth/token",
+      "clientDisplayName" : "CATTFish Web Site",
       "clientId" : "cattfish.com",
       "clientSecret" : "fish heads, roly poly fish heads, eat them up, yum!"
    },

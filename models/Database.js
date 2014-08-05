@@ -1,6 +1,7 @@
 var mysql = require('mysql');
 var flow = require('nimble');
 
+var DatabaseHelper = require("./DatabaseHelper");
 var Users = require('./Users.js');
 
 var config = require('../config');
@@ -15,7 +16,7 @@ module.exports = {
          return errors.length > 0
       };
 
-      var pool = null;
+      var databaseHelper = null;
       var db = {
          users : null
       };
@@ -65,14 +66,15 @@ module.exports = {
                function(done) {
                   if (!hasErrors()) {
                      log.info("2) Creating the connection pool.");
-                     pool = mysql.createPool({
-                                                connectionLimit : config.get("database:pool:connectionLimit"),
-                                                host : config.get("database:host"),
-                                                port : config.get("database:port"),
-                                                database : config.get("database:database"),
-                                                user : config.get("database:username"),
-                                                password : config.get("database:password")
-                                             });
+                     var pool = mysql.createPool({
+                                                    connectionLimit : config.get("database:pool:connectionLimit"),
+                                                    host : config.get("database:host"),
+                                                    port : config.get("database:port"),
+                                                    database : config.get("database:database"),
+                                                    user : config.get("database:username"),
+                                                    password : config.get("database:password")
+                                                 });
+                     databaseHelper = new DatabaseHelper(pool);
                   }
                   done();
                },
@@ -81,7 +83,7 @@ module.exports = {
                function(done) {
                   if (!hasErrors()) {
                      log.info("3) Ensuring the Users table exists.");
-                     var users = new Users(pool);
+                     var users = new Users(databaseHelper);
                      users.initialize(function(err) {
                         if (err) {
                            errors.push(err)
@@ -100,7 +102,6 @@ module.exports = {
 
             ],
             function() {
-
                if (hasErrors()) {
                   log.error("The following error(s) occurred during database initialization:");
                   errors.forEach(function(e) {
@@ -118,4 +119,4 @@ module.exports = {
             }
       );
    }
-}
+};

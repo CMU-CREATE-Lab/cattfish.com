@@ -1,12 +1,11 @@
 var express = require('express');
 var router = express.Router();
-var request = require('request');
 var JaySchema = require('jayschema');
 var config = require('../../config');
-var CreateUserSchema = require('../../models/json-schemas').CreateUserSchema;
 var log = require('log4js').getLogger();
-
-var jsonValidator = new JaySchema();
+var esdr = require('../../lib/esdr');
+var ValidationError = require('../../lib/errors').ValidationError;
+var DuplicateRecordError = require('../../lib/errors').DuplicateRecordError;
 
 module.exports = function(UserModel) {
 
@@ -14,39 +13,37 @@ module.exports = function(UserModel) {
    router.post('/', function(req, res, next) {
       var user = req.body;
 
-      // validate JSON (asynchronously)
-      jsonValidator.validate(user, CreateUserSchema, function(err1) {
-         if (err1) {
-            return res.jsendClientError("Validation failure", err1);
+      log.debug("Received POST to create user [" + user.email + "]");
+
+      UserModel.create(user, function(err, result) {
+         if (err) {
+            if (err instanceof ValidationError) {
+               return res.jsendClientError("Validation failure", err.data, 400);
+            }
+            if (err instanceof DuplicateRecordError) {
+               return res.jsendClientError("User already exists", err.data, 409);
+            }
+            return res.jsendServerError(err.message, err.data);
          }
 
-         // TODO: handle case where user already exists in ESDR.  That's OK if all fields match!
-
-         log.debug("Received POST to create user [" + user.username + "]. Delegating to ESDR...");
-
-         request.post(config.get("esdr:apiRootUrl") + "/users",
-                      {
-                         json : user
-                      },
-                      function(err2, response, body) {
-                         if (err2) {
-                            log.error("/users: failed to delegate to ESDR: " + err2);
-
-                            return res.jsendServerError("Error communicating with ESDR service");
-                         }
-
-                         // see whether this was a JSON response--if so, assume JSend
-                         if (response['headers']['content-type'].lastIndexOf("application/json", 0) === 0) {
-                            // Pass through the JSend response from ESDR.  In the future, I'll probably want to
-                            // do something fancier here, but this is good enough for now.
-                            return res.jsendPassThrough(body);
-                         }
-
-                         // if not a JSON response, then create a new JSend server error response
-                         return res.jsendServerError("Unexpected error: ESDR service responded with HTTP " + response.statusCode);
-                      });
+         return res.jsendSuccess(result, 201);
       });
    });
+
+   router.get('/:verificationToken/verify',
+              function(req, res, next) {
+                 // delegate verification to ESDR
+                 esdr.verifyUser(req.params.verificationToken, function(err, result) {
+                    if (err) {
+                       var message = "Error while trying to verify user with verification token [" + req.params.verificationToken + "]";
+                       log.error(message + ": " + err);
+                       return res.jsendServerError(message);
+                    }
+
+                    res.jsendPassThrough(result);
+                 });
+              }
+   );
 
    return router;
 };
