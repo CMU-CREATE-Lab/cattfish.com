@@ -26,7 +26,10 @@ module.exports = function(UserModel) {
             return res.jsendServerError(err.message, err.data);
          }
 
-         return res.jsendSuccess(result, 201);
+         return res.jsendSuccess({
+                                    email : result.email,
+                                    displayName : result.displayName
+                                 }, 201);
       });
    });
 
