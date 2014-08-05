@@ -76,7 +76,11 @@ module.exports = function(databaseHelper) {
                                    return callback(err);
                                 }
 
-                                var obj = {id : result.insertId};
+                                var obj = {
+                                   id : result.insertId,
+                                   email : user.email,
+                                   displayName : user.displayName
+                                };
                                 // Only return the verification token when in test mode.  In other modes, ESDR will
                                 // email the verification token to the user, to ensure the email address is correct
                                 // and actually belongs to the person who created the account.
