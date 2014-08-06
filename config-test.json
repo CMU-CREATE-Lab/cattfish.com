@@ -3,6 +3,10 @@
       "url" : "http://localhost:3334",
       "port" : 3334
    },
+   "verificationToken" : {
+      "willReturnViaApi" : true,
+      "willEmailToUser" : false
+   },
    "esdr" : {
       "apiRootUrl" : "http://localhost:3001/api/v1"
    },

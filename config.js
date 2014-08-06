@@ -12,6 +12,10 @@ config.defaults({
                       "url" : "http://localhost:3333",
                       "port" : 3333
                    },
+                   "verificationToken" : {
+                      "willReturnViaApi" : false,
+                      "willEmailToUser" : true
+                   },
                    "esdr" : {
                       "apiRootUrl" : "ESDR_API_ROOT_URL"
                    },

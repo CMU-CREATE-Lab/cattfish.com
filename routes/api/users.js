@@ -32,10 +32,12 @@ module.exports = function(UserModel) {
             email : result.email,
             displayName : result.displayName
          };
-         // Only return the verification token when in test mode.  In other modes, ESDR will
-         // email the verification token to the user, to ensure the email address is correct
-         // and actually belongs to the person who created the account.
-         if (process.env['NODE_ENV'] == "test" && result.verificationToken) {
+         // See whether we should return the verification token.  E.g., in most cases, we simply
+         // want ESDR to email the verification token to the user, to ensure the email address is
+         // correct and actually belongs to the person who created the account. But, when
+         // testing, just return it here so I don't have to write tests that check an email
+         // account :-)
+         if (config.get("verificationToken:willReturnViaApi") && result.verificationToken) {
             obj.verificationToken = result.verificationToken
          }
 
