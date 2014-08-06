@@ -13,9 +13,10 @@ var log = require('log4js').getLogger();
 
 describe("cattfish.com", function() {
    var url = config.get("server:url");
+   var userCounter = 0;
    var createTestUser = function() {
       return {
-         email : "tackaberry_" + new Date().getTime() + "@mcadoo.com",
+         email : "tackaberry_" + new Date().getTime() + "_" + (userCounter++) + "@mcadoo.com",
          password : "Tackaberry McAdoo is a fantastic name",
          displayName : "Tackaberry McAdoo"
       };
@@ -93,6 +94,248 @@ describe("cattfish.com", function() {
                               });
                            });
                         });
+   });
+
+   describe("REST API", function() {
+      describe("Users", function() {
+
+         var testUser1 = createTestUser();
+         var testUser2 = createTestUser();
+         var verificationTokens = {};
+
+         describe("create", function() {
+
+            it("Should be able to create a new user", function(done) {
+               agent(url)
+                     .post("/api/v1/users")
+                     .send(testUser1)
+                     .end(function(err, res) {
+                             if (err) {
+                                return done(err);
+                             }
+
+                             res.should.have.property('status', 201);
+                             res.body.should.have.property('code', 201);
+                             res.body.should.have.property('status', 'success');
+                             res.body.should.have.property('data');
+                             res.body.data.should.have.property('email', testUser1.email);
+                             res.body.data.should.have.property('displayName', testUser1.displayName);
+                             res.body.data.should.have.property('verificationToken');
+
+                             // remember the verification token so we can verify this user
+                             verificationTokens[testUser1.email] = res.body.data.verificationToken;
+                             done();
+                          });
+            });
+
+            it("Should not be able to create the same user again", function(done) {
+               agent(url)
+                     .post("/api/v1/users")
+                     .send(testUser1)
+                     .end(function(err, res) {
+                             if (err) {
+                                return done(err);
+                             }
+
+                             res.should.have.property('status', 409);
+                             res.body.should.have.property('code', 409);
+                             res.body.should.have.property('status', 'error');
+                             res.body.should.have.property('data');
+                             res.body.data.should.have.property('email', testUser1.email);
+
+                             done();
+                          });
+            });
+
+            it("Should be able to create a different user", function(done) {
+               agent(url)
+                     .post("/api/v1/users")
+                     .send(testUser2)
+                     .end(function(err, res) {
+                             if (err) {
+                                return done(err);
+                             }
+
+                             res.should.have.property('status', 201);
+                             res.body.should.have.property('code', 201);
+                             res.body.should.have.property('status', 'success');
+                             res.body.should.have.property('data');
+                             res.body.data.should.have.property('email', testUser2.email);
+                             res.body.data.should.have.property('displayName', testUser2.displayName);
+                             res.body.data.should.have.property('verificationToken');
+
+                             // remember the verification token so we can verify this user
+                             verificationTokens[testUser2.email] = res.body.data.verificationToken;
+                             done();
+                          });
+            });
+
+            it("Should fail to create an invalid user", function(done) {
+               agent(url)
+                     .post("/api/v1/users")
+                     .send({
+                              email : "foobar",       // not a valid email address
+                              password : "X"          // too short
+                           })
+                     .end(function(err, res) {
+                             if (err) {
+                                return done(err);
+                             }
+
+                             res.should.have.property('status', 400);
+                             res.body.should.have.property('code', 400);
+                             res.body.should.have.property('status', 'error');
+                             res.body.should.have.property('data');
+                             res.body.data.should.have.length(2);
+                             res.body.data[0].should.have.property('instanceContext', '#/password');
+                             res.body.data[0].should.have.property('constraintName', 'minLength');
+                             res.body.data[0].should.have.property('kind', 'StringValidationError');
+                             res.body.data[1].should.have.property('instanceContext', '#/email');
+                             res.body.data[1].should.have.property('constraintName', 'format');
+                             res.body.data[1].should.have.property('kind', 'FormatValidationError');
+
+                             done();
+                          });
+            });
+
+         });
+
+         describe("verify", function() {
+            it("Should be able to verify a new user", function(done) {
+               agent(url)
+                     .get("/api/v1/users/" + verificationTokens[testUser1.email] + "/verify")
+                     .end(function(err, res) {
+                             if (err) {
+                                return done(err);
+                             }
+
+                             res.should.have.property('status', 200);
+                             res.body.should.have.property('code', 200);
+                             res.body.should.have.property('status', 'success');
+                             res.body.should.have.property('data');
+                             res.body.data.should.have.property('isVerified', true);
+
+                             done();
+                          });
+            });
+
+            it("Should be able to verify the same user again", function(done) {
+               agent(url)
+                     .get("/api/v1/users/" + verificationTokens[testUser1.email] + "/verify")
+                     .end(function(err, res) {
+                             if (err) {
+                                return done(err);
+                             }
+
+                             res.should.have.property('status', 200);
+                             res.body.should.have.property('code', 200);
+                             res.body.should.have.property('status', 'success');
+                             res.body.should.have.property('data');
+                             res.body.data.should.have.property('isVerified', true);
+
+                             done();
+                          });
+            });
+
+            it("Should fail to verify with a bogus verification token", function(done) {
+               agent(url)
+                     .get("/api/v1/users/bogus/verify")
+                     .end(function(err, res) {
+                             if (err) {
+                                return done(err);
+                             }
+
+                             res.should.have.property('status', 400);
+                             res.body.should.have.property('code', 400);
+                             res.body.should.have.property('status', 'error');
+                             res.body.should.have.property('data');
+                             res.body.data.should.have.property('isVerified', false);
+
+                             done();
+                          });
+            });
+         });
+
+         describe("login", function() {
+
+            it("Should be able to login an already-verified user", function(done) {
+               agent(url)
+                     .post("/login")
+                     .send({email : testUser1.email, password : testUser1.password})
+                     .end(function(err, res) {
+                             if (err) {
+                                return done(err);
+                             }
+
+                             res.should.have.property('status', 200);
+                             res.body.should.have.property('code', 200);
+                             res.body.should.have.property('status', 'success');
+                             res.body.should.have.property('data');
+                             res.body.data.should.have.property('accessToken');
+                             res.body.data.should.have.property('accessTokenExpiration');
+
+                             done();
+                          });
+            });
+
+            it("Should fail to login an unverified user", function(done) {
+               agent(url)
+                     .post("/login")
+                     .send({email : testUser2.email, password : testUser2.password})
+                     .end(function(err, res) {
+                             if (err) {
+                                return done(err);
+                             }
+
+                             res.should.have.property('status', 401);
+                             res.body.should.have.property('code', 401);
+                             res.body.should.have.property('status', 'error');
+                             res.body.should.have.property('data', null);
+
+                             done();
+                          });
+            });
+
+            it("Should be able to login after verifying that user", function(done) {
+               agent(url)
+                     .get("/api/v1/users/" + verificationTokens[testUser2.email] + "/verify")
+                     .end(function(err, res) {
+                             if (err) {
+                                return done(err);
+                             }
+
+                             res.should.have.property('status', 200);
+                             res.body.should.have.property('code', 200);
+                             res.body.should.have.property('status', 'success');
+                             res.body.should.have.property('data');
+                             res.body.data.should.have.property('isVerified', true);
+
+                             agent(url)
+                                   .post("/login")
+                                   .send({email : testUser2.email, password : testUser2.password})
+                                   .end(function(err, res) {
+                                           if (err) {
+                                              return done(err);
+                                           }
+
+                                           res.should.have.property('status', 200);
+                                           res.body.should.have.property('code', 200);
+                                           res.body.should.have.property('status', 'success');
+                                           res.body.should.have.property('data');
+                                           res.body.data.should.have.property('accessToken');
+                                           res.body.data.should.have.property('accessTokenExpiration');
+
+                                           done();
+                                        });
+                          });
+            });
+
+            // TODO: get session cookie, access protected resource with that cookie (show that you can't
+            // access the resource before logging in, but can access it afterwards)
+
+         });
+
+      });
    });
 
    describe("Database", function() {
