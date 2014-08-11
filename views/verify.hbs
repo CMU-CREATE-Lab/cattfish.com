@@ -11,20 +11,16 @@
 
       var verificationToken = "{{verificationToken}}";
       if (verificationToken && verificationToken.length > 0) {
-         $.ajax({
-                   type : "GET",
-                   url : "/api/v1/users/" + verificationToken + "/verify",
-                   dataType : "json",
-                   success : function(response, status) {
-                      if (response && response.data && response.data.isVerified) {
-                         handleVerificationSuccess();
-                      }
-                      else {
-                         handleVerificationFailure();
-                      }
-                   },
-                   error : handleVerificationFailure
-                });
+         superagent
+               .get("/api/v1/users/" + verificationToken + "/verify")
+               .end(function(err, res) {
+                       if (res && res.body.data && res.body.data.isVerified) {
+                          handleVerificationSuccess();
+                       }
+                       else {
+                          handleVerificationFailure();
+                       }
+                    });
       }
       else {
          handleVerificationFailure();
