@@ -20,7 +20,6 @@
          email : $("#loginEmail").val().trim(),
          password : $("#loginPassword").val()
       };
-      console.log(user);
 
       // perform simple validation
       var messages = [];
@@ -37,28 +36,24 @@
       else {
          var loginFormInputElements = $("#login_form").find("input");
          loginFormInputElements.prop('disabled', true);
-         $.ajax({
-                   type : "POST",
-                   url : "/login",
-                   dataType : "json",
-                   data : user,
-                   success : function(data, status) {
-                      console.log("LOGIN SUCCESS!: " + JSON.stringify(data, null, 3));
-                      window.location.href = "/";
-                   },
-                   error : function(jqXHR, textStatus, errorThrown) {
-                      if (jqXHR.status == 401) {
-                         messages.push("Invalid email and/or password.  Make sure you verified your account.");
-                      }
-                      else {
-                         messages.push("Login failed.");
-                      }
-                      displayMessages(messages);
-                   },
-                   complete : function() {
-                      loginFormInputElements.prop('disabled', false);
-                   }
-                });
+         superagent
+               .post("/login")
+               .send(user)
+               .end(function(err, res) {
+                       console.log(JSON.stringify(res.body, null, 3));
+                       if (res.status == 200) {
+                          window.location.reload();
+                       }
+                       else if (res.status == 401) {
+                          messages.push("Invalid email and/or password.");
+                          messages.push("Make sure you verified your account.");
+                       }
+                       else {
+                          messages.push("Login failed.");
+                       }
+                       displayMessages(messages);
+                       loginFormInputElements.prop('disabled', false);
+                    });
       }
    }
 
