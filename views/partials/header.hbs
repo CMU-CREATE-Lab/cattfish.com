@@ -3,32 +3,22 @@
    $(document).ready(function() {
       var selectedSectionNavElementId = "nav_" + "{{section}}";
 
-
       // highlight the selected section
-      $("#" + selectedSectionNavElementId).addClass("navigation_item_selected")
+      $("#" + selectedSectionNavElementId).addClass("navigation_item_selected");
 
-      // define the actions for the navigation buttons
-      var navActions = {
-         nav_home : "/",
-         nav_data : "/data",
-         nav_shop : function() {
-            // TODO
-            alert("Not yet implemented");
-         },
-         nav_about : "/about",
-         nav_contact : "/contact",
-         nav_login : function() {
-            var loginPopup = $("#login_popup");
+      $("#login_link").click(function() {
+         var loginPopup = $("#login_popup");
 
-            // toggle visibility
-            loginPopup.toggle();
+         // toggle visibility
+         loginPopup.toggle();
 
-            // if visible, set focus to the email field
-            if (loginPopup.is(":visible")) {
-               loginPopup.find("#email").focus();
-            }
+         // if visible, set focus to the email field
+         if (loginPopup.is(":visible")) {
+            loginPopup.find("#email").focus();
          }
-      };
+
+         return false;
+      });
 
       // add event handlers to the nav items
       $(".navigation_item")
@@ -41,26 +31,30 @@
                          if (!(this.id == "nav_login" && $("#login_popup").is(":visible")) && selectedSectionNavElementId != this.id) {
                             $(this).removeClass("navigation_item_selected");
                          }
-                      })
-            .click(function() {
-                      var navAction = navActions[this.id];
-                      if (typeof navAction === 'function') {
-                         navAction();
-                      } else {
-                         window.location.href = navAction;
-                      }
-                   });
+                      });
    });
 </script>
 <div id="header">
    <div class="container">
       <div id="navigation" class="noselect">
-         <div id="nav_login" class="navigation_item">Log in</div>
-         <div id="nav_contact" class="navigation_item">Contact</div>
-         <div id="nav_about" class="navigation_item">About</div>
-         <div id="nav_shop" class="navigation_item">Shop</div>
-         <div id="nav_data" class="navigation_item">Public Data</div>
-         <div id="nav_home" class="navigation_item">Home</div>
+         <a href="" id="login_link">
+            <div id="nav_login" class="navigation_item">Log in</div>
+         </a>
+         <a href="/contact">
+            <div id="nav_contact" class="navigation_item">Contact</div>
+         </a>
+         <a href="/about">
+            <div id="nav_about" class="navigation_item">About</div>
+         </a>
+         <a href="#" onclick="alert('Not yet implemented');return false;">
+            <div id="nav_shop" class="navigation_item">Shop</div>
+         </a>
+         <a href="/data">
+            <div id="nav_data" class="navigation_item">Public Data</div>
+         </a>
+         <a href="/">
+            <div id="nav_home" class="navigation_item">Home</div>
+         </a>
          {{> login_popup}}
       </div>
       <div id="logo_container">
