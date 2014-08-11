@@ -76,21 +76,12 @@ module.exports = function(databaseHelper) {
                                    return callback(err);
                                 }
 
-                                var obj = {
+                                return callback(null, {
                                    id : result.insertId,
                                    email : user.email,
-                                   displayName : user.displayName
-                                };
-                                // See whether we should return the verification token.  E.g., in most cases, we simply
-                                // want ESDR to email the verification token to the user, to ensure the email address is
-                                // correct and actually belongs to the person who created the account. But, when
-                                // testing, just return it here so I don't have to write tests that check an email
-                                // account :-)
-                                if (config.get("verificationToken:willReturnViaApi") && user && user.verificationToken) {
-                                   obj.verificationToken = user.verificationToken
-                                }
-
-                                return callback(null, obj);
+                                   displayName : user.displayName,
+                                   verificationToken : user.verificationToken
+                                });
                              });
    };
 
