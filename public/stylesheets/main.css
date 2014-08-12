@@ -151,6 +151,34 @@ a:hover, a:focus {
   #footer a {
     color: #e1ebda; }
 
+#signup_page #signup_form #signup_messages {
+  margin-bottom: 10px; }
+#signup_page #signup_form input {
+  width: 400px;
+  height: 50px;
+  text-align: left;
+  border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border: 1px solid #428bca;
+  font-size: 20px;
+  padding-left: 15px;
+  margin-bottom: 15px; }
+#signup_page #signup_form input[type="submit"] {
+  height: auto;
+  background: none;
+  border: none;
+  color: #428bca;
+  text-decoration: none;
+  cursor: pointer;
+  width: auto;
+  position: relative;
+  font-size: 20px;
+  margin: 0;
+  padding: 0; }
+#signup_page #signup_form input[type="submit"]:hover {
+  text-decoration: underline; }
+
 #login_page #login_form #login_messages {
   margin-bottom: 10px; }
 #login_page #login_form input {

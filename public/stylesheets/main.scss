@@ -219,6 +219,50 @@ a:hover, a:focus {
 }
 
 // =====================================================================================================================
+// Signup Page
+// =====================================================================================================================
+
+#signup_page {
+   #signup_form {
+      #signup_messages {
+         margin-bottom: 10px;
+      }
+
+      // TODO: fix redundancy between this and the two login forms...
+
+      input {
+         width: 400px;
+         height: 50px;
+         text-align: left;
+         border-radius: 3px;
+         -webkit-border-radius: 3px;
+         -moz-border-radius: 3px;
+         border: 1px solid $LINK_COLOR;
+         font-size: 20px;
+         padding-left: 15px;
+         margin-bottom: 15px;
+      }
+
+      input[type="submit"] {
+         height: auto;
+         background: none;
+         border: none;
+         color: $LINK_COLOR;
+         text-decoration: none;
+         cursor: pointer;
+         width: auto;
+         position: relative;
+         font-size: 20px;
+         margin: 0;
+         padding: 0;
+      }
+      input[type="submit"]:hover {
+         text-decoration: underline;
+      }
+   }
+}
+
+// =====================================================================================================================
 // Login Page
 // =====================================================================================================================
 
@@ -258,7 +302,6 @@ a:hover, a:focus {
          text-decoration: underline;
       }
    }
-
 }
 
 // =====================================================================================================================

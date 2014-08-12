@@ -1,13 +1,12 @@
 <script language="JavaScript" type="text/javascript">
    $(document).ready(function() {
-      // set focus on first form element (got this from http://stackoverflow.com/a/279153/703200)
-      $('form:first *:input[type!=hidden]:first').focus();
+      $("#signup_email").focus();
    });
 
    function submitRegistration() {
       var user = {
-         email : $("#email").val(),
-         password : $("#password").val()
+         email : $("#signup_email").val(),
+         password : $("#signup_password").val()
       };
       console.log("About to register user: " + JSON.stringify(user, null, 3));
       superagent
@@ -29,15 +28,32 @@
                  });
    }
 </script>
-<h1>Sign Up</h1>
-<form onsubmit="submitRegistration(); return false;">
-   <p>
-      <input type="text" id="email" name="email" placeholder="Email address"/>
-   </p>
-   <p>
-      <input type="password" id="password" name="password" placeholder="Password"/>
-   </p>
-   <p>
-      <input type="submit" value="Sign Up"/>
-   </p>
-</form>
+<div id="signup_page" class="main_container">
+   <div class="content_container">
+      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+         <tr valign="top">
+            <td colspan="3">
+               <div class="page_title">
+                  Sign Up
+               </div>
+            </td>
+         </tr>
+         <tr valign="top">
+            <td width="400">
+               <form id="signup_form" onsubmit="submitRegistration(); return false;">
+                  <div id="signup_messages" class="form_messages"></div>
+                  <div><input type="text" id="signup_email" name="signup_email" placeholder="Email address"/></div>
+                  <div><input type="password" id="signup_password" name="signup_password" placeholder="Password"/></div>
+                  <div>
+                     <div style="float:right"><input type="submit" value="Sign Up &raquo;"></div>
+                  </div>
+               </form>
+            </td>
+            <td width="20">&nbsp;</td>
+            <td width="*" align="right">
+               <div>Have an account? <a href="/login">Log in!</a></div>
+            </td>
+         </tr>
+      </table>
+   </div>
+</div>
