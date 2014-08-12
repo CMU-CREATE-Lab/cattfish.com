@@ -1,8 +1,14 @@
 var express = require('express');
 var router = express.Router();
 
+//======================================================================================================================
+
 router.get('/', function(req, res) {
-   res.render('index', { title : "CATTfish", section : "home"});
+   if (req.isAuthenticated()) {
+      res.redirect('/dashboard');
+   } else {
+      res.render('index', { title : "CATTfish", section : "home"});
+   }
 });
 
 router.get('/about', function(req, res) {
@@ -17,9 +23,11 @@ router.get('/data', function(req, res) {
    res.render('data', { title : "CATTfish: Data", section : "data"});
 });
 
-router.get('/register', function(req, res) {
-   res.render('register', { title : "CATTfish: Register"});
+router.get('/signup', function(req, res) {
+   res.render('signup', { title : "CATTfish: Register", section : "signup"});
 });
+
+//======================================================================================================================
 
 router.get('/verify/:verificationToken', function(req, res) {
    // since we'll be injecting the verification token into JavaScript,
@@ -27,5 +35,7 @@ router.get('/verify/:verificationToken', function(req, res) {
    var cleanedVerificationToken = (req.params.verificationToken) ? req.params.verificationToken.replace(/([^a-f0-9]+)/gi, '') : "";
    res.render('verify', { title : "CATTfish: Verify Your Account", verificationToken : cleanedVerificationToken});
 });
+
+//======================================================================================================================
 
 module.exports = router;

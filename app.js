@@ -105,10 +105,14 @@ Database.create(function(err, db) {
             res.locals.isAuthenticated = req.isAuthenticated();
             if (req.isAuthenticated()) {
                res.locals.user = {
-                  username : req.user.username,
-                  accessToken : req.user.accessToken,
-                  accessTokenExpiration : req.user.accessTokenExpiration
-               }
+                  id : req.user.id,
+                  accessToken : req.user.accessToken
+               };
+               delete req.session.redirectToAfterLogin;
+               delete res.locals.redirectToAfterLogin;
+            } else {
+               // expose the redirectToAfterLogin page to the view
+               res.locals.redirectToAfterLogin = req.session.redirectToAfterLogin;
             }
 
             next();
@@ -124,7 +128,15 @@ Database.create(function(err, db) {
          app.use('/api/v1/users', require('./routes/api/users')(db.users));
          app.use('/login', require('./routes/login'));
          app.use('/logout', require('./routes/logout'));
-         app.use('/', require('./routes/index'));
+         app.use('/',
+                 function(req, res, next) {
+                    // if serving a page which doesn't require authentication, then
+                    // forget the remembered redirectToAfterLogin page
+                    delete req.session.redirectToAfterLogin;
+                    next();
+                 },
+                 require('./routes/index'));
+         app.use('/', require('./routes/authenticated'));
 
          // ERROR HANDLERS ---------------------------------------------------------------------------------------------
 

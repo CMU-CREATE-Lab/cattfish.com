@@ -1,28 +1,25 @@
 <script language="JavaScript" type="text/javascript">
-   var loginMessages = null;
 
-   $(document).ready(function() {
-      loginMessages = $("#login_messages");
-   });
+   function submitLogin(email, password, messagesElementId) {
+      var messages = [];
+      var loginMessages = $("#" + messagesElementId);
 
-   function displayMessages(errors) {
-      if (errors.length > 0) {
-         loginMessages.empty();
-         errors.forEach(function(error) {
-            loginMessages.append('<div>' + error + '</div>');
-         });
-         loginMessages.show();
-      }
-   }
+      var displayMessages = function() {
+         if (messages.length > 0) {
+            loginMessages.empty();
+            messages.forEach(function(message) {
+               loginMessages.append('<div>' + message + '</div>');
+            });
+            loginMessages.show();
+         }
+      };
 
-   function submitLogin() {
       var user = {
-         email : $("#loginEmail").val().trim(),
-         password : $("#loginPassword").val()
+         email : email.trim(),
+         password : password
       };
 
       // perform simple validation
-      var messages = [];
       if (user.email.length <= 0) {
          messages.push("Email address is required.");
       }
@@ -31,10 +28,10 @@
       }
 
       if (messages.length > 0) {
-         displayMessages(messages);
+         displayMessages();
       }
       else {
-         var loginFormInputElements = $("#login_form").find("input");
+         var loginFormInputElements = $("#login_popup_form").find("input");
          loginFormInputElements.prop('disabled', true);
          superagent
                .post("/login")
@@ -42,16 +39,22 @@
                .end(function(err, res) {
                        console.log(JSON.stringify(res.body, null, 3));
                        if (res.status == 200) {
-                          window.location.reload();
+                          var redirectToAfterLogin = '{{{redirectToAfterLogin}}}';
+                          if (redirectToAfterLogin && redirectToAfterLogin.length > 0) {
+                             window.location.href = redirectToAfterLogin;
+                          }
+                          else {
+                             window.location.reload();
+                          }
                        }
                        else if (res.status == 401) {
-                          messages.push("Invalid email and/or password.");
-                          messages.push("Make sure you verified your account.");
+                          messages.push("Login failed. Did you activate your account by");
+                          messages.push("clicking the link in the verification email?");
                        }
                        else {
                           messages.push("Login failed.");
                        }
-                       displayMessages(messages);
+                       displayMessages();
                        loginFormInputElements.prop('disabled', false);
                     });
       }
@@ -59,19 +62,17 @@
 
 </script>
 <div id="login_popup">
-   <form id="login_form" onsubmit="submitLogin(); return false;">
-      <div id="login_messages" class="form_messages"></div>
-      <div><label for="loginEmail">Email address</label></div>
-      <div><input type="text" id="loginEmail" name="loginEmail"/></div>
-      <div><label for="loginPassword">Password</label></div>
-      <div><input type="password" id="loginPassword" name="loginPassword"/></div>
-      <div class="login_form_links" style="text-align: right">
+   <form id="login_popup_form" onsubmit="submitLogin($('#login_popup_email').val(), $('#login_popup_password').val(),'login_popup_messages'); return false;">
 
+      <div id="login_popup_messages" class="form_messages"></div>
+      <div><input type="text" id="login_popup_email" name="login_popup_email" placeholder="Email address"/></div>
+      <div><input type="password" id="login_popup_password" name="login_popup_password" placeholder="Password"/></div>
+      <div style="text-align: right">
          <input type="submit" value="Log In &raquo;">
       </div>
-      <div class="login_form_links" style="font-size: smaller;">
-         <div style="float:right"><a href="/register">Sign up</a></div>
-         <div><a href="javascript:alert('Not yet implemented.')">Forgot password?</a></div>
+      <div class="login_popup_form_links" style="font-size: smaller;">
+         <div style="float:right">Need an account? <a href="/signup">Sign up!</a></div>
+         <div><a href="javascript:alert('Not yet implemented.')">Forgot your password?</a></div>
       </div>
    </form>
 </div>

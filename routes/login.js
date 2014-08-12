@@ -2,6 +2,10 @@ var express = require('express');
 var router = express.Router();
 var passport = require('passport');
 
+router.get('/', function(req, res) {
+   res.render('login', { title : "CATTfish: Login", section : "login"});
+});
+
 router.post('/', function(req, res, next) {
    passport.authenticate('local', function(err, user, info) {
       if (err) {
