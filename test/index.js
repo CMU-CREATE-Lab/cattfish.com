@@ -182,8 +182,8 @@ describe("cattfish.com", function() {
                                 return done(err);
                              }
 
-                             res.should.have.property('status', 400);
-                             res.body.should.have.property('code', 400);
+                             res.should.have.property('status', 422);
+                             res.body.should.have.property('code', 422);
                              res.body.should.have.property('status', 'error');
                              res.body.should.have.property('data');
                              res.body.data.should.have.length(2);

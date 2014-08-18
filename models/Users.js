@@ -36,18 +36,19 @@ module.exports = function(databaseHelper) {
       // already exist in ESDR, but not here--that's totally normal.  But, still respond here that the account is a
       // duplicate.  When the user logs in here, we'll pull the details from ESDR and save here.
       esdr.createUser(user, function(err1, createResult) {
-         // Check the error/result to see whether it was a 201 (Created), 400 (Bad Request), or a 409 (Conflict), or
-         // something else and act accordingly.  If the code was a 201, then the user was created in ESDR and we need
-         // to insert here, too. If a 400, then the user probably submitted the form with missing required fields.
-         // If 409, then a user with the same email already exists in ESDR, so we need to throw a DuplicateRecordError.
+         // Check the error/result to see whether it was a 201 (Created), 409 (Conflict), or a 422 (Unprocessable
+         // Entity), or something else and act accordingly.  If the code was a 201, then the user was created in ESDR
+         // and we need to insert here, too. If a 422, then the user probably submitted the form with missing required
+         // fields. If 409, then a user with the same email already exists in ESDR, so we need to throw a
+         // DuplicateRecordError.
          if (err1) {
             if (err1 instanceof RemoteError) {
-               if (err1.data.code == 400) {
-                  return callback(new ValidationError(err1.data.data, err1.data.message));
-               }
                if (err1.data.code == 409) {
                   // a user with this email address already exists in ESDR
                   return callback(new DuplicateRecordError({email : user.email}, "User already exists."));
+               }
+               if (err1.data.code == 422) {
+                  return callback(new ValidationError(err1.data.data, err1.data.message));
                }
             }
 

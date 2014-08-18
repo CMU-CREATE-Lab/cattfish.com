@@ -19,7 +19,7 @@ module.exports = function(UserModel) {
       UserModel.create(user, function(err, result) {
          if (err) {
             if (err instanceof ValidationError) {
-               return res.jsendClientError("Validation failure", err.data, 400);
+               return res.jsendClientError("Validation failure", err.data, 422);
             }
             if (err instanceof DuplicateRecordError) {
                return res.jsendClientError("User already exists", err.data, 409);

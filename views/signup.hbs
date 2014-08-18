@@ -44,7 +44,11 @@
                           messages.render(successMessagesElement);
                        }
                        else {
-                          if (res.status == 400) {
+                          if (res.status == 409) {
+                             messages.add("Sorry, a user with that email address already exists.");
+                             emailElement.focus();
+                          }
+                          else if (res.status == 422) {
                              if (res.body.data && res.body.data.length > 0) {
                                 var emailErrors = [];
                                 var passwordErrors = [];
@@ -74,10 +78,6 @@
                                    emailElement.focus();
                                 }
                              }
-                          }
-                          else if (res.status == 409) {
-                             messages.add("Sorry, a user with that email address already exists.");
-                             emailElement.focus();
                           }
                           else {
                              messages.add("Sorry, an unexpected error occurred while trying create your account.  Please contact us for help.");
