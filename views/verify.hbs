@@ -2,11 +2,11 @@
    $(document).ready(function() {
 
       var handleVerificationSuccess = function() {
-         $("#verificationResult").text("Your account is verified.  You may now log in.")
+         $("#verificationSuccess").show();
       };
 
       var handleVerificationFailure = function() {
-         $("#verificationResult").text("Sorry, we could not verify the account.")
+         $("#verificationFailure").show();
       };
 
       var verificationToken = "{{verificationToken}}";
@@ -29,4 +29,5 @@
 
 </script>
 <h1>Account Verification</h1>
-<div id="verificationResult"></div>
+<div id="verificationSuccess" style="display:none">Your account is verified. You may now <a href="/login">log in</a>.</div>
+<div id="verificationFailure" style="display:none">Sorry, we could not verify the account.</div>

@@ -3,29 +3,94 @@
       $("#signup_email").focus();
    });
 
-   function submitRegistration() {
+   function submitSignUpForm() {
+      var messages = new com.cattfish.Messages();
+      var form = $("#signup_form");
+      var errorMessagesElement = $("#signup_error_messages");
+      var successMessagesElement = $("#signup_success_messages");
+      errorMessagesElement.empty().hide();
+      successMessagesElement.empty().hide();
+
+      var emailElement = $("#signup_email");
+      var passwordElement = $("#signup_password");
+      var email = emailElement.val().trim();
+      var password = passwordElement.val();
+
       var user = {
-         email : $("#signup_email").val(),
-         password : $("#signup_password").val()
+         email : email,
+         password : password
       };
-      console.log("About to register user: " + JSON.stringify(user, null, 3));
-      superagent
-            .post("/api/v1/users")
-            .send(user)
-            .end(function(err, res) {
-                    if (res.status == 201) {
-                       console.log("CREATE USER SUCCESS!: " + JSON.stringify(res.body, null, 3));
-                    }
-                    else if (res.status == 400) {
-                       console.log("VALIDATION ERROR!: " + JSON.stringify(res.body, null, 3));
-                    }
-                    else if (res.status == 409) {
-                       console.log("USER EXISTS!: " + JSON.stringify(res.body, null, 3));
-                    }
-                    else {
-                       console.log("CREATE USER FAILURE!: " + JSON.stringify(res.body, null, 3));
-                    }
-                 });
+
+      // perform simple validation
+      if (user.password.length <= 0) {
+         messages.add("Password is required.");
+         passwordElement.focus();
+      }
+      if (user.email.length <= 0) {
+         messages.add("Email address is required.");
+         emailElement.focus();
+      }
+
+      if (messages.isEmpty()) {
+         setFormEnabled(form, false);
+         superagent
+               .post("/api/v1/users")
+               .send(user)
+               .end(function(err, res) {
+                       setFormEnabled(form, true);
+                       if (res.status == 201) {
+                          form.hide();
+                          messages.add('Welcome! We have sent you email with instructions to activate your account.');
+                          messages.render(successMessagesElement);
+                       }
+                       else {
+                          if (res.status == 400) {
+                             if (res.body.data && res.body.data.length > 0) {
+                                var emailErrors = [];
+                                var passwordErrors = [];
+                                res.body.data.forEach(function(item) {
+                                   var field = item.instanceContext;
+                                   var constraintName = item.constraintName;
+                                   if (field == '#/email') {
+                                      if (constraintName == 'minLength') {
+                                         emailErrors.push("The email address must be at least " + item.constraintValue + " characters.");
+                                      }
+                                      if (constraintName == 'format') {
+                                         emailErrors.push("The email address must be a valid email address.");
+                                      }
+                                   }
+                                   else if (field == '#/password') {
+                                      if (constraintName == 'minLength') {
+                                         passwordErrors.push("The password must be at least " + item.constraintValue + " characters.");
+                                      }
+                                   }
+                                });
+                                emailErrors.map(messages.add);
+                                passwordErrors.map(messages.add);
+                                if (passwordErrors.length > 0) {
+                                   passwordElement.focus();
+                                }
+                                if (emailErrors.length > 0) {
+                                   emailElement.focus();
+                                }
+                             }
+                          }
+                          else if (res.status == 409) {
+                             messages.add("Sorry, a user with that email address already exists.");
+                             emailElement.focus();
+                          }
+                          else {
+                             messages.add("Sorry, an unexpected error occurred while trying create your account.  Please contact us for help.");
+                          }
+                          messages.render(errorMessagesElement);
+                       }
+                    });
+      }
+      else {
+         messages.render(errorMessagesElement);
+      }
+
+      return false;
    }
 </script>
 <div id="signup_page" class="main_container">
@@ -40,12 +105,13 @@
          </tr>
          <tr valign="top">
             <td width="400">
-               <form id="signup_form" onsubmit="submitRegistration(); return false;">
-                  <div id="signup_messages" class="form_messages"></div>
+               <div id="signup_error_messages" class="form_messages form_error_messages"></div>
+               <div id="signup_success_messages" class="form_messages form_success_messages"></div>
+               <form id="signup_form" onsubmit="return submitSignUpForm();">
                   <div><input type="text" id="signup_email" name="signup_email" placeholder="Email address"/></div>
                   <div><input type="password" id="signup_password" name="signup_password" placeholder="Password"/></div>
                   <div>
-                     <div style="float:right"><input type="submit" value="Sign Up &raquo;"></div>
+                     <div style="float:right"><input class="submit_link" type="submit" value="Sign Up &raquo;"></div>
                   </div>
                </form>
             </td>

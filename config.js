@@ -12,6 +12,10 @@ config.defaults({
                       "url" : "http://localhost:3333",
                       "port" : 3333
                    },
+                   "resetPasswordToken" : {
+                      "willReturnViaApi" : false,
+                      "willEmailToUser" : true
+                   },
                    "verificationToken" : {
                       "willReturnViaApi" : false,
                       "willEmailToUser" : true

@@ -137,4 +137,52 @@ module.exports = function(databaseHelper) {
          return callback(null, user);
       });
    };
+
+   this.createResetPasswordRequest = function(email, callback) {
+      // delegate reset password to ESDR
+      esdr.createResetPasswordRequest(email, function(err, result) {
+         if (err) {
+            if (err instanceof RemoteError) {
+               if (err.data.code == 422) {
+                  return callback(new ValidationError(err.data.data, err.data.message));
+               }
+               return callback(err);
+            }
+
+            log.error("Error while trying to request a password reset from ESDR for email [" + email + "]: " + err);
+            return callback(err);
+         }
+         else {
+            if (result.code == 201) {
+               return callback(null, result);
+            }
+
+            return callback(new Error("Unexpected error: ESDR service responded with HTTP " + result.code));
+         }
+      });
+   };
+
+   this.setNewPassword = function(resetPasswordToken, newPassword, callback) {
+      // delegate set password to ESDR
+      esdr.setNewPassword(resetPasswordToken, newPassword, function(err, result) {
+         if (err) {
+            if (err instanceof RemoteError) {
+               if (err.data.code == 422) {
+                  return callback(new ValidationError(err.data.data, err.data.message));
+               }
+               return callback(err);
+            }
+
+            log.error("Error while trying to set a new password for token [" + resetPasswordToken + "]: " + err);
+            return callback(err);
+         }
+         else {
+            if (result.code == 200) {
+               return callback(null, result);
+            }
+
+            return callback(new Error("Unexpected error: ESDR service responded with HTTP " + result.code));
+         }
+      });
+   };
 };

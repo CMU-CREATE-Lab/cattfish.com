@@ -57,18 +57,64 @@ a:hover, a:focus {
 
 .form_messages {
   display: none;
-  border: 1px solid #A75B4E;
-  background: #FAD3C4;
   border-radius: 3px;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   color: black;
-  padding: 5px; }
+  padding: 5px;
+  margin-bottom: 15px; }
+
+.form_error_messages {
+  border: 1px solid #A75B4E;
+  background: #FAD3C4;
+  display: none; }
+
+.form_success_messages {
+  border: 1px solid #598800;
+  background: #E2F1BB; }
 
 .page_title {
   color: black;
   font-size: 24px;
   margin-bottom: 20px; }
+
+.page_instructions {
+  color: black;
+  font-size: normal;
+  margin-bottom: 20px; }
+
+input {
+  width: 400px;
+  height: 50px;
+  text-align: left;
+  border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border: 1px solid #428bca;
+  font-size: 20px;
+  padding-left: 15px;
+  margin: 0 0 15px 0; }
+
+.submit_link {
+  height: auto;
+  background: none;
+  border: none;
+  color: #428bca;
+  text-decoration: none;
+  cursor: pointer;
+  width: auto;
+  position: relative;
+  font-size: 20px;
+  margin: 0;
+  padding: 0; }
+
+.submit_link:hover {
+  text-decoration: underline; }
+
+.disabled_submit, .disabled_submit:hover {
+  color: #999999;
+  text-decoration: none;
+  cursor: default; }
 
 #header {
   background: #f4f6ee;
@@ -105,37 +151,16 @@ a:hover, a:focus {
       color: white;
       background-color: #2e68a3;
       padding: 10px;
-      display: none; }
+      display: none;
+      z-index: 100; }
       #header #navigation #login_popup a {
         color: white;
         text-decoration: underline; }
       #header #navigation #login_popup #login_popup_form #login_popup_messages {
-        margin-bottom: 10px; }
-      #header #navigation #login_popup #login_popup_form input {
-        width: 400px;
-        height: 50px;
-        text-align: left;
-        border-radius: 3px;
-        -webkit-border-radius: 3px;
-        -moz-border-radius: 3px;
-        border: 1px solid #428bca;
-        font-size: 20px;
-        padding-left: 15px;
-        margin-bottom: 15px; }
+        margin-bottom: 10px;
+        width: 400px; }
       #header #navigation #login_popup #login_popup_form input[type="submit"] {
-        height: auto;
-        background: none;
-        border: none;
-        color: white;
-        text-decoration: none;
-        cursor: pointer;
-        width: auto;
-        position: relative;
-        font-size: 20px;
-        margin: 0;
-        padding: 0; }
-      #header #navigation #login_popup #login_popup_form input[type="submit"]:hover {
-        text-decoration: underline; }
+        color: white; }
       #header #navigation #login_popup #login_popup_form .login_popup_form_links {
         margin-top: 15px; }
 
@@ -150,62 +175,6 @@ a:hover, a:focus {
     margin: 30px 0px; }
   #footer a {
     color: #e1ebda; }
-
-#signup_page #signup_form #signup_messages {
-  margin-bottom: 10px; }
-#signup_page #signup_form input {
-  width: 400px;
-  height: 50px;
-  text-align: left;
-  border-radius: 3px;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  border: 1px solid #428bca;
-  font-size: 20px;
-  padding-left: 15px;
-  margin-bottom: 15px; }
-#signup_page #signup_form input[type="submit"] {
-  height: auto;
-  background: none;
-  border: none;
-  color: #428bca;
-  text-decoration: none;
-  cursor: pointer;
-  width: auto;
-  position: relative;
-  font-size: 20px;
-  margin: 0;
-  padding: 0; }
-#signup_page #signup_form input[type="submit"]:hover {
-  text-decoration: underline; }
-
-#login_page #login_form #login_messages {
-  margin-bottom: 10px; }
-#login_page #login_form input {
-  width: 400px;
-  height: 50px;
-  text-align: left;
-  border-radius: 3px;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  border: 1px solid #428bca;
-  font-size: 20px;
-  padding-left: 15px;
-  margin-bottom: 15px; }
-#login_page #login_form input[type="submit"] {
-  height: auto;
-  background: none;
-  border: none;
-  color: #428bca;
-  text-decoration: none;
-  cursor: pointer;
-  width: auto;
-  position: relative;
-  font-size: 20px;
-  margin: 0;
-  padding: 0; }
-#login_page #login_form input[type="submit"]:hover {
-  text-decoration: underline; }
 
 #home_page {
   padding-top: 0; }

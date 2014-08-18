@@ -3,6 +3,10 @@
       "url" : "http://localhost:3334",
       "port" : 3334
    },
+   "resetPasswordToken" : {
+      "willReturnViaApi" : true,
+      "willEmailToUser" : false
+   },
    "verificationToken" : {
       "willReturnViaApi" : true,
       "willEmailToUser" : false

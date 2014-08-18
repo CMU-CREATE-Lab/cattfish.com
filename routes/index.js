@@ -24,7 +24,7 @@ router.get('/data', function(req, res) {
 });
 
 router.get('/signup', function(req, res) {
-   res.render('signup', { title : "CATTfish: Register", section : "signup"});
+   res.render('signup', { title : "CATTfish: Sign Up", section : "signup"});
 });
 
 //======================================================================================================================

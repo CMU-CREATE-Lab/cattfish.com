@@ -51,7 +51,6 @@ module.exports = function(UserModel) {
                  esdr.verifyUser(req.params.verificationToken, function(err, result) {
                     if (err) {
                        if (err instanceof RemoteError) {
-                          log.debug(err);
                           return res.jsendPassThrough(err.data);
                        }
                        var message = "Error while trying to verify user with verification token [" + req.params.verificationToken + "]";

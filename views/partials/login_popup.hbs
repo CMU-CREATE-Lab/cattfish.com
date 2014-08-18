@@ -1,42 +1,38 @@
 <script language="JavaScript" type="text/javascript">
 
-   function submitLogin(email, password, messagesElementId) {
-      var messages = [];
-      var loginMessages = $("#" + messagesElementId);
+   function submitLogin(formElementId, emailElementId, passwordElementId, messagesElementId) {
+      var messages = new com.cattfish.Messages();
+      var messagesElement = $("#" + messagesElementId);
+      var form = $("#" + formElementId);
+      var emailElement = $("#" + emailElementId);
+      var passwordElement = $("#" + passwordElementId);
+      var email = emailElement.val().trim();
+      var password = passwordElement.val();
 
-      var displayMessages = function() {
-         if (messages.length > 0) {
-            loginMessages.empty();
-            messages.forEach(function(message) {
-               loginMessages.append('<div>' + message + '</div>');
-            });
-            loginMessages.show();
-         }
-      };
+      messagesElement.empty().hide();
 
       var user = {
-         email : email.trim(),
+         email : email,
          password : password
       };
 
       // perform simple validation
-      if (user.email.length <= 0) {
-         messages.push("Email address is required.");
-      }
       if (user.password.length <= 0) {
-         messages.push("Password is required.");
+         messages.add("Password is required.");
+         passwordElement.focus();
+      }
+      if (user.email.length <= 0) {
+         messages.add("Email address is required.");
+         emailElement.focus();
       }
 
-      if (messages.length > 0) {
-         displayMessages();
-      }
-      else {
-         var loginFormInputElements = $("#login_popup_form").find("input");
-         loginFormInputElements.prop('disabled', true);
+      if (messages.isEmpty()) {
+         setFormEnabled(form, false);
          superagent
                .post("/login")
                .send(user)
                .end(function(err, res) {
+                       setFormEnabled(form, true);
                        console.log(JSON.stringify(res.body, null, 3));
                        if (res.status == 200) {
                           var redirectToAfterLogin = '{{{redirectToAfterLogin}}}';
@@ -48,31 +44,37 @@
                           }
                        }
                        else if (res.status == 401) {
-                          messages.push("Login failed. Did you activate your account by");
-                          messages.push("clicking the link in the verification email?");
+                          messages.add("Login failed. Please double-check your login below and make sure you have " +
+                                       "activated your account by clicking the link in the verification email we sent " +
+                                       "when you signed up.");
                        }
                        else {
-                          messages.push("Login failed.");
+                          messages.add("Login failed.");
                        }
-                       displayMessages();
-                       loginFormInputElements.prop('disabled', false);
+                       emailElement.focus();
+                       messages.render(messagesElement);
                     });
       }
+      else {
+         messages.render(messagesElement);
+      }
+
+      return false;
    }
 
 </script>
 <div id="login_popup">
-   <form id="login_popup_form" onsubmit="submitLogin($('#login_popup_email').val(), $('#login_popup_password').val(),'login_popup_messages'); return false;">
+   <form id="login_popup_form" onsubmit="return submitLogin('login_popup_form','login_popup_email','login_popup_password','login_popup_messages');">
 
-      <div id="login_popup_messages" class="form_messages"></div>
+      <div id="login_popup_messages" class="form_messages form_error_messages"></div>
       <div><input type="text" id="login_popup_email" name="login_popup_email" placeholder="Email address"/></div>
       <div><input type="password" id="login_popup_password" name="login_popup_password" placeholder="Password"/></div>
       <div style="text-align: right">
-         <input type="submit" value="Log In &raquo;">
+         <input type="submit" class="submit_link" value="Log In &raquo;">
       </div>
       <div class="login_popup_form_links" style="font-size: smaller;">
          <div style="float:right">Need an account? <a href="/signup">Sign up!</a></div>
-         <div><a href="javascript:alert('Not yet implemented.')">Forgot your password?</a></div>
+         <div><a href="/reset-password">Forgot your password?</a></div>
       </div>
    </form>
 </div>
