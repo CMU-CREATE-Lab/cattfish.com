@@ -128,7 +128,7 @@ Database.create(function(err, db) {
          app.use('/api/v1/users', require('./routes/api/users')(db.users));
          app.use('/login', require('./routes/login'));
          app.use('/logout', require('./routes/logout'));
-         app.use('/reset-password', require('./routes/reset-password')(db.users));
+         app.use('/password-reset', require('./routes/password-reset')(db.users));
          app.use('/',
                  function(req, res, next) {
                     // if serving a page which doesn't require authentication, then

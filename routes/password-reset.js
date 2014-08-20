@@ -8,7 +8,7 @@ var config = require('../config');
 module.exports = function(UserModel) {
 
    router.get('/', function(req, res) {
-      res.render('reset-password', { title : "CATTfish: Reset Password"});
+      res.render('password-reset', { title : "CATTfish: Reset Password"});
    });
 
    router.post('/', function(req, res) {
@@ -62,7 +62,7 @@ module.exports = function(UserModel) {
       // since we'll be injecting the reset password token into JavaScript,
       // be paranoid and remove anything that's not a valid hex character
       var cleanedResetPasswordToken = (req.params.resetPasswordToken) ? req.params.resetPasswordToken.replace(/([^a-f0-9]+)/gi, '') : "";
-      res.render('reset-password', { title : "CATTfish: Reset Password", resetPasswordToken : cleanedResetPasswordToken});
+      res.render('password-reset', { title : "CATTfish: Reset Password", resetPasswordToken : cleanedResetPasswordToken});
    });
 
    return router;

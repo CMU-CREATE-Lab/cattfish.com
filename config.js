@@ -14,11 +14,13 @@ config.defaults({
                    },
                    "resetPasswordToken" : {
                       "willReturnViaApi" : false,
-                      "willEmailToUser" : true
+                      "willEmailToUser" : true,
+                      "url" : "http://localhost:3333/password-reset/:resetPasswordToken"
                    },
                    "verificationToken" : {
                       "willReturnViaApi" : false,
-                      "willEmailToUser" : true
+                      "willEmailToUser" : true,
+                      "url" : "http://localhost:3333/verify/:verificationToken"
                    },
                    "esdr" : {
                       "apiRootUrl" : "ESDR_API_ROOT_URL"

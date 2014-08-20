@@ -5,11 +5,13 @@
    },
    "resetPasswordToken" : {
       "willReturnViaApi" : true,
-      "willEmailToUser" : false
+      "willEmailToUser" : false,
+      "url" : "http://localhost:3334/password-reset/:resetPasswordToken"
    },
    "verificationToken" : {
       "willReturnViaApi" : true,
-      "willEmailToUser" : false
+      "willEmailToUser" : false,
+      "url" : "http://localhost:3334/verify/:verificationToken"
    },
    "esdr" : {
       "apiRootUrl" : "http://localhost:3001/api/v1"
