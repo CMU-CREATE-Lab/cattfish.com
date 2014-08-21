@@ -44,9 +44,9 @@
                           }
                        }
                        else if (res.status == 401) {
-                          messages.add("Login failed. Please double-check your login below and make sure you have " +
-                                       "activated your account by clicking the link in the verification email we sent " +
-                                       "when you signed up.");
+                          messages.add('Login failed. Please double-check your login below and make sure you have ' +
+                                       'activated your account by clicking the link in the verification email we sent ' +
+                                       'when you signed up. If you don\'t have the email, you can <a href="/verification">request a new one</a>.');
                        }
                        else {
                           messages.add("Login failed.");

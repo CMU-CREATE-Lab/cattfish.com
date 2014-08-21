@@ -36,6 +36,10 @@ router.get('/verification/:verificationToken', function(req, res) {
    res.render('verification', { title : "CATTfish: Verify Your Account", verificationToken : cleanedVerificationToken});
 });
 
+router.get('/verification', function(req, res) {
+   res.render('verification', { title : "CATTfish: Resend Account Verification Email"});
+});
+
 //======================================================================================================================
 
 module.exports = router;

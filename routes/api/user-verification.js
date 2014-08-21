@@ -5,6 +5,31 @@ var esdr = require('../../lib/esdr');
 var RemoteError = require('../../lib/errors').RemoteError;
 var log = require('log4js').getLogger();
 
+router.post('/',
+            function(req, res, next) {
+               var email = req.body.email;
+               log.debug("Received POST to request a resend of the verification token for user with email [" + email + "]");
+               if (email) {
+                  // delegate verification to ESDR
+                  esdr.requestVerificationEmailResend(email, function(err, result) {
+                     if (err) {
+                        if (err instanceof RemoteError) {
+                           return res.jsendPassThrough(err.data);
+                        }
+                        var message = "Error while trying to request a resend of the verification token for user with email [" + email + "]";
+                        log.error(message + ": " + err);
+                        return res.jsendServerError(message);
+                     }
+
+                     res.jsendPassThrough(result);
+                  });
+               }
+               else {
+                  return res.jsendClientError("Email not specified.", null, 422);  // HTTP 422 Unprocessable Entity
+               }
+            }
+);
+
 router.put('/',
            function(req, res, next) {
               var verificationToken = req.body.token;
