@@ -52,7 +52,7 @@ module.exports = function(databaseHelper) {
                }
             }
 
-            log.error("Error while trying to create a user in ESDR: " + err1);
+            log.error("Error while trying to create a user in ESDR: " + JSON.stringify(err1, null, 3));
             return callback(err1);
          }
          else {
