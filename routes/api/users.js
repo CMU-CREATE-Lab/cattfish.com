@@ -1,11 +1,8 @@
 var express = require('express');
 var router = express.Router();
-var JaySchema = require('jayschema');
 var config = require('../../config');
-var esdr = require('../../lib/esdr');
 var ValidationError = require('../../lib/errors').ValidationError;
 var DuplicateRecordError = require('../../lib/errors').DuplicateRecordError;
-var RemoteError = require('../../lib/errors').RemoteError;
 var log = require('log4js').getLogger();
 
 module.exports = function(UserModel) {
@@ -44,24 +41,6 @@ module.exports = function(UserModel) {
          return res.jsendSuccess(obj, 201);
       });
    });
-
-   router.get('/verification/:verificationToken',
-              function(req, res, next) {
-                 // delegate verification to ESDR
-                 esdr.verifyUser(req.params.verificationToken, function(err, result) {
-                    if (err) {
-                       if (err instanceof RemoteError) {
-                          return res.jsendPassThrough(err.data);
-                       }
-                       var message = "Error while trying to verify user with verification token [" + req.params.verificationToken + "]";
-                       log.error(message + ": " + err);
-                       return res.jsendServerError(message);
-                    }
-
-                    res.jsendPassThrough(result);
-                 });
-              }
-   );
 
    return router;
 };

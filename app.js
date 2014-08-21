@@ -126,6 +126,7 @@ Database.create(function(err, db) {
 
          // configure routing
          app.use('/api/v1/users', require('./routes/api/users')(db.users));
+         app.use('/api/v1/user-verification', require('./routes/api/user-verification'));
          app.use('/login', require('./routes/login'));
          app.use('/logout', require('./routes/logout'));
          app.use('/password-reset', require('./routes/password-reset')(db.users));

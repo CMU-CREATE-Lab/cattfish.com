@@ -12,7 +12,8 @@
       var verificationToken = "{{verificationToken}}";
       if (verificationToken && verificationToken.length > 0) {
          superagent
-               .get("/api/v1/users/verification/" + verificationToken)
+               .put("/api/v1/user-verification")
+               .send({token : verificationToken})
                .end(function(err, res) {
                        if (res && res.body.data && res.body.data.isVerified) {
                           handleVerificationSuccess();
