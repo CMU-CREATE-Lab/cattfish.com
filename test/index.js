@@ -202,10 +202,10 @@ describe("cattfish.com", function() {
 
          });
 
-         describe("verify", function() {
+         describe("verification", function() {
             it("Should be able to verify a new user", function(done) {
                agent(url)
-                     .get("/api/v1/users/" + verificationTokens[testUser1.email] + "/verify")
+                     .get("/api/v1/users/verification/" + verificationTokens[testUser1.email])
                      .end(function(err, res) {
                              if (err) {
                                 return done(err);
@@ -223,7 +223,7 @@ describe("cattfish.com", function() {
 
             it("Should be able to verify the same user again", function(done) {
                agent(url)
-                     .get("/api/v1/users/" + verificationTokens[testUser1.email] + "/verify")
+                     .get("/api/v1/users/verification/" + verificationTokens[testUser1.email])
                      .end(function(err, res) {
                              if (err) {
                                 return done(err);
@@ -241,7 +241,7 @@ describe("cattfish.com", function() {
 
             it("Should fail to verify with a bogus verification token", function(done) {
                agent(url)
-                     .get("/api/v1/users/bogus/verify")
+                     .get("/api/v1/users/verification/bogus")
                      .end(function(err, res) {
                              if (err) {
                                 return done(err);
@@ -300,7 +300,7 @@ describe("cattfish.com", function() {
 
             it("Should be able to login after verifying that user", function(done) {
                agent(url)
-                     .get("/api/v1/users/" + verificationTokens[testUser2.email] + "/verify")
+                     .get("/api/v1/users/verification/" + verificationTokens[testUser2.email])
                      .end(function(err, res) {
                              if (err) {
                                 return done(err);

@@ -20,7 +20,7 @@ config.defaults({
                    "verificationToken" : {
                       "willReturnViaApi" : false,
                       "willEmailToUser" : true,
-                      "url" : "http://localhost:3333/verify/:verificationToken"
+                      "url" : "http://localhost:3333/verification/:verificationToken"
                    },
                    "esdr" : {
                       "apiRootUrl" : "ESDR_API_ROOT_URL"

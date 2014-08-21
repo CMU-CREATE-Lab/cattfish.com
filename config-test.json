@@ -11,7 +11,7 @@
    "verificationToken" : {
       "willReturnViaApi" : true,
       "willEmailToUser" : false,
-      "url" : "http://localhost:3334/verify/:verificationToken"
+      "url" : "http://localhost:3334/verification/:verificationToken"
    },
    "esdr" : {
       "apiRootUrl" : "http://localhost:3001/api/v1"

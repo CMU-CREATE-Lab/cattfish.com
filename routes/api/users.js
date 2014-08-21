@@ -45,7 +45,7 @@ module.exports = function(UserModel) {
       });
    });
 
-   router.get('/:verificationToken/verify',
+   router.get('/verification/:verificationToken',
               function(req, res, next) {
                  // delegate verification to ESDR
                  esdr.verifyUser(req.params.verificationToken, function(err, result) {
