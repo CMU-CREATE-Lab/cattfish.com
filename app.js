@@ -1,5 +1,6 @@
 // dependencies
 var express = require('express');
+var cors = require('cors');
 var app = express();
 
 var log = require('log4js').getLogger();
@@ -74,6 +75,9 @@ Database.create(function(err, db) {
 
          // setup middleware
          app.use(favicon(path.join(__dirname, 'public/favicon.ico')));     // favicon serving
+         app.use(cors({
+                         origin : '*'
+                      }));
          app.use(compress());                // enables gzip compression
          app.use(express.static(path.join(__dirname, 'public')));          // static file serving
          app.use(requestLogger('dev'));      // request logging
@@ -110,7 +114,8 @@ Database.create(function(err, db) {
                };
                delete req.session.redirectToAfterLogin;
                delete res.locals.redirectToAfterLogin;
-            } else {
+            }
+            else {
                // expose the redirectToAfterLogin page to the view
                res.locals.redirectToAfterLogin = req.session.redirectToAfterLogin;
             }
