@@ -82,6 +82,9 @@ a:hover, a:focus {
    color: black;
    padding: 5px;
    margin-bottom: 15px;
+   a {
+      color: $LINK_COLOR !important;
+   }
 }
 
 .form_error_messages {

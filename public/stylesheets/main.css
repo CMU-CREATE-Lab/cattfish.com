@@ -63,6 +63,8 @@ a:hover, a:focus {
   color: black;
   padding: 5px;
   margin-bottom: 15px; }
+  .form_messages a {
+    color: #428bca !important; }
 
 .form_error_messages {
   border: 1px solid #A75B4E;
