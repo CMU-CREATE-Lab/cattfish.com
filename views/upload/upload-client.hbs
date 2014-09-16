@@ -1,0 +1,84 @@
+//======================================================================================================================
+// VERIFY NAMESPACE
+//======================================================================================================================
+// Create the global symbol "com" if it doesn't exist.  Throw an error if it does exist but is not an object.
+var com;
+if (!com) {
+   com = {};
+}
+else {
+   if (typeof com != "object") {
+      var comExistsMessage = "Error: failed to create com namespace: com already exists and is not an object";
+      alert(comExistsMessage);
+      throw new Error(comExistsMessage);
+   }
+}
+
+// Repeat the creation and type-checking for the next level
+if (!com.cattfish) {
+   com.cattfish = {};
+}
+else {
+   if (typeof com.cattfish != "object") {
+      var comCattfishExistsMessage = "Error: failed to create com.cattfish namespace: com.cattfish already exists and is not an object";
+      alert(comCattfishExistsMessage);
+      throw new Error(comCattfishExistsMessage);
+   }
+}
+//======================================================================================================================
+
+(function() {
+
+   com.cattfish.Device = function(deviceConfig) {
+      var samples = [];
+      var minTime = Number.MAX_VALUE;
+      var maxTime = Number.MIN_VALUE;
+
+      this.add = function(record) {
+         if (record) {
+            var time = record[0];
+            minTime = Math.min(minTime, time);
+            maxTime = Math.max(maxTime, time);
+            samples.push(record);
+         }
+
+         return this;
+      };
+
+      this.toObj = function() {
+         return {
+            device : {
+               serialNumber : deviceConfig.serialNumber,
+               protocolVersion : deviceConfig.protocolVersion
+            },
+            data : {
+               fields : deviceConfig.fields,
+               minTime : minTime,
+               maxTime : maxTime,
+               samples : samples
+            }
+         };
+      };
+   };
+
+})();
+
+//======================================================================================================================
+
+var device = null;
+
+window.addEventListener("message",
+                        function(event) {
+                           if (event.origin.indexOf("{{{cattfishUrl}}}") != 0) {
+                              console.log("Ignoring message from unexpected origin [" + event.origin + "]");
+                              return;
+                           }
+
+                           // if the framed content is loaded, then send it the device data
+                           if (event.data && event.data.isLoaded) {
+                              event.source.postMessage(device.toObj(), "{{{cattfishUrl}}}")
+                           }
+                        },
+                        false);
+
+//======================================================================================================================

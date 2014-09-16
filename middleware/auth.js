@@ -1,5 +1,6 @@
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
+var BearerStrategy = require('passport-http-bearer').Strategy;
 var esdr = require('../lib/esdr');
 var log = require('log4js').getLogger();
 
@@ -41,5 +42,37 @@ module.exports = function(UserModel) {
          done(err, user);
       });
    });
+
+   /**
+    * BearerStrategy
+    *
+    * This strategy is used to authenticate users based on an access token (aka a bearer token).  The user must have
+    * previously authorized a client application, which is issued an access token to make requests on behalf of the
+    * authorizing user.
+    */
+   passport.use(new BearerStrategy(
+         function(accessToken, done) {
+            log.debug("BearerStrategy auth: validating access token: " + accessToken);
+            UserModel.findByAccessToken(accessToken, function(err, user) {
+               if (err) {
+                  return done(err);
+               }
+               if (user) {
+                  var isExpired = new Date(user.accessTokenExpiration).getTime() < Date.now();
+                  if (isExpired) {
+                     log.debug("BearerStrategy auth: token expired!");
+                     return done(null, false, { message : 'Token expired' });
+                  }
+                  else {
+                     log.debug("BearerStrategy auth: token found!");
+                     var info = { scope : '*' };
+                     return done(null, user, info);
+                  }
+               }
+
+               return done(null, false, { message : 'Unknown user' });
+            });
+         }
+   ));
 };
 

@@ -9,11 +9,22 @@ var esdr = require('../lib/esdr');
 var ValidationError = require('../lib/errors').ValidationError;
 var RemoteError = require('../lib/errors').RemoteError;
 var DuplicateRecordError = require('../lib/errors').DuplicateRecordError;
+var httpStatus = require('http-status');
 var log = require('log4js').getLogger();
 
 describe("cattfish.com", function() {
    var url = config.get("server:url");
    var userCounter = 0;
+   var shallowClone = function(obj) {
+      if (obj) {
+         var clone = {};
+         Object.keys(obj).forEach(function(key) {
+            clone[key] = obj[key];
+         });
+         return clone;
+      }
+      return obj;
+   };
    var createTestUser = function() {
       return {
          email : "tackaberry_" + new Date().getTime() + "_" + (userCounter++) + "@mcadoo.com",
@@ -22,6 +33,7 @@ describe("cattfish.com", function() {
       };
    };
    var db = null;
+   var testUsers = {};
 
    var pool = mysql.createPool({
                                   connectionLimit : config.get("database:pool:connectionLimit"),
@@ -44,7 +56,7 @@ describe("cattfish.com", function() {
                         },
                         function(err, result) {
                            if (err) {
-                              if (err instanceof RemoteError && err.data && err.data.code == 409) {
+                              if (err instanceof RemoteError && err.data && err.data.code == httpStatus.CONFLICT) {
                                  log.info("Client already exists in ESDR, no creation necessary.");
                               }
                               else {
@@ -52,7 +64,7 @@ describe("cattfish.com", function() {
                               }
                            }
                            else {
-                              if (result.code == 201) {
+                              if (result.code == httpStatus.CREATED) {
                                  log.info("Client created in ESDR.");
                               }
                               else {
@@ -101,8 +113,8 @@ describe("cattfish.com", function() {
    describe("REST API", function() {
       describe("Users", function() {
 
-         var testUser1 = createTestUser();
-         var testUser2 = createTestUser();
+         testUsers.testUser1 = createTestUser();
+         testUsers.testUser2 = createTestUser();
          var verificationTokens = {};
 
          describe("create", function() {
@@ -110,22 +122,22 @@ describe("cattfish.com", function() {
             it("Should be able to create a new user", function(done) {
                agent(url)
                      .post("/api/v1/users")
-                     .send(testUser1)
+                     .send(testUsers.testUser1)
                      .end(function(err, res) {
                              if (err) {
                                 return done(err);
                              }
 
-                             res.should.have.property('status', 201);
-                             res.body.should.have.property('code', 201);
+                             res.should.have.property('status', httpStatus.CREATED);
+                             res.body.should.have.property('code', httpStatus.CREATED);
                              res.body.should.have.property('status', 'success');
                              res.body.should.have.property('data');
-                             res.body.data.should.have.property('email', testUser1.email);
-                             res.body.data.should.have.property('displayName', testUser1.displayName);
+                             res.body.data.should.have.property('email', testUsers.testUser1.email);
+                             res.body.data.should.have.property('displayName', testUsers.testUser1.displayName);
                              res.body.data.should.have.property('verificationToken');
 
                              // remember the verification token so we can verify this user
-                             verificationTokens[testUser1.email] = res.body.data.verificationToken;
+                             verificationTokens[testUsers.testUser1.email] = res.body.data.verificationToken;
                              done();
                           });
             });
@@ -133,17 +145,17 @@ describe("cattfish.com", function() {
             it("Should not be able to create the same user again", function(done) {
                agent(url)
                      .post("/api/v1/users")
-                     .send(testUser1)
+                     .send(testUsers.testUser1)
                      .end(function(err, res) {
                              if (err) {
                                 return done(err);
                              }
 
-                             res.should.have.property('status', 409);
-                             res.body.should.have.property('code', 409);
+                             res.should.have.property('status', httpStatus.CONFLICT);
+                             res.body.should.have.property('code', httpStatus.CONFLICT);
                              res.body.should.have.property('status', 'error');
                              res.body.should.have.property('data');
-                             res.body.data.should.have.property('email', testUser1.email);
+                             res.body.data.should.have.property('email', testUsers.testUser1.email);
 
                              done();
                           });
@@ -152,22 +164,22 @@ describe("cattfish.com", function() {
             it("Should be able to create a different user", function(done) {
                agent(url)
                      .post("/api/v1/users")
-                     .send(testUser2)
+                     .send(testUsers.testUser2)
                      .end(function(err, res) {
                              if (err) {
                                 return done(err);
                              }
 
-                             res.should.have.property('status', 201);
-                             res.body.should.have.property('code', 201);
+                             res.should.have.property('status', httpStatus.CREATED);
+                             res.body.should.have.property('code', httpStatus.CREATED);
                              res.body.should.have.property('status', 'success');
                              res.body.should.have.property('data');
-                             res.body.data.should.have.property('email', testUser2.email);
-                             res.body.data.should.have.property('displayName', testUser2.displayName);
+                             res.body.data.should.have.property('email', testUsers.testUser2.email);
+                             res.body.data.should.have.property('displayName', testUsers.testUser2.displayName);
                              res.body.data.should.have.property('verificationToken');
 
                              // remember the verification token so we can verify this user
-                             verificationTokens[testUser2.email] = res.body.data.verificationToken;
+                             verificationTokens[testUsers.testUser2.email] = res.body.data.verificationToken;
                              done();
                           });
             });
@@ -184,8 +196,8 @@ describe("cattfish.com", function() {
                                 return done(err);
                              }
 
-                             res.should.have.property('status', 422);
-                             res.body.should.have.property('code', 422);
+                             res.should.have.property('status', httpStatus.UNPROCESSABLE_ENTITY);
+                             res.body.should.have.property('code', httpStatus.UNPROCESSABLE_ENTITY);
                              res.body.should.have.property('status', 'error');
                              res.body.should.have.property('data');
                              res.body.data.should.have.length(2);
@@ -200,20 +212,20 @@ describe("cattfish.com", function() {
                           });
             });
 
-         });
+         });   // end Create
 
          describe("verification", function() {
             it("Should be able to verify a new user", function(done) {
                agent(url)
                      .put("/api/v1/user-verification")
-                     .send({token : verificationTokens[testUser1.email]})
+                     .send({token : verificationTokens[testUsers.testUser1.email]})
                      .end(function(err, res) {
                              if (err) {
                                 return done(err);
                              }
 
-                             res.should.have.property('status', 200);
-                             res.body.should.have.property('code', 200);
+                             res.should.have.property('status', httpStatus.OK);
+                             res.body.should.have.property('code', httpStatus.OK);
                              res.body.should.have.property('status', 'success');
                              res.body.should.have.property('data');
                              res.body.data.should.have.property('isVerified', true);
@@ -225,14 +237,14 @@ describe("cattfish.com", function() {
             it("Should be able to verify the same user again", function(done) {
                agent(url)
                      .put("/api/v1/user-verification")
-                     .send({token : verificationTokens[testUser1.email]})
+                     .send({token : verificationTokens[testUsers.testUser1.email]})
                      .end(function(err, res) {
                              if (err) {
                                 return done(err);
                              }
 
-                             res.should.have.property('status', 200);
-                             res.body.should.have.property('code', 200);
+                             res.should.have.property('status', httpStatus.OK);
+                             res.body.should.have.property('code', httpStatus.OK);
                              res.body.should.have.property('status', 'success');
                              res.body.should.have.property('data');
                              res.body.data.should.have.property('isVerified', true);
@@ -250,8 +262,8 @@ describe("cattfish.com", function() {
                                 return done(err);
                              }
 
-                             res.should.have.property('status', 400);
-                             res.body.should.have.property('code', 400);
+                             res.should.have.property('status', httpStatus.BAD_REQUEST);
+                             res.body.should.have.property('code', httpStatus.BAD_REQUEST);
                              res.body.should.have.property('status', 'error');
                              res.body.should.have.property('data');
                              res.body.data.should.have.property('isVerified', false);
@@ -268,29 +280,29 @@ describe("cattfish.com", function() {
                                 return done(err);
                              }
 
-                             res.should.have.property('status', 422);
-                             res.body.should.have.property('code', 422);
+                             res.should.have.property('status', httpStatus.UNPROCESSABLE_ENTITY);
+                             res.body.should.have.property('code', httpStatus.UNPROCESSABLE_ENTITY);
                              res.body.should.have.property('status', 'error');
                              res.body.should.have.property('data', null);
                              done();
                           });
             });
 
-         });
+         });   // end Verification
 
          describe("login", function() {
 
             it("Should be able to login an already-verified user", function(done) {
                agent(url)
                      .post("/login")
-                     .send({email : testUser1.email, password : testUser1.password})
+                     .send({email : testUsers.testUser1.email, password : testUsers.testUser1.password})
                      .end(function(err, res) {
                              if (err) {
                                 return done(err);
                              }
 
-                             res.should.have.property('status', 200);
-                             res.body.should.have.property('code', 200);
+                             res.should.have.property('status', httpStatus.OK);
+                             res.body.should.have.property('code', httpStatus.OK);
                              res.body.should.have.property('status', 'success');
                              res.body.should.have.property('data');
                              res.body.data.should.have.property('accessToken');
@@ -303,14 +315,14 @@ describe("cattfish.com", function() {
             it("Should fail to login an unverified user", function(done) {
                agent(url)
                      .post("/login")
-                     .send({email : testUser2.email, password : testUser2.password})
+                     .send({email : testUsers.testUser2.email, password : testUsers.testUser2.password})
                      .end(function(err, res) {
                              if (err) {
                                 return done(err);
                              }
 
-                             res.should.have.property('status', 401);
-                             res.body.should.have.property('code', 401);
+                             res.should.have.property('status', httpStatus.UNAUTHORIZED);
+                             res.body.should.have.property('code', httpStatus.UNAUTHORIZED);
                              res.body.should.have.property('status', 'error');
                              res.body.should.have.property('data', null);
 
@@ -321,28 +333,28 @@ describe("cattfish.com", function() {
             it("Should be able to login after verifying that user", function(done) {
                agent(url)
                      .put("/api/v1/user-verification")
-                     .send({token : verificationTokens[testUser2.email]})
+                     .send({token : verificationTokens[testUsers.testUser2.email]})
                      .end(function(err, res) {
                              if (err) {
                                 return done(err);
                              }
 
-                             res.should.have.property('status', 200);
-                             res.body.should.have.property('code', 200);
+                             res.should.have.property('status', httpStatus.OK);
+                             res.body.should.have.property('code', httpStatus.OK);
                              res.body.should.have.property('status', 'success');
                              res.body.should.have.property('data');
                              res.body.data.should.have.property('isVerified', true);
 
                              agent(url)
                                    .post("/login")
-                                   .send({email : testUser2.email, password : testUser2.password})
+                                   .send({email : testUsers.testUser2.email, password : testUsers.testUser2.password})
                                    .end(function(err, res) {
                                            if (err) {
                                               return done(err);
                                            }
 
-                                           res.should.have.property('status', 200);
-                                           res.body.should.have.property('code', 200);
+                                           res.should.have.property('status', httpStatus.OK);
+                                           res.body.should.have.property('code', httpStatus.OK);
                                            res.body.should.have.property('status', 'success');
                                            res.body.should.have.property('data');
                                            res.body.data.should.have.property('accessToken');
@@ -356,16 +368,17 @@ describe("cattfish.com", function() {
             // TODO: get session cookie, access protected resource with that cookie (show that you can't
             // access the resource before logging in, but can access it afterwards)
 
-         });
+         });   // end Login
 
-      });
+      });   // end Users
    });
 
    describe("Database", function() {
+      var testUser = createTestUser();
+
       describe("Users", function() {
          describe("create", function() {
 
-            var testUser = createTestUser();
             var verificationTokens = {};
 
             it("Should be able to create a new user", function(done) {
@@ -427,4 +440,5 @@ describe("cattfish.com", function() {
          });
       });
    });
-});
+})
+;

@@ -3,6 +3,7 @@ var esdr = require('../lib/esdr');
 var ValidationError = require('../lib/errors').ValidationError;
 var RemoteError = require('../lib/errors').RemoteError;
 var DuplicateRecordError = require('../lib/errors').DuplicateRecordError;
+var httpStatus = require('http-status');
 var log = require('log4js').getLogger();
 
 var CREATE_TABLE_QUERY = " CREATE TABLE IF NOT EXISTS `Users` ( " +
@@ -15,6 +16,7 @@ var CREATE_TABLE_QUERY = " CREATE TABLE IF NOT EXISTS `Users` ( " +
                          "`refreshToken` varchar(255) DEFAULT NULL, " +
                          "`accessTokenExpiration` timestamp, " +
                          "PRIMARY KEY (`id`), " +
+                         "UNIQUE KEY `unique_accessToken` (`accessToken`), " +
                          "UNIQUE KEY `unique_esdrUserId` (`esdrUserId`) " +
                          ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8";
 
@@ -43,11 +45,11 @@ module.exports = function(databaseHelper) {
          // DuplicateRecordError.
          if (err1) {
             if (err1 instanceof RemoteError) {
-               if (err1.data.code == 409) {
+               if (err1.data.code == httpStatus.CONFLICT) {
                   // a user with this email address already exists in ESDR
                   return callback(new DuplicateRecordError({email : user.email}, "User already exists."));
                }
-               if (err1.data.code == 422) {
+               if (err1.data.code == httpStatus.UNPROCESSABLE_ENTITY) {
                   return callback(new ValidationError(err1.data.data, err1.data.message));
                }
             }
@@ -56,7 +58,7 @@ module.exports = function(databaseHelper) {
             return callback(err1);
          }
          else {
-            if (createResult.code == 201) {
+            if (createResult.code == httpStatus.CREATED) {
                // user created in ESDR, so create here, too
                return insertUser(createResult.data, callback);
             }
@@ -104,6 +106,55 @@ module.exports = function(databaseHelper) {
                              });
    };
 
+   this.refreshTokens = function(user, callback) {
+      log.debug("refreshTokens for user: " + JSON.stringify(user, null, 3));
+
+      esdr.refreshAccessToken(user.refreshToken, function(err, newTokens) {
+         if (err) {
+            return callback(err);
+         }
+
+         if (newTokens) {
+            databaseHelper.execute("UPDATE Users SET " +
+                                   "accessToken=?, " +
+                                   "refreshToken=?, " +
+                                   "accessTokenExpiration=? " +
+                                   "WHERE id=?",
+                                   [newTokens.accessToken,
+                                    newTokens.refreshToken,
+                                    newTokens.accessTokenExpiration,
+                                    user.id],
+                                   function(err, result) {
+                                      if (err) {
+                                         log.error("Error trying to update access tokens for user [" + user.id + "]: " + err);
+                                         return callback(err);
+                                      }
+
+                                      return callback(null, newTokens);
+                                   });
+         }
+         else {
+            return callback(null, null);
+         }
+      });
+   };
+
+   this.destroyTokens = function(userId, callback) {
+      databaseHelper.execute("UPDATE Users SET " +
+                             "accessToken=NULL, " +
+                             "refreshToken=NULL, " +
+                             "accessTokenExpiration=0 " +
+                             "WHERE id=?",
+                             [userId],
+                             function(err, result) {
+                                if (err) {
+                                   log.error("Error trying to destroy the tokens for user [" + userId + "]: " + err);
+                                   return callback(err);
+                                }
+                                return callback(null, result.changedRows > 0);
+                             });
+   };
+
    /**
     * Tries to find the user with the given <code>userId</code> and returns it to the given <code>callback</code>. If
     * successful, the user is returned as the 2nd argument to the <code>callback</code> function.  If unsuccessful,
@@ -114,6 +165,19 @@ module.exports = function(databaseHelper) {
     */
    this.findById = function(userId, callback) {
       findUser("SELECT * FROM Users WHERE id=?", [userId], callback);
+   };
+
+   /**
+    * Tries to find the user with the given access token and returns it to the given <code>callback</code>. Note that
+    * callers of this method should be careful to check the <code>accessTokenExpiration</code> in the returned user. If
+    * successful, the user is returned as the 2nd argument to the <code>callback</code> function.  If unsuccessful,
+    * <code>null</code> is returned to the callback.
+    *
+    * @param {string} accessToken access token of the user to find.
+    * @param {function} callback function with signature <code>callback(err, user)</code>
+    */
+   this.findByAccessToken = function(accessToken, callback) {
+      findUser("SELECT * FROM Users WHERE accessToken=?", [accessToken], callback);
    };
 
    /**
@@ -144,7 +208,7 @@ module.exports = function(databaseHelper) {
       esdr.createResetPasswordRequest(email, function(err, result) {
          if (err) {
             if (err instanceof RemoteError) {
-               if (err.data.code == 422) {
+               if (err.data.code == httpStatus.UNPROCESSABLE_ENTITY) {
                   return callback(new ValidationError(err.data.data, err.data.message));
                }
                return callback(err);
@@ -154,7 +218,7 @@ module.exports = function(databaseHelper) {
             return callback(err);
          }
          else {
-            if (result.code == 201) {
+            if (result.code == httpStatus.CREATED) {
                return callback(null, result);
             }
 
@@ -168,7 +232,7 @@ module.exports = function(databaseHelper) {
       esdr.setNewPassword(resetPasswordToken, newPassword, function(err, result) {
          if (err) {
             if (err instanceof RemoteError) {
-               if (err.data.code == 422) {
+               if (err.data.code == httpStatus.UNPROCESSABLE_ENTITY) {
                   return callback(new ValidationError(err.data.data, err.data.message));
                }
                return callback(err);
@@ -178,7 +242,7 @@ module.exports = function(databaseHelper) {
             return callback(err);
          }
          else {
-            if (result.code == 200) {
+            if (result.code == httpStatus.OK) {
                return callback(null, result);
             }
 

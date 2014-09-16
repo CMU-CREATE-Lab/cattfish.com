@@ -1,0 +1,85 @@
+<script language="JavaScript" type="text/javascript">
+   var accessToken = new com.cattfish.AccessToken();
+   var ESDR_API_URL = "{{{esdrApiUrl}}}";
+
+   window.addEventListener("message",
+                           function(event) {
+                              console.log("###: Child got a message event from origin [" + event.origin + "]");
+                              if (event.data) {
+                                 doUpload(event.data.device, event.data.data)
+                              }
+                           },
+                           false);
+
+   function doUpload(device, data) {
+      if (device && data) {
+         if (accessToken.get() == null) {
+            // TODO: prompt the user to log in first
+            console.log("YOU MUST LOG IN FIRST!");
+         }
+         else {
+            var esdr = new org.cmucreatelab.esdr.ESDR("{{{esdrApiUrl}}}", accessToken.get());
+
+            // do the upload
+            console.log("See if this device is known and allows unauthenticated login...");
+
+            esdr.devices.get('cattfish_v2', device.serialNumber, {
+               success : function(device) {
+                  // TODO: found the device, so now fetch a list of all feeds for this device
+                  console.log(JSON.stringify(device, null, 3));
+                  $("#content").text(JSON.stringify(device, null, 3));
+               },
+               unauthorized : function() {
+                  // TODO: unauthorized--need to log in first and try again (this shouldn't happen, but...)
+               },
+               notFound : function() {
+                  // unknown device, need to register it
+                  console.log("UKNOWN DEVICE, NEED TO REGISTER IT");
+                  esdr.devices.create('cattfish_v2', device.serialNumber, {
+                     success : function(createdDevice) {
+                        // TODO: created!
+                        console.log("Device created: " + JSON.stringify(createdDevice, null, 3));
+
+                        var deviceId = createdDevice.id;
+
+                        // TODO: now create the feed for this device...
+                     },
+                     duplicate : function() {
+                        // TODO: serial number already exists for this product and user
+                        console.log("Error: serial number already exists for this product and user");
+                     },
+                     validationError : function(validationErrors) {
+                        // TODO: invalid serial number
+                        console.log("Error: invalid serial number: " + JSON.stringify(validationErrors, null, 3));
+                     },
+                     error : function(responseBody) {
+                        // TODO: some other error
+                        console.log("Error: Unexpected error while trying to create the device: " + responseBody);
+                     }
+                  });
+               },
+               error : function(responseBody) {
+                  // TODO: some unexpected error
+               }
+            });
+         }
+      }
+      else {
+         // TODO: do something if device and data aren't defined.
+      }
+   }
+
+   $(document).ready(function() {
+      // don't bother doing anything if I'm not being iframed
+      if (window !== window.top) {
+         // try fetching the access token
+         accessToken.load(function(err, token) {
+            console.log("Done getting the token: " + token);
+
+            // tell the parent that I'm ready
+            window.top.postMessage({isLoaded : true}, '*');
+         });
+      }
+   });
+</script>
+<div id="content"></div>

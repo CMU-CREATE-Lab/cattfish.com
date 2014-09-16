@@ -3,6 +3,7 @@ var router = express.Router();
 var config = require('../../config');
 var esdr = require('../../lib/esdr');
 var RemoteError = require('../../lib/errors').RemoteError;
+var httpStatus = require('http-status');
 var log = require('log4js').getLogger();
 
 router.post('/',
@@ -25,7 +26,7 @@ router.post('/',
                   });
                }
                else {
-                  return res.jsendClientError("Email not specified.", null, 422);  // HTTP 422 Unprocessable Entity
+                  return res.jsendClientError("Email not specified.", null, httpStatus.UNPROCESSABLE_ENTITY);  // HTTP 422 Unprocessable Entity
                }
             }
 );
@@ -50,7 +51,7 @@ router.put('/',
                  });
               }
               else {
-                 return res.jsendClientError("Verification token not specified.", null, 422);  // HTTP 422 Unprocessable Entity
+                 return res.jsendClientError("Verification token not specified.", null, httpStatus.UNPROCESSABLE_ENTITY);  // HTTP 422 Unprocessable Entity
               }
            }
 );

@@ -3,6 +3,7 @@ var router = express.Router();
 var config = require('../../config');
 var ValidationError = require('../../lib/errors').ValidationError;
 var DuplicateRecordError = require('../../lib/errors').DuplicateRecordError;
+var httpStatus = require('http-status');
 var log = require('log4js').getLogger();
 
 module.exports = function(UserModel) {
@@ -16,10 +17,10 @@ module.exports = function(UserModel) {
       UserModel.create(user, function(err, result) {
          if (err) {
             if (err instanceof ValidationError) {
-               return res.jsendClientError("Validation failure", err.data, 422);
+               return res.jsendClientError("Validation failure", err.data, httpStatus.UNPROCESSABLE_ENTITY);
             }
             if (err instanceof DuplicateRecordError) {
-               return res.jsendClientError("User already exists", err.data, 409);
+               return res.jsendClientError("User already exists", err.data, httpStatus.CONFLICT);
             }
             return res.jsendServerError(err.message, err.data);
          }
@@ -38,7 +39,7 @@ module.exports = function(UserModel) {
             obj.verificationToken = result.verificationToken
          }
 
-         return res.jsendSuccess(obj, 201);
+         return res.jsendSuccess(obj, httpStatus.CREATED);
       });
    });
 

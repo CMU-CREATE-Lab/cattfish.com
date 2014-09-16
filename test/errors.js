@@ -4,6 +4,7 @@ var ValidationError = require('../lib/errors').ValidationError;
 var DatabaseError = require('../lib/errors').DatabaseError;
 var DuplicateRecordError = require('../lib/errors').DuplicateRecordError;
 var RemoteError = require('../lib/errors').RemoteError;
+var httpStatus = require('http-status');
 
 describe("Custom Error Classes", function() {
    describe("ValidationError", function() {
@@ -114,12 +115,12 @@ describe("Custom Error Classes", function() {
 
    describe("RemoteError", function() {
       var jSend1 = {
-         code : 200,
+         code : httpStatus.OK,
          status : "success",
          data : {foo : "bar", baz : {bat : "bif"}}
       };
       var jSend2 = {
-         code : 400,
+         code : httpStatus.UNPROCESSABLE_ENTITY,
          status : "error",
          data : [
             { instanceContext : '#/password',
@@ -139,7 +140,7 @@ describe("Custom Error Classes", function() {
          message : "Validation failure"
       };
       var jSend3 = {
-         code : 500,
+         code : httpStatus.INTERNAL_SERVER_ERROR,
          status : "fail",
          data : {goodNews : "there's only one piece of bad news", badNews : "everything is broken, lost, and/or irreparably damaged"},
          message : "Something really nasty happened"

@@ -1,9 +1,9 @@
 var express = require('express');
 var router = express.Router();
-var esdr = require('../lib/esdr');
 var ValidationError = require('../lib/errors').ValidationError;
 var RemoteError = require('../lib/errors').RemoteError;
 var config = require('../config');
+var httpStatus = require('http-status');
 
 module.exports = function(UserModel) {
 
@@ -15,7 +15,7 @@ module.exports = function(UserModel) {
       UserModel.createResetPasswordRequest(req.body.email, function(err, result) {
          if (err) {
             if (err instanceof ValidationError) {
-               return res.jsendClientError(err.message, err.data, 422);
+               return res.jsendClientError(err.message, err.data, httpStatus.UNPROCESSABLE_ENTITY);
             }
             if (err instanceof RemoteError) {
                return res.jsendPassThrough(err.data);
@@ -36,7 +36,7 @@ module.exports = function(UserModel) {
             obj.resetPasswordToken = result.resetPasswordToken
          }
 
-         return res.jsendSuccess(obj, 201);
+         return res.jsendSuccess(obj, httpStatus.CREATED);
 
       });
    });
@@ -45,7 +45,7 @@ module.exports = function(UserModel) {
       UserModel.setNewPassword(req.body.token, req.body.password, function(err, result) {
          if (err) {
             if (err instanceof ValidationError) {
-               return res.jsendClientError(err.message, err.data, 422);
+               return res.jsendClientError(err.message, err.data, httpStatus.UNPROCESSABLE_ENTITY);
             }
             if (err instanceof RemoteError) {
                return res.jsendPassThrough(err.data);
@@ -53,7 +53,7 @@ module.exports = function(UserModel) {
             return res.jsendServerError(err.message, err.data);
          }
 
-         return res.jsendSuccess(null, 200);
+         return res.jsendSuccess(null, httpStatus.OK);
 
       });
    });

@@ -7,7 +7,7 @@ var log = require('log4js').getLogger();
 log.info("Environment: " + app.get('env'));
 
 var config = require('./config');
-var expressHandlebars = require('express3-handlebars');
+var expressHandlebars = require('express-handlebars');
 var path = require('path');
 var favicon = require('serve-favicon');
 var compress = require('compression');
@@ -19,6 +19,7 @@ var passport = require('passport');
 var SessionStore = require('express-mysql-session');
 var flash = require('connect-flash');
 var Database = require("./models/Database");
+var httpStatus = require('http-status');
 
 // decorate express.response with JSend methods
 require('./lib/jsend');
@@ -51,7 +52,7 @@ Database.create(function(err, db) {
          app.set('views', viewsDir);
          var handlebars = expressHandlebars.create({
                                                       extname : '.hbs',
-                                                      defaultLayout : 'main',
+                                                      defaultLayout : 'main-layout',
                                                       layoutsDir : path.join(viewsDir, "layouts"),
                                                       partialsDir : path.join(viewsDir, "partials"),
                                                       helpers : {
@@ -85,7 +86,7 @@ Database.create(function(err, db) {
          app.use(bodyParser.json());         // json body parsing
          app.use(function(error, req, res, next) { // function MUST have arity 4 here!
             // catch invalid JSON error (found at http://stackoverflow.com/a/15819808/703200)
-            res.status(400).json({status : "fail", data : "invalid JSON"})
+            res.status(httpStatus.BAD_REQUEST).json({status : "fail", data : "invalid JSON"})
          });
          app.use(flash());                   // adds a req.flash() function to all requests for displaying one-time messages to the user
          app.use(cookieParser());            // cookie parsing--MUST come before setting up session middleware!
@@ -99,8 +100,10 @@ Database.create(function(err, db) {
                                                         user : config.get("database:username"),
                                                         password : config.get("database:password")
                                                      }),
+                            rolling : false,
+                            //secure: true,   // TODO: enable this once https is enabled
                             saveUninitialized : true,
-                            resave : false               // default is true, but why???
+                            resave : true
                          }));
          app.use(passport.initialize());                                   // initialize passport (must come AFTER session middleware)
          app.use(passport.session());                                      // enable session support for passport
@@ -122,6 +125,7 @@ Database.create(function(err, db) {
 
             next();
          });
+         app.use(require('./middleware/accessToken').refreshAccessToken(db.users));
          app.use(require('./middleware/flash_message_helper'));            // stores flash messages in res.locals for use in views
 
          // configure passport
@@ -133,8 +137,24 @@ Database.create(function(err, db) {
          app.use('/api/v1/users', require('./routes/api/users')(db.users));
          app.use('/api/v1/user-verification', require('./routes/api/user-verification'));
          app.use('/login', require('./routes/login'));
-         app.use('/logout', require('./routes/logout'));
+         app.use('/logout', require('./routes/logout')(db.users));
+         app.use('/upload/v1', require('./routes/upload'));
+         app.use('/access-token', require('./routes/access-token'));
          app.use('/password-reset', require('./routes/password-reset')(db.users));
+
+         // ensure the user is authenticated before serving up the page
+         var ensureAuthenticated = function(req, res, next) {
+            if (req.isAuthenticated()) {
+               return next();
+            }
+            // remember where the user was trying to go and then redirect to the login page
+            req.session.redirectToAfterLogin = req.originalUrl;
+            res.redirect('/login')
+         };
+         app.use('/dashboard', ensureAuthenticated, require('./routes/dashboard'));
+         app.use('/devices', ensureAuthenticated, require('./routes/devices'));
+         app.use('/account', ensureAuthenticated, require('./routes/account'));
+
          app.use('/',
                  function(req, res, next) {
                     // if serving a page which doesn't require authentication, then
@@ -143,7 +163,6 @@ Database.create(function(err, db) {
                     next();
                  },
                  require('./routes/index'));
-         app.use('/', require('./routes/authenticated'));
 
          // ERROR HANDLERS ---------------------------------------------------------------------------------------------
 
