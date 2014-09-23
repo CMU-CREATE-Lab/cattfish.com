@@ -4,6 +4,8 @@
    var cattfish = null;
    var map = null;
    var marker = null;
+   var device = null;
+   var feeds = null;
    var selectedFeed = null;
 
    window.addEventListener("message",
@@ -18,8 +20,6 @@
 
    $(document).ready(function() {
       accessToken = new com.cattfish.AccessToken();
-
-      initializeMap();
 
       // don't bother doing anything if I'm not being iframed
       if (window !== window.top) {
@@ -91,7 +91,8 @@
       esdr.devices.get('cattfish_v2', serialNumber, {
          success : function(foundDevice) {
             console.log("found device: " + JSON.stringify(foundDevice, null, 3));
-            getFeeds(foundDevice.id)
+            device = foundDevice;
+            getFeeds();
          },
          unauthorized : function() {
             // TODO: unauthorized--need to log in first and try again (this shouldn't happen, but...)
@@ -112,9 +113,10 @@
       console.log("Creating device [" + serialNumber + "]...");
       esdr.devices.create('cattfish_v2', serialNumber, {
          success : function(createdDevice) {
+            device = createdDevice;
             // TODO: created!
-            console.log("Device created: " + JSON.stringify(createdDevice, null, 3));
-            showCreateFeedPanel(createdDevice.id);
+            console.log("Device created: " + JSON.stringify(device, null, 3));
+            showChooseFeedPanel();
          },
          duplicate : function() {
             // TODO: serial number already exists for this product and user
@@ -131,60 +133,64 @@
       });
    }
 
-   function getFeeds(deviceId) {
+   function selectFeed(feed) {
+      var feedElement = $("#feed_list_item_" + feed.id);
+      if (selectedFeed == null) {
+         selectedFeed = feed;
+         feedElement
+               .addClass("selected_feed")
+               .find(".checkmark_icon_container").show()
+               .addClass("checkmark_white");
+      }
+      else {
+         // deselect the existing feed
+         $("#feed_list_item_" + selectedFeed.id)
+               .removeClass("selected_feed")
+               .find(".checkmark_icon_container").hide()
+               .removeClass("checkmark_white");
+
+         if (selectedFeed.id == feed.id) {
+            selectedFeed = null;
+         }
+         else {
+            selectedFeed = feed;
+            feedElement
+                  .addClass("selected_feed")
+                  .find(".checkmark_icon_container").show()
+                  .addClass("checkmark_white");
+         }
+      }
+   }
+
+   function getFeeds() {
+      var deviceId = device.id;
       console.log("Getting feeds for device ID [" + deviceId + "]");
+      feeds = null;
       esdr.feeds.get(deviceId, {
-         success : function(feeds) {
+         success : function(foundFeeds) {
+            feeds = foundFeeds;
             if (feeds.length > 0) {
-               showChooseFeedPanel();
                console.log("Found these feeds:");
                var feedListItemTemplate = Handlebars.templates['feed_list_item'];
                feeds.forEach(function(feed) {
                   console.log(feed);
-                  feed.lastUploadFormatted = (feed.minTimeSecs == null || feed.maxTimeSecs == null) ? "never" : new Date(feed.lastUpload).toLocaleDateString();
+                  feed.lastUploadFormatted = (feed.minTimeSecs == null || feed.maxTimeSecs == null) ? "never" : new Date(feed.lastUpload).toLocaleDateString() + " at " + new Date(feed.lastUpload).toLocaleTimeString();
                   var feedElement = $(feedListItemTemplate(feed));
                   $("#existing_feeds").append(feedElement);
                   feedElement.click(function() {
-
-                     if (selectedFeed == null) {
-                        selectedFeed = feed;
-                        feedElement
-                              .addClass("selected_feed")
-                              .find(".checkmark_icon_container").show()
-                              .addClass("checkmark_white");
-                     }
-                     else {
-                        // deselect the existing feed
-                        $("#feed_list_item_" + selectedFeed.id)
-                              .removeClass("selected_feed")
-                              .find(".checkmark_icon_container").hide()
-                              .removeClass("checkmark_white");
-
-                        if (selectedFeed.id == feed.id) {
-                           selectedFeed = null;
-                        }
-                        else {
-                           selectedFeed = feed;
-                           feedElement
-                                 .addClass("selected_feed")
-                                 .find(".checkmark_icon_container").show()
-                                 .addClass("checkmark_white");
-                        }
-                     }
+                     selectFeed(feed);
                   });
                });
             }
-            else {
-               showCreateFeedPanel(deviceId);
-            }
+            showChooseFeedPanel();
          },
          notFound : function() {
             // TODO
-            console.log("Device ID [" + device.id + "] not found");
+            console.log("Device ID [" + deviceId + "] not found");
          },
          error : function(responseBody) {
             // TODO
-            console.log("Error loading feeds for device ID [" + device.id + "]: " + JSON.stringify(responseBody, null, 3));
+            console.log("Error loading feeds for device ID [" + deviceId + "]: " + JSON.stringify(responseBody, null, 3));
          }
       });
    }
@@ -202,10 +208,20 @@
                    'when you signed up.');
    }
 
-   function handleCreateFeedSuccess(createdFeed) {
-      console.log("Woohoo, feed is created: " + JSON.stringify(createdFeed, null, 3));
+   function handleUploadToSelectedFeed() {
+      if (selectedFeed) {
+         uploadToFeed(selectedFeed);
+      }
+      else {
+         $("#choose_feed_error_messages").show();
+      }
+      return false;
+   }
 
-      esdr.feeds.upload(createdFeed.apiKey,
+   function uploadToFeed(targetFeed) {
+      console.log("Woohoo, about to upload to feed: " + JSON.stringify(targetFeed, null, 3));
+
+      esdr.feeds.upload(targetFeed.apiKey,
                         {
                            channel_names : cattfish.data.fields,
                            data : cattfish.data.samples
@@ -241,17 +257,44 @@
       $("#login_email").focus();
    }
 
-   function showCreateFeedPanel(deviceId) {
-      $("#create_feed_device_id").val(deviceId);
-      showPanel('create_feed_panel');
+   function showCreateFeedPanel() {
+      $("#create_feed_panel").show();
+      $("#choose_feed_form").hide();
+      $(".choose_feed_panel_instructions").hide();
 
       // make sure the map is rendered correctly
       var center = map.getCenter();
       google.maps.event.trigger(map, "resize");
       map.setCenter(center);
+      return false;
    }
 
    function showChooseFeedPanel() {
+      console.log("In showChooseFeedPanel!");
+      $("#choose_feed_panel");
+
+      initializeMap();
+
+      // show the appropriate instructions
+      var hasFeeds = (feeds && feeds.length > 0);
+      var hasExactlyOneFeed = (feeds && feeds.length == 1);
+      $(".choose_feed_panel_instructions").hide();
+      $("#create_feed_panel").hide();
+      $("#upload_link").hide();
+      if (hasFeeds) {
+         if (hasExactlyOneFeed) {
+            $("#choose_feed_panel_instructions_one_feed").show();
+            selectFeed(feeds[0]);
+         }
+         else {
+            $("#choose_feed_panel_instructions_multiple_feeds").show();
+         }
+         $("#upload_link").show();
+      }
+      else {
+         showCreateFeedPanel();
+      }
+
       showPanel('choose_feed_panel');
    }
 
@@ -301,6 +344,7 @@
       <div class="page_title">
          CATTfish Data Upload
       </div>
+      <!-- TODO: revive this? -->
       <div id="progress_panel" style="display:none">
          <div style="display: table">
             <div style="display: table-row">
@@ -370,56 +414,68 @@
          </tr>
       </table>
    </div>
-   <div id="create_feed_panel" class="content_container upload_panel">
-      <div class="page_instructions">
-         Please provide details about where you have installed this CATTfish. You will need to provide a name for the
-         location, specify the location on the map, and choose the visibility.
-      </div>
-      <div id="create_feed_error_messages" class="form_messages form_error_messages"></div>
-      <form id="create_feed_form" onsubmit="return submitCreateFeedForm('create_feed_form',$('#create_feed_device_id').val(),'create_feed_location_name',{latitude:marker.getPosition().lat(),longitude:marker.getPosition().lng()},$('#create_feed_is_public_true').prop('checked'),'create_feed_error_messages', esdr, handleCreateFeedSuccess)" style="width:418px">
-         <input type="hidden" id="create_feed_device_id" value=""/>
-         <div>
-            <input type="text" id="create_feed_location_name" name="create_feed_location_name" placeholder="Location name (e.g. Upstairs bathroom)"/>
-         </div>
-         <div id="map_area">
-            <div id="map_geolocation" style="display:none;">
-               <div id="map_geolocation_link" class="map_geolocation_prompt" style="display:block;">
-                  <a href="#" onclick="return doGeolocation();">Place the marker at my current location</a>
-               </div>
-               <div id="map_geolocation_status_please_wait" class="map_geolocation_prompt">Determining your current location, please wait...</div>
-               <div id="map_geolocation_status_fail" class="map_geolocation_prompt">Sorry, your current location could not be determined.</div>
-            </div>
-            <div id="map_canvas"></div>
-            <div class="map_instructions">Double-click the map or drag the marker to set the marker's location.</div>
-         </div>
-         <div style="margin-top:20px;">
-            <div class="">The device name, location, and uploaded data will be:</div>
-            <div>
-               <input type="radio" id="create_feed_is_public_false" name="create_feed_is_public" value="false" checked="checked">
-               <label for="create_feed_is_public_false">Private &mdash; visible only to me</label>
-            </div>
-            <div>
-               <input type="radio" id="create_feed_is_public_true" name="create_feed_is_public" value="true">
-               <label for="create_feed_is_public_true">Public &mdash; visible to all users</label>
-            </div>
-         </div>
-         <div style="text-align:right"><input class="submit_link" type="submit" value="Upload &raquo;"></div>
-      </form>
-   </div>
    <div id="choose_feed_panel" class="content_container upload_panel">
       <div class="page_instructions">
-         There are multiple installation location datasets associated with this CATTfish. Please select the one which
-         should receive this upload.
+         <div id="choose_feed_panel_instructions_multiple_feeds" class="choose_feed_panel_instructions" style="display:none">
+            There are multiple installation location datasets associated with this CATTfish. Please select the one which
+            should receive this upload. Or, if you have moved the CATTfish to a new location, you can
+            <a href="#" onclick="return showCreateFeedPanel();">create a new installation location</a>.
+         </div>
+         <div id="choose_feed_panel_instructions_one_feed" class="choose_feed_panel_instructions" style="display:none">
+            You have uploaded data from this CATTfish before. To upload the new data to the same installation location,
+            simply click Upload below. Or, if you have moved the CATTfish to a new location, you can
+            <a href="#" onclick="return showCreateFeedPanel();">create a new installation location</a>.
+         </div>
       </div>
-      <div id="choose_feed_error_messages" class="form_messages form_error_messages"></div>
-      <form id="choose_feed_form" onsubmit="return submitChooseFeedForm();">
+      <div id="choose_feed_error_messages" class="form_messages form_error_messages">
+         Please select the installation location you want to receive this upload.
+      </div>
+      <form id="choose_feed_form" onsubmit="return handleUploadToSelectedFeed();">
          <div id="existing_feeds" class="feed_list"></div>
-         <div style="text-align:right"><input class="submit_link" type="submit" value="Upload &raquo;"></div>
+         <div id="upload_link">
+            <div style="text-align:right;"><input class="submit_link" type="submit" value="Upload &raquo;"></div>
+         </div>
       </form>
+      <div id="create_feed_panel">
+         <div class="page_instructions">
+            Please provide details about where you have installed this CATTfish. You will need to provide a name for the
+            location, specify the location on the map, and choose the visibility.
+         </div>
+         <div id="create_feed_error_messages" class="form_messages form_error_messages"></div>
+         <form id="create_feed_form" onsubmit="return submitCreateFeedForm('create_feed_form',device.id,'create_feed_location_name',{latitude:marker.getPosition().lat(),longitude:marker.getPosition().lng()},$('#create_feed_is_public_true').prop('checked'),'create_feed_error_messages', esdr, uploadToFeed)" style="width:418px">
+            <div>
+               <input type="text" id="create_feed_location_name" name="create_feed_location_name" placeholder="Location name (e.g. Upstairs bathroom)"/>
+            </div>
+            <div id="map_area">
+               <div id="map_geolocation" style="display:none;">
+                  <div id="map_geolocation_link" class="map_geolocation_prompt" style="display:block;">
+                     <a href="#" onclick="return doGeolocation();">Place the marker at my current location</a>
+                  </div>
+                  <div id="map_geolocation_status_please_wait" class="map_geolocation_prompt">Determining your current location, please wait...</div>
+                  <div id="map_geolocation_status_fail" class="map_geolocation_prompt">Sorry, your current location could not be determined.</div>
+               </div>
+               <div id="map_canvas"></div>
+               <div class="map_instructions">Double-click the map or drag the marker to set the marker's location.</div>
+            </div>
+            <div style="margin-top:20px;">
+               <div class="">The device name, location, and uploaded data will be:</div>
+               <div>
+                  <input type="radio" id="create_feed_is_public_false" name="create_feed_is_public" value="false" checked="checked">
+                  <label for="create_feed_is_public_false">Private &mdash; visible only to me</label>
+               </div>
+               <div>
+                  <input type="radio" id="create_feed_is_public_true" name="create_feed_is_public" value="true">
+                  <label for="create_feed_is_public_true">Public &mdash; visible to all users</label>
+               </div>
+            </div>
+            <div style="text-align:right"><input class="submit_link" type="submit" value="Upload &raquo;"></div>
+         </form>
+      </div>
+
    </div>
    <div id="upload_complete_panel" class="content_container upload_panel">
       <div class="page_instructions">
-         Success!  Your data is uploaded and is ready to <a href="/devices" target="_top">view</a>.
+         Success! Your data is uploaded and is ready to <a href="/devices" target="_top">view</a>.
       </div>
    </div>
 </div>
