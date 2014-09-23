@@ -36,3 +36,13 @@ To run the server in development mode, do:
 To run the server in test mode, do:
 
     NODE_ENV=test npm start
+    
+Development
+===========
+To generate the CSS from the SCSS template, do:
+
+   npm run-script gen-css
+
+To compile the handlebars templates, do:
+
+   npm run-script gen-handlebars

@@ -78,7 +78,7 @@
   </component>
   <component name="JavaScriptLibraryMappings">
     <file url="file://$PROJECT_DIR$" libraries="{cattfish.com node_modules}" />
-    <file url="PROJECT" libraries="{Node.js v0.10.30 Core Modules, cattfish.com node_modules, jQuery 1.11.1, mocha-DefinitelyTyped, nconf-DefinitelyTyped, should-DefinitelyTyped}" />
+    <file url="PROJECT" libraries="{Handlebars Runtime 2.0.0, Node.js v0.10.30 Core Modules, Superagent, cattfish.com node_modules, jQuery 1.11.1, mocha-DefinitelyTyped, nconf-DefinitelyTyped, should-DefinitelyTyped}" />
     <includedPredefinedLibrary name="Node.js Globals" />
     <excludedPredefinedLibrary name="HTML5 / EcmaScript 5" />
   </component>
@@ -430,6 +430,26 @@
       <option name="workingDir" value="$FileDir$" />
       <envs />
     </TaskOptions>
+    <TaskOptions isEnabled="true">
+      <option name="arguments" value="$ProjectFileDir$/public/templates -e hbs" />
+      <option name="checkSyntaxErrors" value="true" />
+      <option name="description" value="Compiles Handlebars templates" />
+      <option name="exitCodeBehavior" value="ERROR" />
+      <option name="fileExtension" value="handlebars;hbs;mustache" />
+      <option name="immediateSync" value="true" />
+      <option name="name" value="Handlebars Compiler" />
+      <option name="output" value="$ProjectFileDir$/public/javascripts/handlebars_templates.js" />
+      <option name="outputFilters">
+        <array />
+      </option>
+      <option name="outputFromStdout" value="true" />
+      <option name="passParentEnvs" value="true" />
+      <option name="program" value="$PROJECT_DIR$/node_modules/handlebars/bin/handlebars" />
+      <option name="scopeName" value="Project Files" />
+      <option name="trackOnlyRoot" value="false" />
+      <option name="workingDir" value="$ProjectFileDir$/public/templates" />
+      <envs />
+    </TaskOptions>
   </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
@@ -448,10 +468,46 @@
       <JAVADOC />
       <SOURCES />
     </library>
+    <library name="Generated files" type="javaScript">
+      <properties>
+        <sourceFilesUrls>
+          <item url="file://$PROJECT_DIR$/public/javascripts/handlebars_templates.js" />
+        </sourceFilesUrls>
+      </properties>
+      <CLASSES>
+        <root url="file://$PROJECT_DIR$/public/javascripts/handlebars_templates.js" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="Handlebars Runtime 2.0.0" type="javaScript">
+      <properties>
+        <sourceFilesUrls>
+          <item url="file://$PROJECT_DIR$/public/lib/handlebars/handlebars.runtime-v2.0.0.js" />
+        </sourceFilesUrls>
+      </properties>
+      <CLASSES>
+        <root url="file://$PROJECT_DIR$/public/lib/handlebars/handlebars.runtime-v2.0.0.js" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
     <library name="jQuery 1.11.1" type="javaScript">
       <CLASSES>
         <root url="file://$PROJECT_DIR$/public/lib/jquery/jquery-1.11.1.min.js" />
         <root url="file://$PROJECT_DIR$/public/lib/jquery/jquery-1.11.1.js" />
+      </CLASSES>
+      <JAVADOC />
+      <SOURCES />
+    </library>
+    <library name="Superagent" type="javaScript">
+      <properties>
+        <sourceFilesUrls>
+          <item url="file://$PROJECT_DIR$/public/lib/superagent/superagent.js" />
+        </sourceFilesUrls>
+      </properties>
+      <CLASSES>
+        <root url="file://$PROJECT_DIR$/public/lib/superagent/superagent.js" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />

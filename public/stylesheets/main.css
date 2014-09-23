@@ -80,6 +80,11 @@ a:hover, a:focus {
   font-size: 24px;
   margin-bottom: 20px; }
 
+.page_subtitle {
+  color: black;
+  font-size: 18px;
+  margin-bottom: 10px; }
+
 .page_instructions {
   color: black;
   font-size: normal;
@@ -96,6 +101,11 @@ input {
   font-size: 20px;
   padding-left: 15px;
   margin: 0 0 15px 0; }
+
+input[type="radio"], input[type="checkbox"] {
+  width: auto;
+  height: auto;
+  margin: 0; }
 
 .submit_link {
   height: auto;
@@ -117,6 +127,20 @@ input {
   color: #999999;
   text-decoration: none;
   cursor: default; }
+
+#map_area #map_canvas {
+  width: 416px;
+  height: 300px;
+  border: 1px solid #1c1c1e;
+  margin: 0;
+  padding: 0; }
+#map_area .map_instructions {
+  font-size: 12px;
+  color: #666666; }
+#map_area #map_geolocation {
+  font-size: 12px; }
+#map_area .map_geolocation_prompt {
+  display: none; }
 
 #header {
   background: #f4f6ee;
@@ -160,7 +184,7 @@ input {
         text-decoration: underline; }
       #header #navigation #login_popup #login_popup_form #login_popup_messages {
         margin-bottom: 10px;
-        width: 400px; }
+        width: 406px; }
       #header #navigation #login_popup #login_popup_form input[type="submit"] {
         color: white; }
       #header #navigation #login_popup #login_popup_form .login_popup_form_links {
@@ -237,3 +261,40 @@ input {
     width: 309px; }
     #home_page #products .product_thumbnail img {
       margin-bottom: 10px; }
+
+.checkmark_icon_container {
+  width: 24px;
+  height: 19px;
+  padding: 0;
+  margin: 0; }
+
+.checkmark_white {
+  width: 24px;
+  height: 19px;
+  background: transparent url("../images/checkmark_white.png") no-repeat 0 0;
+  background-size: 24px 19px; }
+
+.device_list .device_list_item {
+  border: 1px solid #1c1c1e;
+  border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  color: #1c1c1e;
+  padding: 10px;
+  margin: 5px 0 5px 0;
+  cursor: pointer; }
+
+.feed_list .feed_list_item {
+  border: 1px solid #1c1c1e;
+  border-radius: 3px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  color: #1c1c1e;
+  padding: 10px;
+  margin: 5px 0 5px 0;
+  cursor: pointer; }
+.feed_list .feed_list_item:hover {
+  border: 1px solid #428bca; }
+.feed_list .selected_feed {
+  color: white;
+  background-color: #428bca; }

@@ -54,6 +54,27 @@ if (!window['superagent']) {
       };
 
       this.devices = {
+
+         list : function(productName, callbacks) {
+            superagent
+                  .get(esdrApiRootUrl + "/products/" + productName + "/devices")
+                  .set(authorizationHeader)
+                  .end(function(err, res) {
+                          if (err) {
+                             return callbacks.error(err, res.status);
+                          }
+
+                          switch (res.status) {
+                             case 200:
+                                return callbacks.success(res.body.data);
+                             case 401:
+                                return callbacks.unauthorized();
+                             default:
+                                return callbacks.error(res.body);
+                          }
+                       });
+         },
+
          /**
           * TODO: document me (all callbacks MUST be defined)
           * Callbacks:
@@ -116,6 +137,101 @@ if (!window['superagent']) {
                           }
                        });
          }
+
+      };
+
+      this.feeds = {
+
+         /**
+          * TODO: document me (all callbacks MUST be defined)
+          */
+         get : function(deviceId, callbacks) {
+            superagent
+                  .get(esdrApiRootUrl + "/devices/" + deviceId + "/feeds")
+                  .set(authorizationHeader)
+                  .end(function(err, res) {
+                          if (err) {
+                             return callbacks.error(err, res.status);
+                          }
+
+                          switch (res.status) {
+                             case 200:
+                                return callbacks.success(res.body.data);
+                             case 401:
+                                return callbacks.unauthorized();
+                             case 403:
+                                return callbacks.forbidden();
+                             case 404:
+                                return callbacks.notFound();
+                             default:
+                                return callbacks.error(res.body);
+                          }
+                       });
+         },
+
+         /**
+          * TODO: document me (all callbacks MUST be defined)
+          */
+         create : function(deviceId, feed, callbacks) {
+            superagent
+                  .post(esdrApiRootUrl + "/devices/" + deviceId + "/feeds")
+                  .set(authorizationHeader)
+                  .send(feed)
+                  .end(function(err, res) {
+                          if (typeof callbacks.complete === 'function') {
+                             callbacks.complete();
+                          }
+
+                          if (err) {
+                             return callbacks.error(err, res.status);
+                          }
+
+                          switch (res.status) {
+                             case 201:
+                                return callbacks.success(res.body.data);
+                             case 401:
+                                return callbacks.unauthorized();
+                             case 403:
+                                return callbacks.forbidden();
+                             case 404:
+                                return callbacks.notFound();
+                             case 422:
+                                return callbacks.validationError(res.body.data);
+                             default:
+                                return callbacks.error(res.body);
+                          }
+                       });
+         },
+
+         upload : function(feedApiKey, data, callbacks) {
+            superagent
+                  .put(esdrApiRootUrl + "/feeds")
+                  .set({
+                          ApiKey : feedApiKey
+                       })
+                  .send(data)
+                  .end(function(err, res) {
+                          if (typeof callbacks.complete === 'function') {
+                             callbacks.complete();
+                          }
+
+                          if (err) {
+                             return callbacks.error(err, res.status);
+                          }
+
+                          switch (res.status) {
+                             case 200:
+                                return callbacks.success(res.body.data);
+                             case 401:
+                                return callbacks.unauthorized();
+                             case 422:
+                                return callbacks.validationError(res.body.data);
+                             default:
+                                return callbacks.error(res.body);
+                          }
+                       });
+         }
+
 
       };
    };

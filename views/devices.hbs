@@ -1,1 +1,48 @@
-This is the Devices page.
+<script language="JavaScript" type="text/javascript">
+   var accessToken = null;
+   var esdr = null;
+   $(document).ready(function() {
+      accessToken = new com.cattfish.AccessToken();
+      accessToken.load(function(err, token) {
+         console.log("Done getting the token: " + token);
+
+         esdr = new org.cmucreatelab.esdr.ESDR("{{{esdrApiUrl}}}", accessToken.get());
+         fetchDevices();
+      });
+   });
+
+   function fetchDevices() {
+      // TODO: don't hardcode the product name
+      esdr.devices.list("cattfish_v2", {
+         success : function(devices) {
+            renderDevices(devices);
+         },
+         unauthorized : function() {
+            // TODO:
+            console.log("Unauthorized error trying to get the device list from ESDR.");
+         },
+         error : function(responseBody) {
+            // TODO:
+            console.log("Unexpected error trying to get the device list from ESDR.");
+         }
+      });
+   }
+
+   function renderDevices(devices) {
+      var deviceListItemTemplate = Handlebars.templates['device_list_item'];
+      devices.forEach(function(device) {
+         console.log(device);
+         var deviceElement = $(deviceListItemTemplate(device));
+         $("#device_list").append(deviceElement);
+      });
+
+   }
+</script>
+<div class="main_container">
+   <div class="content_container">
+      <div class="page_title">
+         Devices
+      </div>
+      <div id="device_list" class="device_list"></div>
+   </div>
+</div>

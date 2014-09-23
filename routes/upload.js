@@ -5,7 +5,7 @@ var httpStatus = require('http-status');
 var config = require('../config');
 
 router.get('/', function(req, res) {
-   res.render('upload/index', { layout : "upload-layout", title : "CATTfish: Upload", esdrApiUrl : config.get("esdr:apiRootUrl")});
+   res.render('upload/index', { layout : "upload-layout", title : "CATTfish: Upload", esdrApiUrl : config.get("esdr:apiRootUrl"), googleMapsApiKey : config.get("maps:apiKey") });
 });
 
 router.get('/upload-client.js', function(req, res) {

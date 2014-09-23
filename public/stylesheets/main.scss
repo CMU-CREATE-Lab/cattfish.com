@@ -4,12 +4,13 @@ $GREY_TEXT_COLOR: #5b5f6c;
 $BLUE_NAVIGATION_BUTTON_COLOR: #2e68a3;
 $TRANSLUCENT_WHITE_BODY_BACKGROUND: rgba(255, 255, 255, .8);
 $LINK_COLOR: #428bca;
+$BODY_TEXT_COLOR: #1c1c1e;
 
 body {
    font-family: 'Open Sans', 'Helvetica', sans-serif;
    font-weight: 400;
    font-size: 16px;
-   color: #1c1c1e;
+   color: $BODY_TEXT_COLOR;
    background: #455f6a url('../images/background.jpg') no-repeat scroll 0 0;
    background-size: 100%;
    min-width: $BODY_WIDTH;
@@ -90,7 +91,7 @@ a:hover, a:focus {
 .form_error_messages {
    border: 1px solid #A75B4E;
    background: #FAD3C4;
-   display:none;
+   display: none;
 }
 
 .form_success_messages {
@@ -98,11 +99,16 @@ a:hover, a:focus {
    background: #E2F1BB;
 }
 
-
 .page_title {
    color: black;
    font-size: 24px;
    margin-bottom: 20px;
+}
+
+.page_subtitle {
+   color: black;
+   font-size: 18px;
+   margin-bottom: 10px;
 }
 
 .page_instructions {
@@ -128,6 +134,12 @@ input {
    margin: 0 0 15px 0;
 }
 
+input[type="radio"], input[type="checkbox"] {
+   width: auto;
+   height: auto;
+   margin: 0;
+}
+
 .submit_link {
    height: auto;
    background: none;
@@ -151,6 +163,30 @@ input {
    color: #999999;
    text-decoration: none;
    cursor: default;
+}
+
+#map_area {
+
+   #map_canvas {
+      width: 416px;
+      height: 300px;
+      border: 1px solid $BODY_TEXT_COLOR;
+      margin: 0;
+      padding: 0;
+   }
+
+   .map_instructions {
+      font-size: 12px;
+      color: #666666;
+   }
+
+   #map_geolocation {
+      font-size: 12px;
+   }
+
+   .map_geolocation_prompt {
+      display: none;
+   }
 }
 
 // =====================================================================================================================
@@ -216,7 +252,7 @@ input {
          #login_popup_form {
             #login_popup_messages {
                margin-bottom: 10px;
-               width: 400px;
+               width: 406px;
             }
 
             input[type="submit"] {
@@ -350,3 +386,62 @@ input {
    }
 }
 
+// =====================================================================================================================
+// Icons
+// =====================================================================================================================
+
+.checkmark_icon_container {
+   width: 24px;
+   height: 19px;
+   padding:0;
+   margin:0;
+}
+.checkmark_white {
+   width: 24px;
+   height: 19px;
+   background: transparent url("../images/checkmark_white.png") no-repeat 0 0;
+   background-size: 24px 19px;
+}
+
+// =====================================================================================================================
+// Devices
+// =====================================================================================================================
+
+.device_list {
+   .device_list_item {
+      border: 1px solid $BODY_TEXT_COLOR;
+      border-radius: 3px;
+      -webkit-border-radius: 3px;
+      -moz-border-radius: 3px;
+      color: $BODY_TEXT_COLOR;
+      padding: 10px;
+      margin: 5px 0 5px 0;
+      cursor: pointer;
+   }
+}
+
+// =====================================================================================================================
+// Feeds
+// =====================================================================================================================
+
+.feed_list {
+   .feed_list_item {
+      border: 1px solid $BODY_TEXT_COLOR;
+      border-radius: 3px;
+      -webkit-border-radius: 3px;
+      -moz-border-radius: 3px;
+      color: $BODY_TEXT_COLOR;
+      padding: 10px;
+      margin: 5px 0 5px 0;
+      cursor: pointer;
+   }
+
+   .feed_list_item:hover {
+      border: 1px solid $LINK_COLOR;
+   }
+
+   .selected_feed {
+      color: white;
+      background-color: $LINK_COLOR;
+   }
+}

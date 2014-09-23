@@ -1,75 +1,26 @@
 <script language="JavaScript" type="text/javascript">
-   var accessToken = new com.cattfish.AccessToken();
-   var ESDR_API_URL = "{{{esdrApiUrl}}}";
+   var accessToken = null;
+   var esdr = null;
+   var cattfish = null;
+   var map = null;
+   var marker = null;
+   var selectedFeed = null;
 
    window.addEventListener("message",
                            function(event) {
                               console.log("###: Child got a message event from origin [" + event.origin + "]");
-                              if (event.data) {
-                                 doUpload(event.data.device, event.data.data)
+                              if (event.data && event.data.device && event.data.data) {
+                                 cattfish = event.data;
+                                 doUpload();
                               }
                            },
                            false);
 
-   function doUpload(device, data) {
-      if (device && data) {
-         if (accessToken.get() == null) {
-            // TODO: prompt the user to log in first
-            console.log("YOU MUST LOG IN FIRST!");
-         }
-         else {
-            var esdr = new org.cmucreatelab.esdr.ESDR("{{{esdrApiUrl}}}", accessToken.get());
-
-            // do the upload
-            console.log("See if this device is known and allows unauthenticated login...");
-
-            esdr.devices.get('cattfish_v2', device.serialNumber, {
-               success : function(device) {
-                  // TODO: found the device, so now fetch a list of all feeds for this device
-                  console.log(JSON.stringify(device, null, 3));
-                  $("#content").text(JSON.stringify(device, null, 3));
-               },
-               unauthorized : function() {
-                  // TODO: unauthorized--need to log in first and try again (this shouldn't happen, but...)
-               },
-               notFound : function() {
-                  // unknown device, need to register it
-                  console.log("UKNOWN DEVICE, NEED TO REGISTER IT");
-                  esdr.devices.create('cattfish_v2', device.serialNumber, {
-                     success : function(createdDevice) {
-                        // TODO: created!
-                        console.log("Device created: " + JSON.stringify(createdDevice, null, 3));
-
-                        var deviceId = createdDevice.id;
-
-                        // TODO: now create the feed for this device...
-                     },
-                     duplicate : function() {
-                        // TODO: serial number already exists for this product and user
-                        console.log("Error: serial number already exists for this product and user");
-                     },
-                     validationError : function(validationErrors) {
-                        // TODO: invalid serial number
-                        console.log("Error: invalid serial number: " + JSON.stringify(validationErrors, null, 3));
-                     },
-                     error : function(responseBody) {
-                        // TODO: some other error
-                        console.log("Error: Unexpected error while trying to create the device: " + responseBody);
-                     }
-                  });
-               },
-               error : function(responseBody) {
-                  // TODO: some unexpected error
-               }
-            });
-         }
-      }
-      else {
-         // TODO: do something if device and data aren't defined.
-      }
-   }
-
    $(document).ready(function() {
+      accessToken = new com.cattfish.AccessToken();
+
+      initializeMap();
+
       // don't bother doing anything if I'm not being iframed
       if (window !== window.top) {
          // try fetching the access token
@@ -78,8 +29,397 @@
 
             // tell the parent that I'm ready
             window.top.postMessage({isLoaded : true}, '*');
+
          });
       }
    });
+
+   function initializeMap() {
+      var mapOptions = {
+         center : { lat : 36.81435205714916, lng : -93.35445347656253},
+         zoom : 3,
+         streetViewControl : false,
+         overviewMapControl : false
+      };
+      map = new google.maps.Map(document.getElementById('map_canvas'), mapOptions);
+      map.set("disableDoubleClickZoom", true);
+      marker = new google.maps.Marker({
+                                         position : map.getCenter(),
+                                         map : map,
+                                         draggable : true
+                                      });
+
+      google.maps.event.addListener(map, 'dblclick', function(e) {
+         console.log(e.latLng.toString());
+         marker.setPosition(e.latLng);
+      });
+
+      google.maps.event.addListener(marker,
+                                    'dragend',
+                                    function() {
+                                       console.log("Marker at: " + marker.getPosition().toString());
+                                    });
+
+      // show the geolocation link, if supported
+      if (isGeolocationSupported()) {
+         $("#map_geolocation").show();
+      }
+   }
+
+   function doUpload() {
+      if (cattfish) {
+         if (accessToken.get() == null) {
+            console.log("Need login info!");
+            // prompt the user to log in first
+            showLogInPanel();
+         }
+         else {
+            esdr = new org.cmucreatelab.esdr.ESDR("{{{esdrApiUrl}}}", accessToken.get());
+
+            // start the upload process by checking whether this device is already registered
+            getDevice(cattfish.device.serialNumber);
+         }
+      }
+      else {
+         // TODO: do something if device and data aren't defined.
+         console.log("cattfish is not defined. ");
+      }
+   }
+
+   function getDevice(serialNumber) {
+      console.log("Checking whether device [" + serialNumber + "] is registered...");
+      esdr.devices.get('cattfish_v2', serialNumber, {
+         success : function(foundDevice) {
+            console.log("found device: " + JSON.stringify(foundDevice, null, 3));
+            getFeeds(foundDevice.id)
+         },
+         unauthorized : function() {
+            // TODO: unauthorized--need to log in first and try again (this shouldn't happen, but...)
+         },
+         notFound : function() {
+            console.log("Unknown device, need to create it.");
+            createDevice(cattfish.device.serialNumber);
+         },
+         error : function(responseBody) {
+            // TODO: some unexpected error
+            console.log("Unexpected error trying to get the device info from ESDR.");
+         }
+      });
+   }
+
+   function createDevice(serialNumber) {
+      // unknown device, need to register it
+      console.log("Creating device [" + serialNumber + "]...");
+      esdr.devices.create('cattfish_v2', serialNumber, {
+         success : function(createdDevice) {
+            // TODO: created!
+            console.log("Device created: " + JSON.stringify(createdDevice, null, 3));
+            showCreateFeedPanel(createdDevice.id);
+         },
+         duplicate : function() {
+            // TODO: serial number already exists for this product and user
+            console.log("Error: serial number already exists for this product and user");
+         },
+         validationError : function(validationErrors) {
+            // TODO: invalid serial number
+            console.log("Error: invalid serial number: " + JSON.stringify(validationErrors, null, 3));
+         },
+         error : function(responseBody) {
+            // TODO: some other error
+            console.log("Error: Unexpected error while trying to create the device: " + JSON.stringify(responseBody, null, 3));
+         }
+      });
+   }
+
+   function getFeeds(deviceId) {
+      console.log("Getting feeds for device ID [" + deviceId + "]");
+      esdr.feeds.get(deviceId, {
+         success : function(feeds) {
+            if (feeds.length > 0) {
+               showChooseFeedPanel();
+               console.log("Found these feeds:");
+               var feedListItemTemplate = Handlebars.templates['feed_list_item'];
+               feeds.forEach(function(feed) {
+                  console.log(feed);
+                  feed.lastUploadFormatted = (feed.minTimeSecs == null || feed.maxTimeSecs == null) ? "never" : new Date(feed.lastUpload).toLocaleDateString();
+                  var feedElement = $(feedListItemTemplate(feed));
+                  $("#existing_feeds").append(feedElement);
+                  feedElement.click(function() {
+
+                     if (selectedFeed == null) {
+                        selectedFeed = feed;
+                        feedElement
+                              .addClass("selected_feed")
+                              .find(".checkmark_icon_container").show()
+                              .addClass("checkmark_white");
+                     }
+                     else {
+                        // deselect the existing feed
+                        $("#feed_list_item_" + selectedFeed.id)
+                              .removeClass("selected_feed")
+                              .find(".checkmark_icon_container").hide()
+                              .removeClass("checkmark_white");
+
+                        if (selectedFeed.id == feed.id) {
+                           selectedFeed = null;
+                        }
+                        else {
+                           selectedFeed = feed;
+                           feedElement
+                                 .addClass("selected_feed")
+                                 .find(".checkmark_icon_container").show()
+                                 .addClass("checkmark_white");
+                        }
+                     }
+                  });
+               });
+            }
+            else {
+               showCreateFeedPanel(deviceId);
+            }
+         },
+         notFound : function() {
+            // TODO
+            console.log("Device ID [" + device.id + "] not found");
+         },
+         error : function(responseBody) {
+            // TODO
+            console.log("Error loading feeds for device ID [" + device.id + "]: " + JSON.stringify(responseBody, null, 3));
+         }
+      });
+   }
+
+   function handleLoginSuccess(loginResult) {
+      console.log("in handleLoginSuccess(): got access token: " + loginResult.accessToken);
+      $(".upload_panel").hide();
+      accessToken.set(loginResult.accessToken);
+      doUpload();
+   }
+
+   function handleLoginUnauthorized(messages) {
+      messages.add('Login failed. Please double-check your login below and make sure you have ' +
+                   'activated your account by clicking the link in the verification email we sent ' +
+                   'when you signed up.');
+   }
+
+   function handleCreateFeedSuccess(createdFeed) {
+      console.log("Woohoo, feed is created: " + JSON.stringify(createdFeed, null, 3));
+
+      esdr.feeds.upload(createdFeed.apiKey,
+                        {
+                           channel_names : cattfish.data.fields,
+                           data : cattfish.data.samples
+                        },
+                        {
+                           success : function(uploadResult) {
+                              // TODO
+                              console.log("Upload successful!");
+                              showUploadCompletePanel();
+                           },
+                           unauthorized : function() {
+                              // TODO
+                              console.log("Upload not authorized!");
+                           },
+                           validationError : function(validationErrors) {
+                              // TODO
+                              console.log("Upload failed due to validation errors!" + JSON.stringify(validationErrors, null, 3));
+                           },
+                           error : function(responseBody) {
+                              // TODO
+                              console.log("Upload failed due to unexpected error!" + JSON.stringify(responseBody, null, 3));
+                           }
+                        });
+   }
+
+   function showSignUpPanel() {
+      showPanel('signup_panel');
+      $("#signup_email").focus();
+   }
+
+   function showLogInPanel() {
+      showPanel('login_panel');
+      $("#login_email").focus();
+   }
+
+   function showCreateFeedPanel(deviceId) {
+      $("#create_feed_device_id").val(deviceId);
+      showPanel('create_feed_panel');
+
+      // make sure the map is rendered correctly
+      var center = map.getCenter();
+      google.maps.event.trigger(map, "resize");
+      map.setCenter(center);
+   }
+
+   function showChooseFeedPanel() {
+      showPanel('choose_feed_panel');
+   }
+
+   function showUploadCompletePanel() {
+      showPanel('upload_complete_panel');
+   }
+
+   function showPanel(panelElementId) {
+      $(".upload_panel").hide();
+      $("#" + panelElementId).show();
+   }
+
+   function doGeolocation() {
+      if (isGeolocationSupported()) {
+         $(".map_geolocation_prompt").hide();
+         $("#map_geolocation_status_please_wait").show();
+         var errorHandler = function() {
+            $(".map_geolocation_prompt").hide();
+            $("#map_geolocation_status_fail").show();
+         };
+         navigator.geolocation.getCurrentPosition(function(geoPosition) {
+                                                     if (geoPosition && geoPosition.coords) {
+                                                        $(".map_geolocation_prompt").hide();
+                                                        $("#map_geolocation_link").show();
+                                                        var userLocation = new google.maps.LatLng(geoPosition.coords.latitude, geoPosition.coords.longitude);
+                                                        marker.setPosition(userLocation);
+                                                        map.setZoom(17);
+                                                        map.setCenter(userLocation);
+                                                     }
+                                                     else {
+                                                        errorHandler();
+                                                     }
+                                                  },
+                                                  errorHandler,
+                                                  {timeout : 8000});
+      }
+      return false;
+   }
+
+   function isGeolocationSupported() {
+      return navigator['geolocation'] && navigator['geolocation']['getCurrentPosition'];
+   }
+
 </script>
-<div id="content"></div>
+<div class="main_container" style="margin-top:10px">
+   <div id="upload_panel" class="content_container">
+      <div class="page_title">
+         CATTfish Data Upload
+      </div>
+      <div id="progress_panel" style="display:none">
+         <div style="display: table">
+            <div style="display: table-row">
+               <div style="display: table-cell">Log In</div>
+               <div style="display: table-cell"></div>
+               <div style="display: table-cell">Installation Location</div>
+               <div style="display: table-cell"></div>
+               <div style="display: table-cell">Upload</div>
+            </div>
+         </div>
+         <div style="display: table">
+            <div style="display: table-row">
+               <div style="display: table-cell"><img src="/images/progress_marker_on.png" width="20" height="20"></div>
+               <div style="display: table-cell">
+                  <div style="width:200px;height:4px; margin-bottom:8px;background-color: #1c1c1e;"></div>
+               </div>
+               <div style="display: table-cell"><img src="/images/progress_marker_off.png" width="20" height="20"></div>
+               <div style="display: table-cell">
+                  <div style="width:200px;height:4px; margin-bottom:8px;background-color: #bababa;"></div>
+               </div>
+               <div style="display: table-cell"><img src="/images/progress_marker_off.png" width="20" height="20"></div>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <div id="login_panel" class="content_container upload_panel">
+      <div class="page_instructions">You must be logged in to upload your data. Please log in using the form below.</div>
+      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+         <tr valign="top">
+            <td width="418">
+               <form id="login_form" onsubmit="return submitLoginForm('login_form','login_email','login_password','login_messages',null,handleLoginSuccess,handleLoginUnauthorized);">
+                  <div id="login_messages" class="form_messages form_error_messages"></div>
+                  <div><input type="text" id="login_email" name="login_email" placeholder="Email address"/></div>
+                  <div><input type="password" id="login_password" name="login_password" placeholder="Password"/></div>
+                  <div>
+                     <div style="float:right"><input class="submit_link" type="submit" value="Log In &raquo;"></div>
+                  </div>
+               </form>
+            </td>
+            <td width="20">&nbsp;</td>
+            <td width="*" align="right">
+               <div>Need an account? <a href="#" onclick="showSignUpPanel(); return false;">Sign up!</a></div>
+            </td>
+         </tr>
+      </table>
+   </div>
+   <div id="signup_panel" class="content_container upload_panel">
+      <div class="page_instructions">If you need an account, please submit the form below to sign up.</div>
+      <table border="0" cellpadding="0" cellspacing="0" width="100%">
+         <tr valign="top">
+            <td width="418">
+               <div id="signup_error_messages" class="form_messages form_error_messages"></div>
+               <div id="signup_success_messages" class="form_messages form_success_messages"></div>
+               <form id="signup_form" onsubmit="return submitSignUpForm('signup_form', 'signup_email', 'signup_password', 'signup_error_messages', 'signup_success_messages', 'Come back here once your account is active to log in and complete your upload.');">
+                  <div><input type="text" id="signup_email" name="signup_email" placeholder="Email address"/></div>
+                  <div><input type="password" id="signup_password" name="signup_password" placeholder="Password"/></div>
+                  <div>
+                     <div style="float:right"><input class="submit_link" type="submit" value="Sign Up &raquo;"></div>
+                  </div>
+               </form>
+            </td>
+            <td width="20">&nbsp;</td>
+            <td width="*" align="right">
+               <div>Have an account? <a href="#" onclick="showLogInPanel(); return false;">Log in!</a></div>
+            </td>
+         </tr>
+      </table>
+   </div>
+   <div id="create_feed_panel" class="content_container upload_panel">
+      <div class="page_instructions">
+         Please provide details about where you have installed this CATTfish. You will need to provide a name for the
+         location, specify the location on the map, and choose the visibility.
+      </div>
+      <div id="create_feed_error_messages" class="form_messages form_error_messages"></div>
+      <form id="create_feed_form" onsubmit="return submitCreateFeedForm('create_feed_form',$('#create_feed_device_id').val(),'create_feed_location_name',{latitude:marker.getPosition().lat(),longitude:marker.getPosition().lng()},$('#create_feed_is_public_true').prop('checked'),'create_feed_error_messages', esdr, handleCreateFeedSuccess)" style="width:418px">
+         <input type="hidden" id="create_feed_device_id" value=""/>
+         <div>
+            <input type="text" id="create_feed_location_name" name="create_feed_location_name" placeholder="Location name (e.g. Upstairs bathroom)"/>
+         </div>
+         <div id="map_area">
+            <div id="map_geolocation" style="display:none;">
+               <div id="map_geolocation_link" class="map_geolocation_prompt" style="display:block;">
+                  <a href="#" onclick="return doGeolocation();">Place the marker at my current location</a>
+               </div>
+               <div id="map_geolocation_status_please_wait" class="map_geolocation_prompt">Determining your current location, please wait...</div>
+               <div id="map_geolocation_status_fail" class="map_geolocation_prompt">Sorry, your current location could not be determined.</div>
+            </div>
+            <div id="map_canvas"></div>
+            <div class="map_instructions">Double-click the map or drag the marker to set the marker's location.</div>
+         </div>
+         <div style="margin-top:20px;">
+            <div class="">The device name, location, and uploaded data will be:</div>
+            <div>
+               <input type="radio" id="create_feed_is_public_false" name="create_feed_is_public" value="false" checked="checked">
+               <label for="create_feed_is_public_false">Private &mdash; visible only to me</label>
+            </div>
+            <div>
+               <input type="radio" id="create_feed_is_public_true" name="create_feed_is_public" value="true">
+               <label for="create_feed_is_public_true">Public &mdash; visible to all users</label>
+            </div>
+         </div>
+         <div style="text-align:right"><input class="submit_link" type="submit" value="Upload &raquo;"></div>
+      </form>
+   </div>
+   <div id="choose_feed_panel" class="content_container upload_panel">
+      <div class="page_instructions">
+         There are multiple installation location datasets associated with this CATTfish. Please select the one which
+         should receive this upload.
+      </div>
+      <div id="choose_feed_error_messages" class="form_messages form_error_messages"></div>
+      <form id="choose_feed_form" onsubmit="return submitChooseFeedForm();">
+         <div id="existing_feeds" class="feed_list"></div>
+         <div style="text-align:right"><input class="submit_link" type="submit" value="Upload &raquo;"></div>
+      </form>
+   </div>
+   <div id="upload_complete_panel" class="content_container upload_panel">
+      <div class="page_instructions">
+         Success!  Your data is uploaded and is ready to <a href="/devices" target="_top">view</a>.
+      </div>
+   </div>
+</div>

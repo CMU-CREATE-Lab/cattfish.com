@@ -35,6 +35,9 @@ config.defaults({
                       "clientId" : "YOUR_OAUTH2_CLIENT_ID",
                       "clientSecret" : "YOUR_OAUTH2_CLIENT_SECRET"
                    },
+                   "maps" : {
+                      "apiKey" : "AIzaSyAx4X9rCsb7BguosyqSxatdxjzUeQMvM4w"
+                   },
                    "database" : {
                       "host" : "DATABASE_HOST",
                       "port" : "3306",

@@ -34,8 +34,9 @@ else {
       var minTime = Number.MAX_VALUE;
       var maxTime = Number.MIN_VALUE;
 
-      this.add = function(record) {
-         if (record) {
+      this.add = function(record, errorCodes, checksum) {
+         // TODO: validate checksum
+         if (record && errorCodes == 0) {
             var time = record[0];
             minTime = Math.min(minTime, time);
             maxTime = Math.max(maxTime, time);

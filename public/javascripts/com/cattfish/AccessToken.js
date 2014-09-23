@@ -64,6 +64,10 @@ if (!window['superagent']) {
       this.get = function() {
          return accessToken;
       };
+
+      this.set = function(newAccessToken) {
+         accessToken = newAccessToken;
+      };
    };
 
 })();
