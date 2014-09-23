@@ -30,11 +30,16 @@
 
    function renderDevices(devices) {
       var deviceListItemTemplate = Handlebars.templates['device_list_item'];
-      devices.forEach(function(device) {
-         console.log(device);
-         var deviceElement = $(deviceListItemTemplate(device));
-         $("#device_list").append(deviceElement);
-      });
+      $("#device_list").empty();
+      if (devices && devices.length > 0) {
+         devices.forEach(function(device) {
+            console.log(device);
+            var deviceElement = $(deviceListItemTemplate(device));
+            $("#device_list").append(deviceElement);
+         });
+      } else {
+         $("#device_list").append("You have not yet registered any devices.")
+      }
 
    }
 </script>
