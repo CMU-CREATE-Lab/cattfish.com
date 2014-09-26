@@ -431,14 +431,14 @@
       <envs />
     </TaskOptions>
     <TaskOptions isEnabled="true">
-      <option name="arguments" value="$ProjectFileDir$/public/templates -e hbs" />
+      <option name="arguments" value="$ProjectFileDir$/templates -e hbs" />
       <option name="checkSyntaxErrors" value="true" />
       <option name="description" value="Compiles Handlebars templates" />
       <option name="exitCodeBehavior" value="ERROR" />
       <option name="fileExtension" value="handlebars;hbs;mustache" />
       <option name="immediateSync" value="true" />
       <option name="name" value="Handlebars Compiler" />
-      <option name="output" value="$ProjectFileDir$/public/javascripts/handlebars_templates.js" />
+      <option name="output" value="$ProjectFileDir$/public/js/handlebars_templates.js" />
       <option name="outputFilters">
         <array />
       </option>
@@ -447,7 +447,7 @@
       <option name="program" value="$PROJECT_DIR$/node_modules/handlebars/bin/handlebars" />
       <option name="scopeName" value="Project Files" />
       <option name="trackOnlyRoot" value="false" />
-      <option name="workingDir" value="$ProjectFileDir$/public/templates" />
+      <option name="workingDir" value="$ProjectFileDir$/templates" />
       <envs />
     </TaskOptions>
   </component>
@@ -475,7 +475,7 @@
         </sourceFilesUrls>
       </properties>
       <CLASSES>
-        <root url="file://$PROJECT_DIR$/public/javascripts/handlebars_templates.js" />
+        <root url="file://$PROJECT_DIR$/public/js/handlebars_templates.js" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
