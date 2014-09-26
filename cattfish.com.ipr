@@ -431,7 +431,7 @@
       <envs />
     </TaskOptions>
     <TaskOptions isEnabled="true">
-      <option name="arguments" value="$ProjectFileDir$/templates -e hbs" />
+      <option name="arguments" value="$ProjectFileDir$/public-templates -e hbs" />
       <option name="checkSyntaxErrors" value="true" />
       <option name="description" value="Compiles Handlebars templates" />
       <option name="exitCodeBehavior" value="ERROR" />
@@ -447,7 +447,7 @@
       <option name="program" value="$PROJECT_DIR$/node_modules/handlebars/bin/handlebars" />
       <option name="scopeName" value="Project Files" />
       <option name="trackOnlyRoot" value="false" />
-      <option name="workingDir" value="$ProjectFileDir$/templates" />
+      <option name="workingDir" value="$ProjectFileDir$/public-templates" />
       <envs />
     </TaskOptions>
   </component>
