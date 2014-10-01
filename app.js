@@ -113,7 +113,7 @@ Database.create(function(err, db) {
             if (req.isAuthenticated()) {
                res.locals.user = {
                   id : req.user.id,
-                  accessToken : req.user.accessToken
+                  esdrUserId : req.user.esdrUserId
                };
                delete req.session.redirectToAfterLogin;
                delete res.locals.redirectToAfterLogin;
