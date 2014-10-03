@@ -23,6 +23,7 @@ config.defaults({
                       "url" : "http://localhost:3333/verification/:verificationToken"
                    },
                    "esdr" : {
+                      "rootUrl" : "ROOT_URL",
                       "apiRootUrl" : "ESDR_API_ROOT_URL"
                    },
                    "cookie" : {

@@ -205,7 +205,7 @@ if (!window['superagent']) {
 
          upload : function(feedApiKey, data, callbacks) {
             superagent
-                  .put(esdrApiRootUrl + "/feeds")
+                  .put(esdrApiRootUrl + "/feed")
                   .set({
                           ApiKey : feedApiKey
                        })
@@ -230,9 +230,62 @@ if (!window['superagent']) {
                                 return callbacks.error(res.body);
                           }
                        });
+         },
+
+         /**
+          * TODO: document me (all callbacks MUST be defined)
+          */
+         info : function(feedApiKey, callbacks) {
+            superagent
+                  .get(esdrApiRootUrl + "/feed")
+                  .set({
+                          ApiKey : feedApiKey
+                       })
+                  .end(function(err, res) {
+                          if (err) {
+                             return callbacks.error(err, res.status);
+                          }
+
+                          switch (res.status) {
+                             case 200:
+                                return callbacks.success(res.body.data);
+                             case 401:
+                                return callbacks.unauthorized();
+                             case 403:
+                                return callbacks.forbidden();
+                             default:
+                                return callbacks.error(res.body);
+                          }
+                       });
          }
 
 
+      };
+
+      this.tiles = {
+         get : function(channelName, level, offset, apiKey, callbacks){
+            superagent
+                  .get(esdrApiRootUrl + "/feed/channels/" + channelName + "/tiles/" + level + "." + offset)
+                  .set({
+                          ApiKey : apiKey
+                       })
+                  .end(function(err, res) {
+                          if (err) {
+                             return callbacks.error(err, res.status);
+                          }
+
+                          switch (res.status) {
+                             case 200:
+                                return callbacks.success(res.body.data);
+                             case 401:
+                                return callbacks.unauthorized();
+                             case 403:
+                                return callbacks.forbidden();
+                             default:
+                                return callbacks.error(res.body);
+                          }
+                       });
+         }
       };
    };
 

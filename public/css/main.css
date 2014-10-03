@@ -1,7 +1,7 @@
 body {
-  font-family: 'Open Sans', 'Helvetica', sans-serif;
-  font-weight: 400;
-  font-size: 16px;
+  font-family: 'Open Sans', 'Helvetica', sans-serif !important;
+  font-weight: 400 !important;
+  font-size: 16px !important;
   color: #1c1c1e;
   background: #455f6a url('../images/background.jpg') no-repeat scroll 0 0;
   background-size: 100%;
@@ -44,8 +44,8 @@ body {
   margin-right: auto; }
 
 h1 {
-  font-weight: 400;
-  font-size: 30px;
+  font-weight: 400 !important;
+  font-size: 30px !important;
   line-height: 1.1; }
 
 a {
@@ -77,18 +77,23 @@ a:hover, a:focus {
 
 .page_title {
   color: black;
-  font-size: 24px;
+  font-size: 24px !important;
   margin-bottom: 20px; }
 
 .page_subtitle {
   color: black;
-  font-size: 18px;
+  font-size: 18px !important;
   margin-bottom: 10px; }
 
 .page_instructions {
   color: black;
-  font-size: normal;
+  font-size: normal !important;
   margin-bottom: 20px; }
+
+.rotate_90 {
+  transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  -webkit-transform: rotate(90deg); }
 
 input {
   width: 400px;
@@ -98,7 +103,7 @@ input {
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   border: 1px solid #428bca;
-  font-size: 20px;
+  font-size: 20px !important;
   padding-left: 15px;
   margin: 0 0 15px 0; }
 
@@ -116,7 +121,7 @@ input[type="radio"], input[type="checkbox"] {
   cursor: pointer;
   width: auto;
   position: relative;
-  font-size: 20px;
+  font-size: 20px !important;
   margin: 0;
   padding: 0; }
 
@@ -135,10 +140,10 @@ input[type="radio"], input[type="checkbox"] {
   margin: 0;
   padding: 0; }
 #map_area .map_instructions {
-  font-size: 12px;
+  font-size: 12px !important;
   color: #666666; }
 #map_area #map_geolocation {
-  font-size: 12px; }
+  font-size: 12px !important; }
 #map_area .map_geolocation_prompt {
   display: none; }
 
@@ -192,7 +197,7 @@ input[type="radio"], input[type="checkbox"] {
 
 #footer {
   color: #e1ebda;
-  font-size: 12px;
+  font-size: 12px !important;
   text-align: center; }
   #footer #sections a {
     margin-left: 15px;
@@ -213,12 +218,12 @@ input[type="radio"], input[type="checkbox"] {
       padding-top: 210px;
       padding-left: 70px; }
       #home_page .hero_image #hero_text h1 {
-        font-size: 25px;
-        font-weight: 700;
+        font-size: 25px !important;
+        font-weight: 700 !important;
         margin-top: 20px;
         margin-bottom: 10px; }
       #home_page .hero_image #hero_text span {
-        font-size: 20px;
+        font-size: 20px !important;
         color: #99c2dc;
         line-height: 1.4; }
   #home_page .section {
@@ -230,21 +235,21 @@ input[type="radio"], input[type="checkbox"] {
   #home_page #intro {
     width: 500px;
     padding: 89px 15px 55px 15px;
-    font-weight: 300;
+    font-weight: 300 !important;
     text-align: center;
     margin-top: 0;
     margin-bottom: 55px;
     color: #314b5c; }
     #home_page #intro .title {
-      font-size: 40px;
-      font-weight: 300;
+      font-size: 40px !important;
+      font-weight: 300 !important;
       margin-top: 6px;
       margin-bottom: 20px;
       line-height: 1.1; }
     #home_page #intro p {
-      font-size: 28px;
+      font-size: 28px !important;
+      font-weight: 300 !important;
       margin: 0 0 10px 0;
-      font-weight: 300;
       line-height: 1.45; }
   #home_page #videos .video_thumbnail {
     padding-left: 15px;

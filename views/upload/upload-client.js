@@ -93,10 +93,16 @@ else {
                // now compute and check the checksum
                var actualChecksum = computeCrc(record[1], record[2], record[3], errorCodes);
                if (expectedChecksum == actualChecksum) {
+                  if (record[2] <= 0) {
+                     console.log(record);
+                  }
                   var time = record[0];
                   minTime = Math.min(minTime, time);
                   maxTime = Math.max(maxTime, time);
                   samples.push(record);
+                  if (record[1] == -1 || record[2] == -1 || record[3] == -1) {
+                     console.log(record);
+                  }
 
                   for (var i = 0; i < deviceConfig.fields.length; i++) {
                      var channelName = deviceConfig.fields[i];

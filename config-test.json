@@ -14,6 +14,7 @@
       "url" : "http://localhost:3334/verification/:verificationToken"
    },
    "esdr" : {
+      "rootUrl" : "http://localhost:3001",
       "apiRootUrl" : "http://localhost:3001/api/v1"
    },
    "cookie" : {

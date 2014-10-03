@@ -1,1 +1,237 @@
-This is the Dashboard page.
+<link href="/css/grapher.css" rel="stylesheet" type="text/css"/>
+<script src="{{esdrUrl}}/lib/bodytrack-grapher/org/bodytrack/grapher/gwt/grapher2.nocache.js" type="text/javascript"></script>
+<script src="{{esdrUrl}}/lib/bodytrack-grapher/org/bodytrack/grapher/MultiplotGrapher.js" type="text/javascript"></script>
+<script language="JavaScript" type="text/javascript">
+   var accessToken = null;
+   var esdr = null;
+
+   var feeds = null;
+   var selectedFeed = null;
+
+   // grapher stuff
+   var dateAxis;
+   var plotContainer;
+   var grapher;
+   var grapherTemplate = Handlebars.templates['grapher'];
+
+   window.grapherLoad = function() {
+      accessToken = new com.cattfish.AccessToken();
+
+      // try fetching the access token
+      accessToken.load(function(err, token) {
+
+         esdr = new org.cmucreatelab.esdr.ESDR("{{{esdrApiUrl}}}", token);
+
+         var deviceId = 1; // TODO: fix this hardcoded lameness!
+         esdr.feeds.get(deviceId, {
+            success : function(foundFeeds) {
+               feeds = foundFeeds;
+               if (feeds.length > 0) {
+                  var feedListItemTemplate = Handlebars.templates['feed_list_item'];
+                  feeds.forEach(function(feed) {
+                     feed.lastUploadFormatted = (feed.minTimeSecs == null || feed.maxTimeSecs == null) ? "never" : new Date(feed.lastUpload).toLocaleDateString() + " at " + new Date(feed.lastUpload).toLocaleTimeString();
+                     var feedElement = $(feedListItemTemplate(feed));
+                     $("#existing_feeds").append(feedElement);
+                     feedElement.click(function() {
+                        selectFeed(feed);
+                     });
+                  });
+               }
+            },
+            notFound : function() {
+               // TODO
+               console.log("Device ID [" + deviceId + "] not found");
+            },
+            error : function(responseBody) {
+               // TODO
+               console.log("Error loading feeds for device ID [" + deviceId + "]: " + JSON.stringify(responseBody, null, 3));
+            }
+         });
+
+      });
+   };
+
+   function selectFeed(feed) {
+      var feedElement = $("#feed_list_item_" + feed.id);
+      if (selectedFeed == null) {
+         selectedFeed = feed;
+         feedElement
+               .addClass("selected_feed")
+               .find(".checkmark_icon_container").show()
+               .addClass("checkmark_white");
+      }
+      else {
+         // deselect the existing feed
+         $("#feed_list_item_" + selectedFeed.id)
+               .removeClass("selected_feed")
+               .find(".checkmark_icon_container").hide()
+               .removeClass("checkmark_white");
+
+         if (selectedFeed.id == feed.id) {
+            selectedFeed = null;
+         }
+         else {
+            selectedFeed = feed;
+            feedElement
+                  .addClass("selected_feed")
+                  .find(".checkmark_icon_container").show()
+                  .addClass("checkmark_white");
+         }
+      }
+      loadFeedInfo(selectedFeed);
+   }
+
+   // ==================================================================================================================
+
+   // ==================================================================================================================
+
+   function loadFeedInfo(feed) {
+      $("#grapher_container").empty().hide();
+      if (feed) {
+         esdr.feeds.info(feed.apiKeyReadOnly,
+                         {
+                            success : function(feedInfo) {
+                               renderPlot(feedInfo);
+                            },
+                            unauthorized : function() {
+                               // TODO:
+                               console.log("Unauthorized");
+                            },
+                            forbidden : function() {
+                               // TODO:
+                               console.log("Forbidden");
+                            },
+                            error : function(responseBody) {
+                               // TODO:
+                               console.log("Error: " + responseBody);
+                            }
+                         });
+      }
+   }
+
+   function renderPlot(feed) {
+      if (feed) {
+
+         // TODO: more hardcoded lameness...
+         var channelId = "conductivity";
+
+         var grapherElement = $(grapherTemplate({
+                                                   plotHeight : 300,
+                                                   yAxisLabel : feed.channels[channelId].prettyName + " (" + feed.channels[channelId].units + ")"
+                                                }));
+         $("#grapher_container").show().append(grapherElement);
+         var channelMinTimeSecs = feed.channels[channelId].bounds.minTimeSecs;
+         var channelMaxTimeSecs = feed.channels[channelId].bounds.maxTimeSecs;
+
+         // Grapher is not happy if min time equals max time.  Adjust them if necessary
+         if (channelMinTimeSecs == channelMaxTimeSecs) {
+            channelMinTimeSecs--;
+            channelMaxTimeSecs++;
+         }
+         dateAxis = new DateAxis("date_axis", "horizontal", {"min" : channelMinTimeSecs, "max" : channelMaxTimeSecs});
+         dateAxis.setMaxRange(channelMinTimeSecs, channelMaxTimeSecs);
+         grapher = new org.bodytrack.grapher.MultiplotGrapher(dateAxis);
+         plotContainer = new PlotContainer("plot", false, []);
+
+         var theChannel = {
+            "min" : feed.channels[channelId].bounds.minValue,
+            "max" : feed.channels[channelId].bounds.maxValue,
+            "time_type" : "utc",
+            "style" : {
+               "styles" : [
+                  {"type" : "line", "lineWidth" : 1, "show" : true, "color" : "#2e68a3"},
+                  {"type" : "circle", radius : 1, "lineWidth" : 1, "show" : true, "color" : "#2e68a3", fill : true}
+               ],
+               "highlight" : {
+                  "lineWidth" : 1,
+                  "styles" : [
+                     {
+                        "show" : true,
+                        "type" : "lollipop",
+                        "color" : "#000000",
+                        "radius" : 0,
+                        "lineWidth" : 1,
+                        "fill" : false
+                     },
+                     {"type" : "circle", radius : 3, "lineWidth" : 0.5, "show" : true, "color" : "#ff0000", fill : false},
+                     {
+                        "show" : true,
+                        "type" : "value",
+                        "fillColor" : "#ff0000",
+                        "marginWidth" : 10,
+                        "font" : "7pt Helvetica,Arial,Verdana,sans-serif",
+                        "verticalOffset" : 7,
+                        "numberFormat" : "###,##0"
+                     }
+                  ]
+               }
+            }
+         };
+
+         grapher.addPlot(channelId,
+                         theChannel,
+                         function(level, offset, successCallback) {
+                            esdr.tiles.get(channelId, level, offset, selectedFeed.apiKeyReadOnly, {
+                               success : function(json) {
+                                  successCallback(JSON.stringify(json));
+                               },
+                               unauthorized : function() {
+                                  // TODO:
+                                  console.log("Unauthorized");
+                               },
+                               forbidden : function() {
+                                  // TODO:
+                                  console.log("Forbidden");
+                               },
+                               error : function(responseBody) {
+                                  // TODO:
+                                  console.log("Error: " + responseBody);
+                               }
+                            });
+                         },
+                         "y_axis");
+
+         plotContainer.addPlot(grapher.getPlot(channelId));
+
+         // set the sizes of the various plot elements
+         setSizes();
+
+         // set up window resize handler
+         //$(window).resize(setSizes);
+      }
+   }
+
+   function setSizes() {
+      var yAxisElement = $("#y_axis");
+      var yAxisLabelElement = $("#y_axis_label");
+      var totalWidth = $(".content_container").width();
+      var yAxisWidth = yAxisElement.width();
+      var yAxisHeight = yAxisElement.height();
+      yAxisLabelElement.width(yAxisHeight); // set the width == height since we're rotating
+      var yAxisLabelHeight = yAxisLabelElement.height();
+      var plotContainerWidth = totalWidth - yAxisWidth - 3;  // subtract 3 to allow for borders
+
+      // compute the position of the y-axis label
+      var yAxisLabelLeft = Math.round(yAxisWidth + yAxisLabelHeight / 2 - yAxisHeight / 2 + 2);
+      var yAxisLabelTop = Math.round(yAxisHeight / 2 - yAxisLabelHeight / 2);
+
+      // set positions and sizes
+      yAxisLabelElement.css("top", yAxisLabelTop + "px").css("left", yAxisLabelLeft + "px");
+      dateAxis.setSize(plotContainerWidth, $("#date_axis").height(), SequenceNumber.getNext());
+      plotContainer.setSize(plotContainerWidth, $("#plot").height(), SequenceNumber.getNext());
+      grapher.updateYAxesSizes();
+   }
+
+</script>
+
+<div class="main_container">
+   <div class="content_container">
+      <div class="page_title">
+         Water Quality Dashboard
+      </div>
+   </div>
+   <div id="choose_feed_panel" class="content_container">
+      <div id="existing_feeds" class="feed_list"></div>
+      <div id="grapher_container" class="noselect" style="display:none;"></div>
+   </div>
+</div>
