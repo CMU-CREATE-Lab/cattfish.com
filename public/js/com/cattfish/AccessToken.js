@@ -43,17 +43,13 @@ if (!window['superagent']) {
 
       this.load = function(callback) {
          if (accessToken != null) {
-            console.log("Returning cached access token...");
             return callback(null, accessToken);
          }
-         console.log("Fetching access token...");
          superagent
                .get("/access-token?no-cache=" + new Date().getTime())
                .end(function(err, res) {
                        if (err) {
-                          var msg = "Failed to get the access token due to an unexpected error.";
-                          console.log(msg);
-                          return callback(new Error(msg));
+                          return callback(new Error("Failed to get the access token due to an unexpected error."));
                        }
                        // remember the accessToken for later, then return to the caller
                        accessToken = res.body.data ? res.body.data.token : null;
