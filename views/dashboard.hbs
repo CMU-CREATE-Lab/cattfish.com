@@ -117,11 +117,11 @@
 
          var grapherElement = $(grapherTemplate({
                                                    plotHeight : 300,
-                                                   yAxisLabel : feed.channels[channelId].prettyName + " (" + feed.channels[channelId].units + ")"
+                                                   yAxisLabel : feed.channelSpecs[channelId].prettyName + " (" + feed.channelSpecs[channelId].units + ")"
                                                 }));
          $("#grapher_container").show().append(grapherElement);
-         var channelMinTimeSecs = feed.channels[channelId].bounds.minTimeSecs;
-         var channelMaxTimeSecs = feed.channels[channelId].bounds.maxTimeSecs;
+         var channelMinTimeSecs = feed.channelBounds.channels[channelId].minTimeSecs;
+         var channelMaxTimeSecs = feed.channelBounds.channels[channelId].maxTimeSecs;
 
          // Grapher is not happy if min time equals max time.  Adjust them if necessary
          if (channelMinTimeSecs == channelMaxTimeSecs) {
@@ -134,8 +134,8 @@
          plotContainer = new PlotContainer("plot", false, []);
 
          var theChannel = {
-            "min" : feed.channels[channelId].bounds.minValue,
-            "max" : feed.channels[channelId].bounds.maxValue,
+            "min" : feed.channelBounds.channels[channelId].minValue,
+            "max" : feed.channelBounds.channels[channelId].maxValue,
             "time_type" : "utc",
             "style" : {
                "styles" : [
