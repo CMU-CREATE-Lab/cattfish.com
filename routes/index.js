@@ -15,6 +15,10 @@ router.get('/about', function(req, res) {
    res.render('about', { title : "CATTfish: About", section : "about"});
 });
 
+router.get('/about/partners', function(req, res) {
+   res.render('partners', { title : "CATTfish: Partners", section : "about"});
+});
+
 router.get('/contact', function(req, res) {
    res.render('contact', { title : "CATTfish: Contact", section : "contact"});
 });
