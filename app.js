@@ -22,7 +22,7 @@ var Database = require("./models/Database");
 var httpStatus = require('http-status');
 
 // decorate express.response with JSend methods
-require('./lib/jsend');
+require('jsend-utils').decorateExpressResponse(require('express').response);
 
 var gracefulExit = function() {
    // TODO: any way (or need?) to gracefully shut down the database pool?
