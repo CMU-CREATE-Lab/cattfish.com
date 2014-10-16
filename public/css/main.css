@@ -270,6 +270,8 @@ input[type="radio"], input[type="checkbox"] {
     position: relative;
     padding: 30px 0 30px 0;
     margin: 0 100px 0 30px; }
+    #home_page #about_container.partners {
+      margin: 0 0 0 30px !important; }
     #home_page #about_container .table_left {
       position: absolute;
       width: 130px;
@@ -283,13 +285,23 @@ input[type="radio"], input[type="checkbox"] {
       width: auto;
       left: 15px;
       margin: 0 75px 0 130px;
-      padding: 0 15px 0 30px;
+      padding: 0 15px 30px 30px;
       border-left: 1px solid #b0bac0;
       min-height: 600px; }
-      #home_page #about_container .table_right .table_right div.images {
+      #home_page #about_container .table_right div.images {
         padding: 15px 0 15px 0; }
-        #home_page #about_container .table_right .table_right div.images img.right {
+        #home_page #about_container .table_right div.images img.right {
           float: right; }
+    #home_page #about_container .textlogo {
+      position: relative;
+      float: left;
+      padding: 10px;
+      width: 220px; }
+      #home_page #about_container .textlogo img {
+        width: 220px; }
+      #home_page #about_container .textlogo p {
+        /*TODO formatting paragraph text */
+        width: 220px; }
 
 .checkmark_icon_container {
   width: 24px;
