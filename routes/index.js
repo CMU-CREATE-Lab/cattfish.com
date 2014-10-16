@@ -15,6 +15,10 @@ router.get('/about', function(req, res) {
    res.render('about', { title : "CATTfish: About", section : "about"});
 });
 
+router.get('/about/water-quality-measures', function(req, res) {
+   res.render('water-quality-measures', { title : "CATTfish: Water Quality Measures", section : "about"});
+});
+
 router.get('/about/partners', function(req, res) {
    res.render('partners', { title : "CATTfish: Partners", section : "about"});
 });
