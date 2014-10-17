@@ -1,7 +1,9 @@
 <script language="JavaScript" type="text/javascript">
 
    $(document).ready(function() {
-      var selectedSectionNavElementId = "nav_" + "{{section}}";
+      var section = "{{section}}";
+      var mainSection = section.split(":")[0];
+      var selectedSectionNavElementId = "nav_" + mainSection;
 
       // highlight the selected section
       $("#" + selectedSectionNavElementId).addClass("navigation_item_selected");

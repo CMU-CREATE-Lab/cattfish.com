@@ -1,34 +1,53 @@
-<div id="home_page" class="main_container">
-<div id="about_container">
-   <div class="table_left">
-      <p><a href="/about">ABOUT US</a></p>
-      <p><a class="selected" href="/about/water-quality-measures">WATER QUALITY MEASURES</a></p>
-      <p><a href="/about/partners">PARTNERS</a></p>
-   </div>
-   <div class="table_right">
-      <h2>Water Quality Measures</h2>
-      <div class="images">
-         <img src="/images/water_quality_graph.png"/>
-      </div>
-      <h3>Conductance/Total Dissolved Solids:</h3>
-      <h4>What is conductivity and why is it important?</h4>
-      <p>
-      Conductivity is a measure of the ability of water to pass an electrical current. Conductivity in water is affected by the presence of inorganic dissolved solids such as chloride, nitrate, sulfate, and phosphate anions (ions that carry a negative charge) or sodium, magnesium, calcium, iron, and aluminum cations (ions that carry a positive charge). Organic compounds like oil, phenol, alcohol, and sugar do not conduct electrical current very well and therefore have a low conductivity when in water. Conductivity is also affected by temperature: the warmer the water, the higher the conductivity. For this reason, conductivity is reported as conductivity at 25 degrees Celsius (25 C). CATTfish has been calibrated at this same industry standard.
-      </p>
-      <p>
-      The basic unit of measurement of conductivity is the mho or siemens. Conductivity is measured in micromhos per centimeter (µmhos/cm) or microsiemens per centimeter (µs/cm). Distilled water has a conductivity in the range of 0.5 to 3 µmhos/cm. Water treated centrally ranges from 75 to 500 us/cm – this is the scale used by CATTfish and FlaminGo. The conductivity of rivers in the United States generally ranges from 50 to 1500 µmhos/cm. Studies of inland fresh waters indicate that streams supporting good mixed fisheries have a range between 150 and 500 µhos/cm. Conductivity outside this range could indicate that the water is not suitable for certain species of fish or macroinvertebrates. Industrial waters can range as high as 10,000 µmhos/cm.
-      </p>
+<div class="main_container">
+   <div id="about_container">
+      {{> about_menu}}
+      <div class="table_right">
+         <div class="page_title">Water Quality Measures</div>
+         <div class="images">
+            <img src="/images/water_quality_graph.png"/>
+         </div>
+         <h3>Conductance/Total Dissolved Solids:</h3>
+         <h4>What is conductivity and why is it important?</h4>
+         <p>
+            Conductivity is a measure of the ability of water to pass an electrical current. Conductivity in water is
+            affected by the presence of inorganic dissolved solids such as chloride, nitrate, sulfate, and phosphate
+            anions (ions that carry a negative charge) or sodium, magnesium, calcium, iron, and aluminum cations (ions
+            that carry a positive charge). Organic compounds like oil, phenol, alcohol, and sugar do not conduct
+            electrical current very well and therefore have a low conductivity when in water. Conductivity is also
+            affected by temperature: the warmer the water, the higher the conductivity. For this reason, conductivity
+            is reported as conductivity at 25 degrees Celsius (25 C). CATTfish has been calibrated at this same
+            industry standard.
+         </p>
+         <p>
+            The basic unit of measurement of conductivity is the mho or siemens. Conductivity is measured in micromhos
+            per centimeter (&mu;mhos/cm) or microsiemens per centimeter (&mu;s/cm). Distilled water has a conductivity
+            in the range of 0.5 to 3 &mu;mhos/cm. Water treated centrally ranges from 75 to 500 us/cm – this is the
+            scale used by CATTfish and FlaminGo. The conductivity of rivers in the United States generally ranges from
+            50 to 1500 &mu;mhos/cm. Studies of inland fresh waters indicate that streams supporting good mixed fisheries
+            have a range between 150 and 500 &mu;hos/cm. Conductivity outside this range could indicate that the water
+            is not suitable for certain species of fish or macroinvertebrates. Industrial waters can range as high as
+            10,000 &mu;mhos/cm.
+         </p>
 
-      <h4>Sampling and equipment Considerations</h4>
-      <p>
-      Conductivity is useful as a general measure of water quality. Each water source tends to have a relatively constant range of conductivity that, once established, can be used as a baseline for comparison with regular conductivity measurements. Significant changes in conductivity could then be an indicator that a discharge or some other source of pollution has entered a water source.
-      </p>
-      <p>
-      Conductivity is measured with a probe and a meter. Voltage is applied between two electrodes in a probe immersed in the sample water. The drop in voltage caused by the resistance of the water is used to calculate the conductivity per centimeter. The meter converts the probe measurement to micromhos per centimeter and displays the result for the user. NOTE: Some conductivity meters can also be used to test for total dissolved solids and salinity. The total dissolved solids concentration in milligrams per liter (mg/L) can also be calculated by multiplying the conductivity result by a factor between 0.55 and 0.9, which is empirically determined (see Standard Methods #2510, APHA 1992).
-      </p>
-      <p>
-      For more inforamtion visit <a href="http://water.epa.gov/">water.epa.gov</a>.
-      </p>
+         <h4>Sampling and equipment Considerations</h4>
+         <p>
+            Conductivity is useful as a general measure of water quality. Each water source tends to have a relatively
+            constant range of conductivity that, once established, can be used as a baseline for comparison with regular
+            conductivity measurements. Significant changes in conductivity could then be an indicator that a discharge
+            or some other source of pollution has entered a water source.
+         </p>
+         <p>
+            Conductivity is measured with a probe and a meter. Voltage is applied between two electrodes in a probe
+            immersed in the sample water. The drop in voltage caused by the resistance of the water is used to
+            calculate the conductivity per centimeter. The meter converts the probe measurement to micromhos per
+            centimeter and displays the result for the user. NOTE: Some conductivity meters can also be used to test for
+            total dissolved solids and salinity. The total dissolved solids concentration in milligrams per liter (mg/L)
+            can also be calculated by multiplying the conductivity result by a factor between 0.55 and 0.9, which is
+            empirically determined (see Standard Methods #2510, APHA 1992).
+         </p>
+         <p>
+            For more inforamtion visit <a href="http://water.epa.gov/">water.epa.gov</a>.
+         </p>
+      </div>
    </div>
-</div>
 </div>
