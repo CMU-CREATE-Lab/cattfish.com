@@ -4,3 +4,6 @@ node_modules
 out
 
 config-production.json
+
+upload-client
+etc/psd
