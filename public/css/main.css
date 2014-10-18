@@ -269,38 +269,33 @@ input[type="radio"], input[type="checkbox"] {
 
 #about_container {
   position: relative;
-  padding: 0 0 30px 0;
-  margin: 0 100px 0 30px; }
-  #about_container.partners {
-    margin: 0 0 0 30px !important; }
+  margin: 0; }
   #about_container .table_left {
     position: absolute;
     width: 130px;
-    padding: 9px 0 15px 0; }
+    padding: 9px 0 0 30px; }
     #about_container .table_left .left_margin_menu_item {
       margin-bottom: 20px; }
   #about_container .table_right {
     position: relative;
     width: auto;
-    left: 15px;
-    margin: 0 75px 0 130px;
-    padding: 0 15px 30px 30px;
+    margin-left: 160px;
+    margin-right: 190px;
+    padding-left: 30px;
+    padding-bottom: 30px;
     border-left: 1px solid #b0bac0;
-    min-height: 600px; }
-    #about_container .table_right div.images {
-      padding: 15px 0 15px 0; }
-      #about_container .table_right div.images img.right {
-        float: right; }
+    min-height: 300px; }
+    #about_container .table_right div.images img.right {
+      float: right; }
   #about_container .textlogo {
     position: relative;
     float: left;
-    padding: 10px;
-    width: 220px; }
+    margin-right: 19px;
+    width: 200px; }
     #about_container .textlogo img {
-      width: 220px; }
-    #about_container .textlogo p {
-      /*TODO formatting paragraph text */
-      width: 220px; }
+      width: 200px; }
+  #about_container .textlogo:last-of-type {
+    margin-right: 0; }
 
 .checkmark_icon_container {
   width: 24px;

@@ -405,17 +405,12 @@ input[type="radio"], input[type="checkbox"] {
 // =====================================================================================================================
 #about_container {
    position: relative;
-   padding: 0 0 30px 0;
-   margin: 0 100px 0 30px;
-
-   &.partners {
-      margin: 0 0 0 30px !important;
-   }
+   margin: 0;
 
    .table_left {
       position: absolute;
       width: 130px;
-      padding: 9px 0 15px 0;
+      padding: 9px 0 0 30px;
 
       .left_margin_menu_item {
          margin-bottom: 20px
@@ -425,15 +420,14 @@ input[type="radio"], input[type="checkbox"] {
    .table_right {
       position: relative;
       width: auto;
-      left: 15px;
-      margin: 0 75px 0 130px;
-      padding: 0 15px 30px 30px;
+      margin-left: $BODY_HORIZONTAL_MARGIN_WIDTH - 30px;
+      margin-right: $BODY_HORIZONTAL_MARGIN_WIDTH;
+      padding-left: 30px;
+      padding-bottom: 30px;
       border-left: 1px solid #b0bac0;
-      min-height: 600px;
+      min-height: 300px;
 
       div.images {
-         padding: 15px 0 15px 0;
-
          img.right {
             float: right;
          }
@@ -443,17 +437,16 @@ input[type="radio"], input[type="checkbox"] {
    .textlogo {
       position: relative;
       float: left;
-      padding: 10px;
-      width: 220px;
+      margin-right: 19px;
+
+      width: 200px;
 
       img {
-         width: 220px;
+         width: 200px;
       }
-
-      p {
-         /*TODO formatting paragraph text */
-         width: 220px;
-      }
+   }
+   .textlogo:last-of-type {
+      margin-right: 0;
    }
 
 }
