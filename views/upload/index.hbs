@@ -4,9 +4,10 @@
    var cattfish = null;
    var map = null;
    var marker = null;
-   var device = null;
+   var deviceId = null;
    var feeds = null;
    var selectedFeed = null;
+   var PRODUCT_ID = '{{cattfish_product_id}}';
 
    window.addEventListener("message",
                            function(event) {
@@ -74,7 +75,7 @@
             showLogInPanel();
          }
          else {
-            esdr = new org.cmucreatelab.esdr.ESDR("{{{esdrApiUrl}}}", accessToken.get());
+            esdr = new org.cmucreatelab.esdr.ESDR(accessToken.get());
 
             // start the upload process by checking whether this device is already registered
             getDevice(cattfish.device.serialNumber);
@@ -88,49 +89,62 @@
 
    function getDevice(serialNumber) {
       console.log("Checking whether device [" + serialNumber + "] is registered...");
-      esdr.devices.get('cattfish_v2', serialNumber, {
-         success : function(foundDevice) {
-            console.log("found device: " + JSON.stringify(foundDevice, null, 3));
-            device = foundDevice;
-            getFeeds();
-         },
-         unauthorized : function() {
-            // TODO: unauthorized--need to log in first and try again (this shouldn't happen, but...)
-         },
-         notFound : function() {
-            console.log("Unknown device, need to create it.");
-            createDevice(cattfish.device.serialNumber);
-         },
-         error : function(responseBody) {
-            // TODO: some unexpected error
-            console.log("Unexpected error trying to get the device info from ESDR.");
-         }
-      });
+      esdr.devices.findByProductAndSerialNumber(PRODUCT_ID,
+                                                serialNumber,
+                                                'id',
+                                                {
+                                                   success : function(foundDevice) {
+                                                      console.log("found device: " + JSON.stringify(foundDevice, null, 3));
+                                                      deviceId = foundDevice.id;
+                                                      getFeeds();
+                                                   },
+                                                   unauthorized : function() {
+                                                      // TODO: unauthorized--need to log in first and try again (this shouldn't happen, but...)
+                                                   },
+                                                   notFound : function() {
+                                                      console.log("Unknown device, need to create it.");
+                                                      createDevice(cattfish.device.serialNumber);
+                                                   },
+                                                   error : function(responseBody, httpStatusCode) {
+                                                      // TODO: some unexpected error
+                                                      console.log("Error: Unexpected error (HTTP status " + httpStatusCode + ") trying to get the device info from ESDR: " + JSON.stringify(responseBody, null, 3));
+                                                   },
+                                                   failure : function(err, httpStatusCode) {
+                                                      // TODO: some unexpected error
+                                                      console.log("Error: Unexpected failure (HTTP status " + httpStatusCode + ") trying to get the device info from ESDR: " + err);
+                                                   }
+                                                });
    }
 
    function createDevice(serialNumber) {
       // unknown device, need to register it
       console.log("Creating device [" + serialNumber + "]...");
-      esdr.devices.create('cattfish_v2', serialNumber, {
-         success : function(createdDevice) {
-            device = createdDevice;
-            // TODO: created!
-            console.log("Device created: " + JSON.stringify(device, null, 3));
-            showChooseFeedPanel();
-         },
-         duplicate : function() {
-            // TODO: serial number already exists for this product and user
-            console.log("Error: serial number already exists for this product and user");
-         },
-         validationError : function(validationErrors) {
-            // TODO: invalid serial number
-            console.log("Error: invalid serial number: " + JSON.stringify(validationErrors, null, 3));
-         },
-         error : function(responseBody) {
-            // TODO: some other error
-            console.log("Error: Unexpected error while trying to create the device: " + JSON.stringify(responseBody, null, 3));
-         }
-      });
+      esdr.devices.create(PRODUCT_ID,
+                          serialNumber,
+                          {
+                             created : function(createdDevice) {
+                                deviceId = createdDevice.id;
+                                // TODO: created!
+                                console.log("Device created: " + JSON.stringify(createdDevice, null, 3));
+                                showChooseFeedPanel();
+                             },
+                             duplicate : function() {
+                                // TODO: serial number already exists for this product and user
+                                console.log("Error: serial number already exists for this product and user");
+                             },
+                             validationError : function(validationErrors) {
+                                // TODO: invalid serial number
+                                console.log("Error: invalid serial number: " + JSON.stringify(validationErrors, null, 3));
+                             },
+                             error : function(responseBody, httpStatusCode) {
+                                // TODO: some other error
+                                console.log("Error: Unexpected error (HTTP status " + httpStatusCode + ") while trying to create the device: " + JSON.stringify(responseBody, null, 3));
+                             },
+                             failure : function(err, httpStatusCode) {
+                                // TODO: some other error
+                                console.log("Error: Unexpected failure (HTTP status " + httpStatusCode + ") trying to create the device: " + err);
+                             }
+                          });
    }
 
    function selectFeed(feed) {
@@ -163,36 +177,40 @@
    }
 
    function getFeeds() {
-      var deviceId = device.id;
-      console.log("Getting feeds for device ID [" + deviceId + "]");
+      console.log("Finding feeds for device ID [" + deviceId + "]");
       feeds = null;
-      esdr.feeds.get(deviceId, {
-         success : function(foundFeeds) {
-            feeds = foundFeeds;
-            if (feeds.length > 0) {
-               console.log("Found these feeds:");
-               var feedListItemTemplate = Handlebars.templates['feed_list_item'];
-               feeds.forEach(function(feed) {
-                  console.log(feed);
-                  feed.lastUploadFormatted = (feed.minTimeSecs == null || feed.maxTimeSecs == null) ? "never" : new Date(feed.lastUpload).toLocaleDateString() + " at " + new Date(feed.lastUpload).toLocaleTimeString();
-                  var feedElement = $(feedListItemTemplate(feed));
-                  $("#existing_feeds").append(feedElement);
-                  feedElement.click(function() {
-                     selectFeed(feed);
-                  });
-               });
-            }
-            showChooseFeedPanel();
-         },
-         notFound : function() {
-            // TODO
-            console.log("Device ID [" + deviceId + "] not found");
-         },
-         error : function(responseBody) {
-            // TODO
-            console.log("Error loading feeds for device ID [" + deviceId + "]: " + JSON.stringify(responseBody, null, 3));
-         }
-      });
+      esdr.feeds.find("?where=deviceId=" + deviceId + "&orderBy=-lastUpload", // TODO: limit selected fields!
+                      {
+                         success : function(foundFeeds) {
+                            feeds = foundFeeds.rows;
+                            if (feeds.length > 0) {
+                               console.log("Found these feeds:");
+                               var feedListItemTemplate = Handlebars.templates['feed_list_item'];
+                               feeds.forEach(function(feed) {
+                                  console.log(feed);
+                                  feed.lastUploadFormatted = (feed.minTimeSecs == null || feed.maxTimeSecs == null) ? "never" : new Date(feed.lastUpload).toLocaleDateString() + " at " + new Date(feed.lastUpload).toLocaleTimeString();
+                                  var feedElement = $(feedListItemTemplate(feed));
+                                  $("#existing_feeds").append(feedElement);
+                                  feedElement.click(function() {
+                                     selectFeed(feed);
+                                  });
+                               });
+                            }
+                            showChooseFeedPanel();
+                         },
+                         validationError : function(errors) {
+                            // TODO
+                            console.log("Validation error while trying to load feeds for device ID [" + deviceId + "]: " + JSON.stringify(errors, null, 3));
+                         },
+                         error : function(responseBody, httpStatusCode) {
+                            // TODO: some other error
+                            console.log("Error: Unexpected error (HTTP status " + httpStatusCode + ") while trying to load feeds for device ID [" + deviceId + "]: " + JSON.stringify(responseBody, null, 3));
+                         },
+                         failure : function(err, httpStatusCode) {
+                            // TODO: some other error
+                            console.log("Error: Unexpected failure (HTTP status " + httpStatusCode + ") while trying to load feeds for device ID [" + deviceId + "]: " + err);
+                         }
+                      });
    }
 
    function handleLoginSuccess(loginResult) {
@@ -229,20 +247,32 @@
                         {
                            success : function(uploadResult) {
                               // TODO
-                              console.log("Upload successful!");
+                              console.log("Upload successful: " + JSON.stringify(uploadResult, null, 3));
                               showUploadCompletePanel();
+                           },
+                           badRequest : function() {
+                              // TODO
+                              console.log("Bad request, no data!");
                            },
                            unauthorized : function() {
                               // TODO
                               console.log("Upload not authorized!");
                            },
+                           forbidden : function() {
+                              // TODO
+                              console.log("Upload forbidden!");
+                           },
                            validationError : function(validationErrors) {
                               // TODO
                               console.log("Upload failed due to validation errors!" + JSON.stringify(validationErrors, null, 3));
                            },
-                           error : function(responseBody) {
+                           error : function(responseBody, httpStatusCode) {
                               // TODO
-                              console.log("Upload failed due to unexpected error!" + JSON.stringify(responseBody, null, 3));
+                              console.log("Error: Unexpected error (HTTP status " + httpStatusCode + ") while trying to upload to feed:" + JSON.stringify(responseBody, null, 3));
+                           },
+                           failure : function(err, httpStatusCode) {
+                              // TODO: some other error
+                              console.log("Error: Unexpected failure (HTTP status " + httpStatusCode + ") while trying to upload to feed: " + err);
                            }
                         });
    }
@@ -442,7 +472,7 @@
             location, specify the location on the map, and choose the visibility.
          </div>
          <div id="create_feed_error_messages" class="form_messages form_error_messages"></div>
-         <form id="create_feed_form" onsubmit="return submitCreateFeedForm('create_feed_form',device.id,'create_feed_location_name',{latitude:marker.getPosition().lat(),longitude:marker.getPosition().lng()},$('#create_feed_is_public_true').prop('checked'),'create_feed_error_messages', esdr, uploadToFeed)" style="width:418px">
+         <form id="create_feed_form" onsubmit="return submitCreateFeedForm('create_feed_form',deviceId,'create_feed_location_name',{latitude:marker.getPosition().lat(),longitude:marker.getPosition().lng()},$('#create_feed_is_public_true').prop('checked'),'create_feed_error_messages', esdr, uploadToFeed)" style="width:418px">
             <div>
                <input type="text" id="create_feed_location_name" name="create_feed_location_name" placeholder="Location name (e.g. Upstairs bathroom)"/>
             </div>

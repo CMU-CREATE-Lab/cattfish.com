@@ -26,6 +26,10 @@ config.defaults({
                       "rootUrl" : "ROOT_URL",
                       "apiRootUrl" : "ESDR_API_ROOT_URL"
                    },
+                   "product" : {
+                      "name" : "cattfish_v2",
+                      "id" : "THIS_WILL_BE_DETERMINED_AT_RUNTIME"
+                   },
                    "cookie" : {
                       "name" : "sid",
                       "secret" : "YOUR_COOKIE_SECRET"

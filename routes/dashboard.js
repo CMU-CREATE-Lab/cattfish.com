@@ -9,7 +9,6 @@ router.get('/',
                             title : "CATTfish: Dashboard",
                             section : "dashboard",
                             esdrUrl : config.get("esdr:rootUrl"),
-                            esdrApiUrl : config.get("esdr:apiRootUrl"),
                             googleMapsApiKey : config.get("maps:apiKey")
                          });
            });

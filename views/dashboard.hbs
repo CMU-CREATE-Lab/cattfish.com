@@ -2,7 +2,6 @@
 <script src="{{esdrUrl}}/lib/bodytrack-grapher/org/bodytrack/grapher/gwt/grapher2.nocache.js" type="text/javascript"></script>
 <script src="{{esdrUrl}}/lib/bodytrack-grapher/org/bodytrack/grapher/MultiplotGrapher.js" type="text/javascript"></script>
 <script language="JavaScript" type="text/javascript">
-   var accessToken = null;
    var esdr = null;
 
    var feeds = null;
@@ -15,39 +14,42 @@
    var grapherTemplate = Handlebars.templates['grapher'];
 
    window.grapherLoad = function() {
-      accessToken = new com.cattfish.AccessToken();
+      var accessToken = new com.cattfish.AccessToken();
 
       // try fetching the access token
       accessToken.load(function(err, token) {
 
-         esdr = new org.cmucreatelab.esdr.ESDR("{{{esdrApiUrl}}}", token);
+         esdr = new org.cmucreatelab.esdr.ESDR(token);
 
-         var deviceId = 1; // TODO: fix this hardcoded lameness!
-         esdr.feeds.get(deviceId, {
-            success : function(foundFeeds) {
-               feeds = foundFeeds;
-               if (feeds.length > 0) {
-                  var feedListItemTemplate = Handlebars.templates['feed_list_item'];
-                  feeds.forEach(function(feed) {
-                     feed.lastUploadFormatted = (feed.minTimeSecs == null || feed.maxTimeSecs == null) ? "never" : new Date(feed.lastUpload).toLocaleDateString() + " at " + new Date(feed.lastUpload).toLocaleTimeString();
-                     var feedElement = $(feedListItemTemplate(feed));
-                     $("#existing_feeds").append(feedElement);
-                     feedElement.click(function() {
-                        selectFeed(feed);
-                     });
-                  });
-               }
-            },
-            notFound : function() {
-               // TODO
-               console.log("Device ID [" + deviceId + "] not found");
-            },
-            error : function(responseBody) {
-               // TODO
-               console.log("Error loading feeds for device ID [" + deviceId + "]: " + JSON.stringify(responseBody, null, 3));
-            }
-         });
-
+         esdr.feeds.find("?orderBy=-deviceId,-lastUpload", // TODO: limit selected fields!
+                         {
+                            success : function(foundFeeds) {
+                               feeds = foundFeeds.rows;
+                               if (feeds.length > 0) {
+                                  var feedListItemTemplate = Handlebars.templates['feed_list_item'];
+                                  feeds.forEach(function(feed) {
+                                     feed.lastUploadFormatted = (feed.minTimeSecs == null || feed.maxTimeSecs == null) ? "never" : new Date(feed.lastUpload).toLocaleDateString() + " at " + new Date(feed.lastUpload).toLocaleTimeString();
+                                     var feedElement = $(feedListItemTemplate(feed));
+                                     $("#existing_feeds").append(feedElement);
+                                     feedElement.click(function() {
+                                        selectFeed(feed);
+                                     });
+                                  });
+                               }
+                            },
+                            validationError : function(errors) {
+                               // TODO
+                               console.log("Validation error while trying to load feeds for device ID [" + deviceId + "]: " + JSON.stringify(errors, null, 3));
+                            },
+                            error : function(responseBody, httpStatusCode) {
+                               // TODO: some other error
+                               console.log("Error: Unexpected error (HTTP status " + httpStatusCode + ") while trying to load feeds for device ID [" + deviceId + "]: " + JSON.stringify(responseBody, null, 3));
+                            },
+                            failure : function(err, httpStatusCode) {
+                               // TODO: some other error
+                               console.log("Error: Unexpected failure (HTTP status " + httpStatusCode + ") while trying to load feeds for device ID [" + deviceId + "]: " + err);
+                            }
+                         });
       });
    };
 
@@ -78,38 +80,16 @@
                   .addClass("checkmark_white");
          }
       }
-      loadFeedInfo(selectedFeed);
+      renderPlot(selectedFeed);
    }
 
    // ==================================================================================================================
 
    // ==================================================================================================================
-
-   function loadFeedInfo(feed) {
-      $("#grapher_container").empty().hide();
-      if (feed) {
-         esdr.feeds.info(feed.apiKeyReadOnly,
-                         {
-                            success : function(feedInfo) {
-                               renderPlot(feedInfo);
-                            },
-                            unauthorized : function() {
-                               // TODO:
-                               console.log("Unauthorized");
-                            },
-                            forbidden : function() {
-                               // TODO:
-                               console.log("Forbidden");
-                            },
-                            error : function(responseBody) {
-                               // TODO:
-                               console.log("Error: " + responseBody);
-                            }
-                         });
-      }
-   }
 
    function renderPlot(feed) {
+      var grapherContainer = $("#grapher_container");
+      grapherContainer.empty().hide();
       if (feed) {
 
          // TODO: more hardcoded lameness...
@@ -119,7 +99,7 @@
                                                    plotHeight : 300,
                                                    yAxisLabel : feed.channelSpecs[channelId].prettyName + " (" + feed.channelSpecs[channelId].units + ")"
                                                 }));
-         $("#grapher_container").show().append(grapherElement);
+         grapherContainer.show().append(grapherElement);
          var channelMinTimeSecs = feed.channelBounds.channels[channelId].minTimeSecs;
          var channelMaxTimeSecs = feed.channelBounds.channels[channelId].maxTimeSecs;
 
@@ -171,7 +151,7 @@
          grapher.addPlot(channelId,
                          theChannel,
                          function(level, offset, successCallback) {
-                            esdr.tiles.get(channelId, level, offset, selectedFeed.apiKeyReadOnly, {
+                            esdr.tiles.get(selectedFeed.apiKeyReadOnly, channelId, level, offset, {
                                success : function(json) {
                                   successCallback(JSON.stringify(json));
                                },

@@ -1,21 +1,21 @@
 <script language="JavaScript" type="text/javascript">
-   var accessToken = null;
    var esdr = null;
+   var PRODUCT_ID = '{{cattfish_product_id}}';
+
    $(document).ready(function() {
-      accessToken = new com.cattfish.AccessToken();
+      var accessToken = new com.cattfish.AccessToken();
       accessToken.load(function(err, token) {
          console.log("Done getting the token: " + token);
 
-         esdr = new org.cmucreatelab.esdr.ESDR("{{{esdrApiUrl}}}", accessToken.get());
+         esdr = new org.cmucreatelab.esdr.ESDR(token);
          fetchDevices();
       });
    });
 
    function fetchDevices() {
-      // TODO: don't hardcode the product name
-      esdr.devices.list("cattfish_v2", {
+      esdr.devices.find("?orderBy=-created&where=productId="+PRODUCT_ID, {
          success : function(devices) {
-            renderDevices(devices);
+            renderDevices(devices.rows);
          },
          unauthorized : function() {
             // TODO:
@@ -40,7 +40,6 @@
       } else {
          $("#device_list").append("You have not yet registered any devices.")
       }
-
    }
 </script>
 <div class="main_container">
