@@ -18,8 +18,12 @@ config.defaults({
                       "oauthTokenUrl" : "http://localhost:3000/oauth/token"
                    },
                    "product" : {
-                      "name" : "cattfish_v2",
-                      "id" : "THIS_WILL_BE_DETERMINED_AT_RUNTIME"
+                      "id" : "THIS_WILL_BE_DETERMINED_AT_RUNTIME",
+                      "name" : 'cattfish_v1',
+                      "prettyName" : 'CATTfish v1',
+                      "vendor" : 'MellonHead Labs',
+                      "description" : 'The CATTfish v1 water temperature and conductivity sensor.',
+                      "defaultChannelSpecs" : { "temperature" : { "prettyName" : "Temperature", "units" : "C" }, "conductivity" : { "prettyName" : "Conductivity", "units" : "&mu;S/cm" }, "battery_voltage" : { "prettyName" : "Battery Voltage", "units" : "V" }}
                    },
                    "cookie" : {
                       "name" : "sid",
