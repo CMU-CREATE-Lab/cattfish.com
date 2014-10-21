@@ -16,8 +16,10 @@ var CREATE_TABLE_QUERY = " CREATE TABLE IF NOT EXISTS `Users` ( " +
                          "`refreshToken` varchar(255) DEFAULT NULL, " +
                          "`accessTokenExpiration` timestamp, " +
                          "PRIMARY KEY (`id`), " +
-                         "UNIQUE KEY `unique_accessToken` (`accessToken`), " +
-                         "UNIQUE KEY `unique_esdrUserId` (`esdrUserId`) " +
+                         "UNIQUE KEY `unique_esdrUserId` (`esdrUserId`), " +
+                         "KEY `created` (`created`), " +
+                         "KEY `modified` (`modified`), " +
+                         "UNIQUE KEY `unique_accessToken` (`accessToken`) " +
                          ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8";
 
 module.exports = function(databaseHelper) {
