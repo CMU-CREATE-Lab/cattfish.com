@@ -21,6 +21,7 @@ var flash = require('connect-flash');
 var Database = require("./models/Database");
 var httpStatus = require('http-status');
 var esdr = require('./lib/esdr');
+var RemoteError = require('./lib/errors').RemoteError;
 
 // decorate express.response with JSend methods
 require('jsend-utils').decorateExpressResponse(require('express').response);
@@ -36,164 +37,192 @@ process
       .on('SIGINT', gracefulExit)
       .on('SIGTERM', gracefulExit);
 
-// start by querying ESDR for the product ID
-esdr.getProductId(config.get("product:name"), function(err, productId) {
-   if (err) {
-      return log.error("Failed to fetch the CATTfish product ID from ESDR: " + err);
-   }
+// start by making sure our client entry exists in ESDR
+esdr.createClient({
+                     displayName : config.get("client:displayName"),
+                     clientName : config.get("client:name"),
+                     clientSecret : config.get("client:secret"),
+                     email : config.get("client:email"),
+                     verificationUrl : config.get("client:verificationToken:url"),
+                     resetPasswordUrl : config.get("client:resetPasswordToken:url")
+                  },
+                  function(err, result) {
+                     if (err) {
+                        if (err instanceof RemoteError && err.data && err.data.code == httpStatus.CONFLICT) {
+                           log.info("Client already exists in ESDR, no creation necessary.");
+                        }
+                        else {
+                           throw err;
+                        }
+                     }
+                     else {
+                        if (result.code == httpStatus.CREATED) {
+                           log.info("Client created in ESDR.");
+                        }
+                        else {
+                           throw new Error("Unexpected result code from ESDR when creating client: " + result.code);
+                        }
+                     }
 
-   // store the product ID in the config, so we can use it elsewhere
-   config.set("product:id", productId);
+                     // now query ESDR for the product ID
+                     esdr.getProductId(config.get("product:name"), function(err, productId) {
+                        if (err) {
+                           return log.error("Failed to fetch the CATTfish product ID from ESDR: " + err);
+                        }
 
-   // now initialize the database and get a reference to it
-   Database.create(function(err, db) {
-      if (err) {
-         log.error("Failed to initialize the database!" + err);
-      }
-      else {
-         log.info("Database initialized, starting app server...");
+                        // store the product ID in the config, so we can use it elsewhere
+                        config.set("product:id", productId);
 
-         // configure the app
-         try {
-            // VIEW -------------------------------------------------------------------------------------------------------------
+                        // now initialize the database and get a reference to it
+                        Database.create(function(err, db) {
+                           if (err) {
+                              log.error("Failed to initialize the database!" + err);
+                           }
+                           else {
+                              log.info("Database initialized, starting app server...");
 
-            // setup view engine
-            var viewsDir = path.join(__dirname, 'views');
-            app.set('views', viewsDir);
-            var handlebars = expressHandlebars.create({
-                                                         extname : '.hbs',
-                                                         defaultLayout : 'main-layout',
-                                                         layoutsDir : path.join(viewsDir, "layouts"),
-                                                         partialsDir : path.join(viewsDir, "partials"),
-                                                         helpers : {
-                                                            // Got this from http://stackoverflow.com/a/9405113
-                                                            ifEqual : function(v1, v2, options) {
-                                                               if (v1 === v2) {
-                                                                  return options.fn(this);
-                                                               }
-                                                               return options.inverse(this);
-                                                            }
-                                                         }
-                                                      });
+                              // configure the app
+                              try {
+                                 // VIEW -------------------------------------------------------------------------------------------------------------
 
-            app.engine('hbs', handlebars.engine);
-            app.set('view engine', '.hbs');
-            app.set('view cache', app.get('env') === 'production');           // only cache views in production
-            log.info("View cache enabled = " + app.enabled('view cache'));
+                                 // setup view engine
+                                 var viewsDir = path.join(__dirname, 'views');
+                                 app.set('views', viewsDir);
+                                 var handlebars = expressHandlebars.create({
+                                                                              extname : '.hbs',
+                                                                              defaultLayout : 'main-layout',
+                                                                              layoutsDir : path.join(viewsDir, "layouts"),
+                                                                              partialsDir : path.join(viewsDir, "partials"),
+                                                                              helpers : {
+                                                                                 // Got this from http://stackoverflow.com/a/9405113
+                                                                                 ifEqual : function(v1, v2, options) {
+                                                                                    if (v1 === v2) {
+                                                                                       return options.fn(this);
+                                                                                    }
+                                                                                    return options.inverse(this);
+                                                                                 }
+                                                                              }
+                                                                           });
 
-            // MIDDLEWARE -------------------------------------------------------------------------------------------------
-            var error_handlers = require('./middleware/error_handlers');
+                                 app.engine('hbs', handlebars.engine);
+                                 app.set('view engine', '.hbs');
+                                 app.set('view cache', app.get('env') === 'production');           // only cache views in production
+                                 log.info("View cache enabled = " + app.enabled('view cache'));
 
-            // setup middleware
-            app.use(favicon(path.join(__dirname, 'public/favicon.ico')));     // favicon serving
-            app.use(cors({
-                            origin : '*'
-                         }));
-            app.use(compress());                // enables gzip compression
-            app.use(express.static(path.join(__dirname, 'public')));          // static file serving
-            app.use(requestLogger('dev'));      // request logging
-            app.use(bodyParser.urlencoded({ extended : true }));     // form parsing
-            app.use(bodyParser.json());         // json body parsing
-            app.use(function(error, req, res, next) { // function MUST have arity 4 here!
-               // catch invalid JSON error (found at http://stackoverflow.com/a/15819808/703200)
-               res.status(httpStatus.BAD_REQUEST).json({status : "fail", data : "invalid JSON"})
-            });
-            app.use(flash());                   // adds a req.flash() function to all requests for displaying one-time messages to the user
-            app.use(cookieParser());            // cookie parsing--MUST come before setting up session middleware!
-            app.use(session({                   // configure support for storing sessions in the database
-                               key : config.get("cookie:name"),
-                               secret : config.get("cookie:secret"),
-                               store : new SessionStore({
-                                                           host : config.get("database:host"),
-                                                           port : config.get("database:port"),
-                                                           database : config.get("database:database"),
-                                                           user : config.get("database:username"),
-                                                           password : config.get("database:password")
-                                                        }),
-                               rolling : false,
-                               //secure: true,   // TODO: enable this once https is enabled
-                               saveUninitialized : true,
-                               resave : true
-                            }));
-            app.use(passport.initialize());                                   // initialize passport (must come AFTER session middleware)
-            app.use(passport.session());                                      // enable session support for passport
-            app.use(function(req, res, next) {
-               log.debug("req.isAuthenticated()=[" + req.isAuthenticated() + "]");
-               res.locals.isAuthenticated = req.isAuthenticated();
-               if (req.isAuthenticated()) {
-                  res.locals.user = {
-                     id : req.user.id,
-                     esdrUserId : req.user.esdrUserId
-                  };
-                  delete req.session.redirectToAfterLogin;
-                  delete res.locals.redirectToAfterLogin;
-               }
-               else {
-                  // expose the redirectToAfterLogin page to the view
-                  res.locals.redirectToAfterLogin = req.session.redirectToAfterLogin;
-               }
+                                 // MIDDLEWARE -------------------------------------------------------------------------------------------------
+                                 var error_handlers = require('./middleware/error_handlers');
 
-               next();
-            });
-            app.use(require('./middleware/accessToken').refreshAccessToken(db.users));
-            app.use(require('./middleware/flash_message_helper'));            // stores flash messages in res.locals for use in views
+                                 // setup middleware
+                                 app.use(favicon(path.join(__dirname, 'public/favicon.ico')));     // favicon serving
+                                 app.use(cors({
+                                                 origin : '*'
+                                              }));
+                                 app.use(compress());                // enables gzip compression
+                                 app.use(express.static(path.join(__dirname, 'public')));          // static file serving
+                                 app.use(requestLogger('dev'));      // request logging
+                                 app.use(bodyParser.urlencoded({ extended : true }));     // form parsing
+                                 app.use(bodyParser.json());         // json body parsing
+                                 app.use(function(error, req, res, next) { // function MUST have arity 4 here!
+                                    // catch invalid JSON error (found at http://stackoverflow.com/a/15819808/703200)
+                                    res.status(httpStatus.BAD_REQUEST).json({status : "fail", data : "invalid JSON"})
+                                 });
+                                 app.use(flash());                   // adds a req.flash() function to all requests for displaying one-time messages to the user
+                                 app.use(cookieParser());            // cookie parsing--MUST come before setting up session middleware!
+                                 app.use(session({                   // configure support for storing sessions in the database
+                                                    key : config.get("cookie:name"),
+                                                    secret : config.get("cookie:secret"),
+                                                    store : new SessionStore({
+                                                                                host : config.get("database:host"),
+                                                                                port : config.get("database:port"),
+                                                                                database : config.get("database:database"),
+                                                                                user : config.get("database:username"),
+                                                                                password : config.get("database:password")
+                                                                             }),
+                                                    rolling : false,
+                                                    //secure: true,   // TODO: enable this once https is enabled
+                                                    saveUninitialized : true,
+                                                    resave : true
+                                                 }));
+                                 app.use(passport.initialize());                                   // initialize passport (must come AFTER session middleware)
+                                 app.use(passport.session());                                      // enable session support for passport
+                                 app.use(function(req, res, next) {
+                                    log.debug("req.isAuthenticated()=[" + req.isAuthenticated() + "]");
+                                    res.locals.isAuthenticated = req.isAuthenticated();
+                                    if (req.isAuthenticated()) {
+                                       res.locals.user = {
+                                          id : req.user.id,
+                                          esdrUserId : req.user.esdrUserId
+                                       };
+                                       delete req.session.redirectToAfterLogin;
+                                       delete res.locals.redirectToAfterLogin;
+                                    }
+                                    else {
+                                       // expose the redirectToAfterLogin page to the view
+                                       res.locals.redirectToAfterLogin = req.session.redirectToAfterLogin;
+                                    }
 
-            // configure passport
-            require('./middleware/auth')(db.users);
+                                    next();
+                                 });
+                                 app.use(require('./middleware/accessToken').refreshAccessToken(db.users));
+                                 app.use(require('./middleware/flash_message_helper'));            // stores flash messages in res.locals for use in views
 
-            // ROUTING ----------------------------------------------------------------------------------------------------
+                                 // configure passport
+                                 require('./middleware/auth')(db.users);
 
-            // configure routing
-            app.use('/api/v1/users', require('./routes/api/users')(db.users));
-            app.use('/api/v1/user-verification', require('./routes/api/user-verification'));
-            app.use('/login', require('./routes/login'));
-            app.use('/logout', require('./routes/logout')(db.users));
-            app.use('/upload/v1', require('./routes/upload'));
-            app.use('/access-token', require('./routes/access-token'));
-            app.use('/password-reset', require('./routes/password-reset')(db.users));
+                                 // ROUTING ----------------------------------------------------------------------------------------------------
 
-            // ensure the user is authenticated before serving up the page
-            var ensureAuthenticated = function(req, res, next) {
-               if (req.isAuthenticated()) {
-                  return next();
-               }
-               // remember where the user was trying to go and then redirect to the login page
-               req.session.redirectToAfterLogin = req.originalUrl;
-               res.redirect('/login')
-            };
-            app.use('/dashboard', ensureAuthenticated, require('./routes/dashboard'));
-            app.use('/devices', ensureAuthenticated, require('./routes/devices'));
-            app.use('/account', ensureAuthenticated, require('./routes/account'));
+                                 // configure routing
+                                 app.use('/api/v1/users', require('./routes/api/users')(db.users));
+                                 app.use('/api/v1/user-verification', require('./routes/api/user-verification'));
+                                 app.use('/login', require('./routes/login'));
+                                 app.use('/logout', require('./routes/logout')(db.users));
+                                 app.use('/upload/v1', require('./routes/upload'));
+                                 app.use('/access-token', require('./routes/access-token'));
+                                 app.use('/password-reset', require('./routes/password-reset')(db.users));
 
-            app.use('/',
-                    function(req, res, next) {
-                       // if serving a page which doesn't require authentication, then
-                       // forget the remembered redirectToAfterLogin page
-                       delete req.session.redirectToAfterLogin;
-                       next();
-                    },
-                    require('./routes/index'));
+                                 // ensure the user is authenticated before serving up the page
+                                 var ensureAuthenticated = function(req, res, next) {
+                                    if (req.isAuthenticated()) {
+                                       return next();
+                                    }
+                                    // remember where the user was trying to go and then redirect to the login page
+                                    req.session.redirectToAfterLogin = req.originalUrl;
+                                    res.redirect('/login')
+                                 };
+                                 app.use('/dashboard', ensureAuthenticated, require('./routes/dashboard'));
+                                 app.use('/devices', ensureAuthenticated, require('./routes/devices'));
+                                 app.use('/account', ensureAuthenticated, require('./routes/account'));
 
-            // ERROR HANDLERS ---------------------------------------------------------------------------------------------
+                                 app.use('/',
+                                         function(req, res, next) {
+                                            // if serving a page which doesn't require authentication, then
+                                            // forget the remembered redirectToAfterLogin page
+                                            delete req.session.redirectToAfterLogin;
+                                            next();
+                                         },
+                                         require('./routes/index'));
 
-            // custom 404
-            app.use(error_handlers.http404);
+                                 // ERROR HANDLERS ---------------------------------------------------------------------------------------------
 
-            // dev and prod should handle errors differently: e.g. don't show stacktraces in prod
-            app.use((app.get('env') === 'development') ? error_handlers.development : error_handlers.production);
+                                 // custom 404
+                                 app.use(error_handlers.http404);
 
-            // ------------------------------------------------------------------------------------------------------------
+                                 // dev and prod should handle errors differently: e.g. don't show stacktraces in prod
+                                 app.use((app.get('env') === 'development') ? error_handlers.development : error_handlers.production);
 
-            // set the port and start the server
-            app.set('port', config.get("server:port"));
-            var server = app.listen(app.get('port'), function() {
-               log.info('Express server listening on port ' + server.address().port);
-            });
+                                 // ------------------------------------------------------------------------------------------------------------
 
-         }
-         catch (err) {
-            log.error("Sever initialization failed ", err.message);
-         }
-      }
-   });
-});
+                                 // set the port and start the server
+                                 app.set('port', config.get("server:port"));
+                                 var server = app.listen(app.get('port'), function() {
+                                    log.info('Express server listening on port ' + server.address().port);
+                                 });
+
+                              }
+                              catch (err) {
+                                 log.error("Sever initialization failed ", err.message);
+                              }
+                           }
+                        });
+                     });
+                  });

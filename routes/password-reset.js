@@ -32,7 +32,7 @@ module.exports = function(UserModel) {
          // correct and actually belongs to the person who requested the reset. But, when
          // testing, just return it here so I don't have to write tests that check an email
          // account :-)
-         if (config.get("resetPasswordToken:willReturnViaApi") && result.resetPasswordToken) {
+         if (config.get("client:resetPasswordToken:willReturnViaApi") && result.resetPasswordToken) {
             obj.resetPasswordToken = result.resetPasswordToken
          }
 

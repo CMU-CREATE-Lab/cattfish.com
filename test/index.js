@@ -48,11 +48,12 @@ describe("cattfish.com", function() {
    before(function(initDone) {
       // make sure the client exists in ESDR
       esdr.createClient({
-                           displayName : config.get("oauth:clientDisplayName"),
-                           clientName : config.get("oauth:clientId"),
-                           clientSecret : config.get("oauth:clientSecret"),
-                           verificationUrl : config.get("verificationToken:url"),
-                           resetPasswordUrl : config.get("resetPasswordToken:url")
+                           displayName : config.get("client:displayName"),
+                           clientName : config.get("client:name"),
+                           clientSecret : config.get("client:secret"),
+                           email : config.get("client:email"),
+                           verificationUrl : config.get("client:verificationToken:url"),
+                           resetPasswordUrl : config.get("client:resetPasswordToken:url")
                         },
                         function(err, result) {
                            if (err) {

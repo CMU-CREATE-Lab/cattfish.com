@@ -12,19 +12,10 @@ config.defaults({
                       "url" : "http://localhost:3333",
                       "port" : 3333
                    },
-                   "resetPasswordToken" : {
-                      "willReturnViaApi" : false,
-                      "willEmailToUser" : true,
-                      "url" : "http://localhost:3333/password-reset/:resetPasswordToken"
-                   },
-                   "verificationToken" : {
-                      "willReturnViaApi" : false,
-                      "willEmailToUser" : true,
-                      "url" : "http://localhost:3333/verification/:verificationToken"
-                   },
                    "esdr" : {
-                      "rootUrl" : "ROOT_URL",
-                      "apiRootUrl" : "ESDR_API_ROOT_URL"
+                      "rootUrl" : "http://localhost:3000",
+                      "apiRootUrl" : "http://localhost:3000/api/v1",
+                      "oauthTokenUrl" : "http://localhost:3000/oauth/token"
                    },
                    "product" : {
                       "name" : "cattfish_v2",
@@ -34,11 +25,21 @@ config.defaults({
                       "name" : "sid",
                       "secret" : "YOUR_COOKIE_SECRET"
                    },
-                   "oauth" : {
-                      "tokenURL" : "OAUTH2_TOKEN_SERVER_URL",
-                      "clientDisplayName" : "YOUR_OAUTH2_CLIENT_DISPLAY_NAME",
-                      "clientId" : "YOUR_OAUTH2_CLIENT_ID",
-                      "clientSecret" : "YOUR_OAUTH2_CLIENT_SECRET"
+                   "client" : {
+                      "displayName" : "CATTFish Web Site",
+                      "name" : "cattfish.com",
+                      "secret" : "YOUR_OAUTH2_CLIENT_SECRET",
+                      "email" : "admin@cattfish.com",
+                      "resetPasswordToken" : {
+                         "url" : "http://localhost:3333/password-reset/:resetPasswordToken",
+                         "willReturnViaApi" : false,
+                         "willEmailToUser" : true
+                      },
+                      "verificationToken" : {
+                         "url" : "http://localhost:3333/verification/:verificationToken",
+                         "willReturnViaApi" : false,
+                         "willEmailToUser" : true
+                      }
                    },
                    "maps" : {
                       "apiKey" : "AIzaSyAx4X9rCsb7BguosyqSxatdxjzUeQMvM4w"

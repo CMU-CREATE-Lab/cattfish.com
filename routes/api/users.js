@@ -35,7 +35,7 @@ module.exports = function(UserModel) {
          // correct and actually belongs to the person who created the account. But, when
          // testing, just return it here so I don't have to write tests that check an email
          // account :-)
-         if (config.get("verificationToken:willReturnViaApi") && result.verificationToken) {
+         if (config.get("client:verificationToken:willReturnViaApi") && result.verificationToken) {
             obj.verificationToken = result.verificationToken
          }
 
