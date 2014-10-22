@@ -30,7 +30,7 @@ config.defaults({
                       "secret" : "YOUR_COOKIE_SECRET"
                    },
                    "client" : {
-                      "displayName" : "CATTFish Web Site",
+                      "displayName" : "CATTfish Web Site",
                       "name" : "cattfish.com",
                       "secret" : "YOUR_OAUTH2_CLIENT_SECRET",
                       "email" : "admin@cattfish.com",
