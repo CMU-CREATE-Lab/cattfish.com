@@ -21,7 +21,7 @@
 
          esdr = new org.cmucreatelab.esdr.ESDR(token);
 
-         esdr.feeds.find("?orderBy=-deviceId,-lastUpload", // TODO: limit selected fields!
+         esdr.feeds.find("?orderBy=-lastUpload", // TODO: limit selected fields!
                          {
                             success : function(foundFeeds) {
                                feeds = foundFeeds.rows;
