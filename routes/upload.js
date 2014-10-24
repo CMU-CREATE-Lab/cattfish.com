@@ -9,7 +9,6 @@ router.get('/', function(req, res) {
               {
                  layout : "upload-layout",
                  title : "CATTfish: Upload",
-                 esdrUrl : config.get("esdr:rootUrl"),
                  googleMapsApiKey : config.get("maps:apiKey"),
                  cattfish_product_id : config.get("product:id")
               });

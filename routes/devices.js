@@ -8,7 +8,6 @@ router.get('/',
                          {
                             title : "CATTfish: Devices",
                             section : "devices",
-                            esdrUrl : config.get("esdr:rootUrl"),
                             cattfish_product_id : config.get("product:id")
                          });
            });
