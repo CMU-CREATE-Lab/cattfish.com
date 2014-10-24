@@ -333,3 +333,13 @@ input[type="radio"], input[type="checkbox"] {
 .feed_list .selected_feed {
   color: white;
   background-color: #428bca; }
+
+.account_table {
+  display: table; }
+  .account_table .account_row {
+    display: table-row; }
+    .account_table .account_row .account_header_cell {
+      font-weight: bold; }
+    .account_table .account_row .account_cell {
+      display: table-cell;
+      padding-right: 5px; }
