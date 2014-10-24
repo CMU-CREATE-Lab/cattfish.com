@@ -193,6 +193,8 @@ flow.series([
                            app.use(function(req, res, next) {
                               log.debug("req.isAuthenticated()=[" + req.isAuthenticated() + "]");
                               res.locals.isAuthenticated = req.isAuthenticated();
+                              res.locals.esdrUrl = config.get("esdr:rootUrl");
+
                               if (req.isAuthenticated()) {
                                  res.locals.user = {
                                     id : req.user.id,
