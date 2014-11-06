@@ -26,10 +26,6 @@
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.jdbc.Driver</jdbc-driver>
       <jdbc-url>jdbc:mysql://localhost:3306</jdbc-url>
-      <user-name>cattfish</user-name>
-      <user-password>dfdadfcbdfd9dfd9dfdddfc5dfd8dfce</user-password>
-      <schema-pattern>cattfish.* cattfish_test.*</schema-pattern>
-      <default-schemas>cattfish.* cattfish_test.*</default-schemas>
       <driver-properties>
         <property name="zeroDateTimeBehavior" value="convertToNull" />
         <property name="tinyInt1isBit" value="false" />
@@ -80,7 +76,6 @@
     <file url="file://$PROJECT_DIR$" libraries="{cattfish.com node_modules}" />
     <file url="PROJECT" libraries="{Handlebars Runtime 2.0.0, Node.js v0.10.30 Core Modules, Superagent, cattfish.com node_modules, googlemaps-DefinitelyTyped, jQuery 1.11.1, mocha-DefinitelyTyped, nconf-DefinitelyTyped, should-DefinitelyTyped}" />
     <includedPredefinedLibrary name="Node.js Globals" />
-    <excludedPredefinedLibrary name="HTML5 / EcmaScript 5" />
   </component>
   <component name="ProjectCodeStyleSettingsManager">
     <option name="PER_PROJECT_SETTINGS">
@@ -276,7 +271,6 @@
           <option name="ALIGN_MULTILINE_PARENTHESIZED_EXPRESSION" value="true" />
           <option name="ALIGN_MULTILINE_ARRAY_INITIALIZER_EXPRESSION" value="true" />
           <option name="SPACE_AFTER_TYPE_CAST" value="false" />
-          <option name="WRAP_COMMENTS" value="true" />
           <option name="IF_BRACE_FORCE" value="3" />
           <option name="DOWHILE_BRACE_FORCE" value="3" />
           <option name="WHILE_BRACE_FORCE" value="3" />
@@ -287,6 +281,10 @@
             <option name="CONTINUATION_INDENT_SIZE" value="6" />
             <option name="TAB_SIZE" value="3" />
           </indentOptions>
+        </codeStyleSettings>
+        <codeStyleSettings language="JSON">
+          <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
+          <option name="PARENT_SETTINGS_INSTALLED" value="true" />
         </codeStyleSettings>
         <codeStyleSettings language="JSP">
           <indentOptions>
@@ -454,6 +452,14 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
   </component>
+  <component name="dataSourceStorageLocal">
+    <data-source name="MySQL - @localhost" uuid="fb21d6c7-d0a6-4bcf-a406-102f92274033">
+      <user-name>cattfish</user-name>
+      <user-password>dfdadfcbdfd9dfd9dfdddfc5dfd8dfce</user-password>
+      <schema-pattern>cattfish.* cattfish_test.*</schema-pattern>
+      <default-schemas>cattfish.* cattfish_test.*</default-schemas>
+    </data-source>
+  </component>
   <component name="libraryTable">
     <library name="cattfish.com node_modules" type="javaScript">
       <properties>
@@ -494,8 +500,8 @@
     </library>
     <library name="jQuery 1.11.1" type="javaScript">
       <CLASSES>
-        <root url="file://$PROJECT_DIR$/public/lib/jquery/jquery-1.11.1.min.js" />
         <root url="file://$PROJECT_DIR$/public/lib/jquery/jquery-1.11.1.js" />
+        <root url="file://$PROJECT_DIR$/public/lib/jquery/jquery-1.11.1.min.js" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
@@ -514,4 +520,3 @@
     </library>
   </component>
 </project>
-
