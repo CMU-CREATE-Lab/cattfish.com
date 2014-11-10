@@ -34,6 +34,7 @@ config.defaults({
                       "name" : "cattfish.com",
                       "secret" : "YOUR_OAUTH2_CLIENT_SECRET",
                       "email" : "admin@cattfish.com",
+                      "isPublic" : true,
                       "resetPasswordToken" : {
                          "url" : "http://localhost:3333/password-reset/:resetPasswordToken",
                          "willReturnViaApi" : false,

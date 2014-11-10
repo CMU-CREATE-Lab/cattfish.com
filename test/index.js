@@ -51,6 +51,7 @@ describe("cattfish.com", function() {
                            displayName : config.get("client:displayName"),
                            clientName : config.get("client:name"),
                            clientSecret : config.get("client:secret"),
+                           isPublic : config.get("client:isPublic"),
                            email : config.get("client:email"),
                            verificationUrl : config.get("client:verificationToken:url"),
                            resetPasswordUrl : config.get("client:resetPasswordToken:url")
