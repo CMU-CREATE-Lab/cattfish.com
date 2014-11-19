@@ -25,7 +25,6 @@ var bodyParser = require('body-parser');
 var session = require('express-session');
 var passport = require('passport');
 var SessionStore = require('express-mysql-session');
-var flash = require('connect-flash');
 var Database = require("./models/Database");
 var httpStatus = require('http-status');
 var esdr = require('./lib/esdr');
@@ -168,73 +167,111 @@ flow.series([
 
                            // setup middleware
                            app.use(favicon(path.join(__dirname, 'public/favicon.ico')));     // favicon serving
-                           app.use(cors({
-                                           origin : '*'
-                                        }));
                            app.use(compress());                // enables gzip compression
                            app.use(express.static(path.join(__dirname, 'public')));          // static file serving
-                           app.use(requestLogger('dev'));      // request logging
-                           app.use(bodyParser.urlencoded({extended : true}));     // form parsing
-                           app.use(bodyParser.json());         // json body parsing
-                           app.use(function(error, req, res, next) { // function MUST have arity 4 here!
-                              // catch invalid JSON error (found at http://stackoverflow.com/a/15819808/703200)
-                              res.status(httpStatus.BAD_REQUEST).json({status : "fail", data : "invalid JSON"})
-                           });
-                           app.use(flash());                   // adds a req.flash() function to all requests for displaying one-time messages to the user
-                           app.use(cookieParser());            // cookie parsing--MUST come before setting up session middleware!
-                           app.use(session({                   // configure support for storing sessions in the database
-                                              key : config.get("cookie:name"),
-                                              secret : config.get("cookie:secret"),
-                                              store : new SessionStore({
-                                                                          host : config.get("database:host"),
-                                                                          port : config.get("database:port"),
-                                                                          database : config.get("database:database"),
-                                                                          user : config.get("database:username"),
-                                                                          password : config.get("database:password")
-                                                                       }),
-                                              rolling : false,
-                                              //secure: true,   // TODO: enable this once https is enabled
-                                              saveUninitialized : true,
-                                              resave : true
-                                           }));
-                           app.use(passport.initialize());                                   // initialize passport (must come AFTER session middleware)
-                           app.use(passport.session());                                      // enable session support for passport
-                           app.use(function(req, res, next) {
-                              log.debug("req.isAuthenticated()=[" + req.isAuthenticated() + "]");
-                              res.locals.isAuthenticated = req.isAuthenticated();
-                              res.locals.esdrUrl = config.get("esdr:rootUrl");
+                           if (RunMode.isProduction()) {
+                              // create a write stream (in append mode)
+                              var fs = require('fs');
+                              var httpAccessLogDirectory = config.get("httpAccessLogDirectory");
+                              log.info("HTTP access log: " + httpAccessLogDirectory);
+                              var accessLogStream = fs.createWriteStream(httpAccessLogDirectory, { flags : 'a' });
 
-                              if (req.isAuthenticated()) {
-                                 res.locals.user = {
-                                    id : req.user.id,
-                                    esdrUserId : req.user.esdrUserId
-                                 };
-                                 delete req.session.redirectToAfterLogin;
-                                 delete res.locals.redirectToAfterLogin;
+                              // get the correct remote address from the X-Forwarded-For header
+                              requestLogger.token('remote-addr', function(req) {
+                                 return req.headers['x-forwarded-for'];
+                              });
+                              app.use(requestLogger('combined', { stream : accessLogStream }));
+                           }
+                           else {
+                              app.use(requestLogger('dev'));      // simple request logging when in non-production mode
+                           }
+                           app.use(bodyParser.urlencoded({ extended : true }));     // form parsing
+                           app.use(bodyParser.json({ limit : '5mb' }));           // json body parsing (5 MB limit)
+                           app.use(function(err, req, res, next) { // function MUST have arity 4 here!
+                              // catch body parser error (beefed up version of http://stackoverflow.com/a/15819808/703200)
+                              if (err) {
+                                 var statusCode = err.status || httpStatus.INTERNAL_SERVER_ERROR;
+                                 var message = err.message || (statusCode < httpStatus.INTERNAL_SERVER_ERROR ? "Bad Request" : "Internal Server Error");
+                                 var data = err;
+
+                                 if (statusCode < httpStatus.INTERNAL_SERVER_ERROR) {
+                                    res.jsendClientError(message, data, statusCode);
+                                 }
+                                 else {
+                                    res.jsendServerError(message, data, statusCode);
+                                 }
                               }
                               else {
-                                 // expose the redirectToAfterLogin page to the view
-                                 res.locals.redirectToAfterLogin = req.session.redirectToAfterLogin;
+                                 next();
                               }
-
-                              next();
                            });
-                           app.use(require('./middleware/accessToken').refreshAccessToken(db.users));
-                           app.use(require('./middleware/flash_message_helper'));            // stores flash messages in res.locals for use in views
 
                            // configure passport
                            require('./middleware/auth')(db.users);
 
-                           // ROUTING ----------------------------------------------------------------------------------------------------
+                           // CUSTOM MIDDLEWARE ------------------------------------------------------------------------------------------
 
-                           // configure routing
-                           app.use('/api/v1/users', require('./routes/api/users')(db.users));
-                           app.use('/api/v1/user-verification', require('./routes/api/user-verification'));
-                           app.use('/login', require('./routes/login'));
-                           app.use('/logout', require('./routes/logout')(db.users));
-                           app.use('/upload/v1', require('./routes/upload'));
-                           app.use('/access-token', require('./routes/access-token'));
-                           app.use('/password-reset', require('./routes/password-reset')(db.users));
+                           if (RunMode.isProduction()) {
+                              app.set('trust proxy', 1) // trust first proxy
+                           }
+
+                           // define the various middleware required for routes which need session support
+                           var sessionSupport = [
+                              cookieParser(),                  // cookie parsing--MUST come before setting up session middleware!
+                              session({                        // configure support for storing sessions in the database
+                                         key : config.get("cookie:name"),
+                                         secret : config.get("cookie:secret"),
+                                         store : new SessionStore({
+                                                                     host : config.get("database:host"),
+                                                                     port : config.get("database:port"),
+                                                                     database : config.get("database:database"),
+                                                                     user : config.get("database:username"),
+                                                                     password : config.get("database:password")
+                                                                  }),
+                                         rolling : false,
+                                         cookie : {
+                                            httpOnly : true,
+                                            secure : RunMode.isProduction()   // enable secure cookies in production, which uses HTTPS
+                                         },
+                                         proxy : RunMode.isProduction(),       // we use a proxy in production
+                                         saveUninitialized : true,
+                                         resave : true,
+                                         unset : "destroy"
+                                      }),
+                              passport.initialize(),           // initialize passport (must come AFTER session middleware)
+                              passport.session(),              // enable session support for passport
+                              function(req, res, next) {
+                                 log.debug("req.isAuthenticated()=[" + req.isAuthenticated() + "]");
+                                 res.locals.isAuthenticated = req.isAuthenticated();
+                                 res.locals.esdrUrl = config.get("esdr:rootUrl");
+
+                                 if (req.isAuthenticated()) {
+                                    res.locals.user = {
+                                       id : req.user.id,
+                                       esdrUserId : req.user.esdrUserId
+                                    };
+                                    delete req.session.redirectToAfterLogin;
+                                    delete res.locals.redirectToAfterLogin;
+                                 }
+                                 else {
+                                    // expose the redirectToAfterLogin page to the view
+                                    res.locals.redirectToAfterLogin = req.session.redirectToAfterLogin;
+                                 }
+
+                                 next();
+                              },
+                              require('./middleware/accessToken').refreshAccessToken()
+                           ];
+
+                           // define the various middleware required for routes which don't need (and should not have!) session support
+                           var noSessionSupport = [
+                              passport.initialize()         // initialize passport
+                           ];
+
+                           // define CORS options and apply CORS to specific route groups
+                           var corsSupport = cors({
+                                                     origin : '*'
+                                                  });
 
                            // ensure the user is authenticated before serving up the page
                            var ensureAuthenticated = function(req, res, next) {
@@ -245,14 +282,30 @@ flow.series([
                               req.session.redirectToAfterLogin = req.originalUrl;
                               res.redirect('/login')
                            };
-                           app.use('/dashboard', ensureAuthenticated, require('./routes/dashboard'));
-                           app.use('/devices', ensureAuthenticated, require('./routes/devices'));
-                           app.use('/account', ensureAuthenticated, require('./routes/account'));
+
+                           // ROUTING ----------------------------------------------------------------------------------------------------
+
+                           // configure routing
+                           app.use('/api/v1/*', noSessionSupport, corsSupport);
+                           app.use('/api/v1/users', require('./routes/api/users')(db.users));
+                           app.use('/api/v1/user-verification', require('./routes/api/user-verification'));
+
+                           app.use('/login', sessionSupport, require('./routes/login'));
+                           app.use('/logout', sessionSupport, require('./routes/logout')(db.users));
+                           app.use('/upload/v1', sessionSupport, require('./routes/upload'));
+                           app.use('/access-token', sessionSupport, require('./routes/access-token'));
+                           app.use('/password-reset', sessionSupport, require('./routes/password-reset')(db.users));
+
+                           app.use('/dashboard', sessionSupport, ensureAuthenticated, require('./routes/dashboard'));
+                           app.use('/devices', sessionSupport, ensureAuthenticated, require('./routes/devices'));
+                           app.use('/account', sessionSupport, ensureAuthenticated, require('./routes/account'));
 
                            app.use('/',
+                                   sessionSupport,
                                    function(req, res, next) {
                                       // if serving a page which doesn't require authentication, then
                                       // forget the remembered redirectToAfterLogin page
+                                      log.debug("FORGETTING THE redirectToAfterLogin page!");
                                       delete req.session.redirectToAfterLogin;
                                       next();
                                    },
