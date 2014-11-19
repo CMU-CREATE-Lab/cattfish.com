@@ -28,7 +28,7 @@ config.defaults({
                       "defaultChannelSpecs" : { "temperature" : { "prettyName" : "Temperature", "units" : "C" }, "conductivity" : { "prettyName" : "Conductivity", "units" : "&mu;S/cm" }, "battery_voltage" : { "prettyName" : "Battery Voltage", "units" : "V" }}
                    },
                    "cookie" : {
-                      "name" : "sid",
+                      "name" : "cattfish_sid",
                       "secret" : "YOUR_COOKIE_SECRET"
                    },
                    "client" : {
