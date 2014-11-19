@@ -305,7 +305,6 @@ flow.series([
                                    function(req, res, next) {
                                       // if serving a page which doesn't require authentication, then
                                       // forget the remembered redirectToAfterLogin page
-                                      log.debug("FORGETTING THE redirectToAfterLogin page!");
                                       delete req.session.redirectToAfterLogin;
                                       next();
                                    },
