@@ -13,9 +13,14 @@ module.exports = function(UserModel) {
                if (err) {
                   log.error("Error while trying to delete tokens for user [" + userId + "]");
                }
+               else {
+                  log.debug("Tokens destroyed for user [" + userId + "]: " + wasSuccessful);
+               }
             });
          });
       }
+      log.debug("Destroying session for user [" + userId + "]");
+      req.session = null;
       req.logout();
       res.redirect('/');
    });
