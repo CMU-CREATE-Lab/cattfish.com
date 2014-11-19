@@ -1,10 +1,18 @@
+var RunMode = require('run-mode');
+if (!RunMode.isValid()) {
+   console.log("FATAL ERROR: Unknown NODE_ENV '" + process.env.NODE_ENV + "'. Must be one of: " + RunMode.getValidModes());
+   process.exit(1);
+}
+
+var log4js = require('log4js');
+log4js.configure('log4js-config-' + RunMode.get() + '.json');
+var log = log4js.getLogger('cattfish');
+log.info("Run Mode: " + RunMode.get());
+
 // dependencies
 var express = require('express');
 var cors = require('cors');
 var app = express();
-
-var log = require('log4js').getLogger();
-log.info("Environment: " + app.get('env'));
 
 var config = require('./config');
 var expressHandlebars = require('express-handlebars');
@@ -152,7 +160,7 @@ flow.series([
 
                            app.engine('hbs', handlebars.engine);
                            app.set('view engine', '.hbs');
-                           app.set('view cache', app.get('env') === 'production');           // only cache views in production
+                           app.set('view cache', RunMode.isProduction());           // only cache views in production
                            log.info("View cache enabled = " + app.enabled('view cache'));
 
                            // MIDDLEWARE -------------------------------------------------------------------------------------------------
@@ -166,7 +174,7 @@ flow.series([
                            app.use(compress());                // enables gzip compression
                            app.use(express.static(path.join(__dirname, 'public')));          // static file serving
                            app.use(requestLogger('dev'));      // request logging
-                           app.use(bodyParser.urlencoded({ extended : true }));     // form parsing
+                           app.use(bodyParser.urlencoded({extended : true}));     // form parsing
                            app.use(bodyParser.json());         // json body parsing
                            app.use(function(error, req, res, next) { // function MUST have arity 4 here!
                               // catch invalid JSON error (found at http://stackoverflow.com/a/15819808/703200)
@@ -256,7 +264,7 @@ flow.series([
                            app.use(error_handlers.http404);
 
                            // dev and prod should handle errors differently: e.g. don't show stacktraces in prod
-                           app.use((app.get('env') === 'development') ? error_handlers.development : error_handlers.production);
+                           app.use(RunMode.isProduction() ? error_handlers.prod : error_handlers.dev);
 
                            // ------------------------------------------------------------------------------------------------------------
 

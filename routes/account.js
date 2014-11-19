@@ -2,13 +2,10 @@ var express = require('express');
 var router = express.Router();
 var esdr = require('../lib/esdr');
 
-var log = require('log4js').getLogger();
+var log = require('log4js').getLogger('cattfish:routes:account');
 
 router.get('/',
            function(req, res, next) {
-              log.debug("ACCOUNT!");
-              log.debug("res.locals.user=" + JSON.stringify(res.locals.user, null, 3));
-              log.debug("req.user=" + JSON.stringify(req.user, null, 3));
               esdr.getUserInfo(req.user.esdrUserId, req.user.accessToken, function(err, userInfoResponse) {
                  // TODO: What to do if there's an error?
                  if (err) {

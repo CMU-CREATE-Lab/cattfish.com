@@ -5,7 +5,7 @@ var DatabaseHelper = require("./DatabaseHelper");
 var Users = require('./Users.js');
 
 var config = require('../config');
-var log = require('log4js').getLogger();
+var log = require('log4js').getLogger('cattfish:models:database');
 
 module.exports = {
    create : function(callback) {

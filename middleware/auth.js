@@ -2,7 +2,7 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var BearerStrategy = require('passport-http-bearer').Strategy;
 var esdr = require('../lib/esdr');
-var log = require('log4js').getLogger();
+var log = require('log4js').getLogger('cattfish:middleware:auth');
 
 module.exports = function(UserModel) {
 

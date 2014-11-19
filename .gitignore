@@ -3,7 +3,7 @@
 node_modules
 out
 
-config-production.json
+config-prod.json
 
 upload-client
 etc/psd

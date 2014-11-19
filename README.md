@@ -29,14 +29,21 @@ Setup
 Run
 ===
 
-To run the server in development mode, do:
+To run the server in development mode, do any of the following:
 
     npm start
+    NODE_ENV=dev npm start
+    NODE_ENV=development npm start
     
 To run the server in test mode, do:
 
     NODE_ENV=test npm start
-    
+
+To run the server in production mode, do either of the following:
+
+    NODE_ENV=prod npm start
+    NODE_ENV=production npm start
+
 Development
 ===========
 To generate the CSS from the SCSS template, do:

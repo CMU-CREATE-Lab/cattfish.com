@@ -1,8 +1,9 @@
 var config = require('nconf');
-var log = require('log4js').getLogger();
+var path = require('path');
+var log = require('log4js').getLogger('cattfish:config');
+var RunMode = require('run-mode');
 
-var nodeEnvironment = process.env.NODE_ENV || "development";
-var configFile = './config-' + nodeEnvironment + '.json';
+var configFile = './config-' + RunMode.get() + '.json';
 log.info("Using config file: " + configFile);
 
 config.argv().env().file({ file : configFile });
@@ -12,6 +13,7 @@ config.defaults({
                       "url" : "http://localhost:3333",
                       "port" : 3333
                    },
+                   "httpAccessLogDirectory" : path.join(__dirname, './logs/access.log'),
                    "esdr" : {
                       "rootUrl" : "http://localhost:3000",
                       "apiRootUrl" : "http://localhost:3000/api/v1",

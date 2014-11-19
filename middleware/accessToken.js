@@ -1,4 +1,4 @@
-var log = require('log4js').getLogger();
+var log = require('log4js').getLogger('cattfish:middleware:accesstoken');
 
 module.exports.refreshAccessToken = function(UserModel) {
    return function(req, res, next) {

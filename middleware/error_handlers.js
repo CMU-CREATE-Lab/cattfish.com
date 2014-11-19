@@ -1,41 +1,72 @@
 var httpStatus = require('http-status');
-var log = require('log4js').getLogger();
+var S = require('string');
+var log = require('log4js').getLogger('cattfish:middleware:error_handlers');
 
-var getFormatObject = function(res, statusCode, message) {
-   return {
-      "text/html" : function() {
-         res.render('error', {layout : "error-layout", title : "HTTP " + statusCode, message : message});
-      },
-      "text/plain" : function() {
-         res.send("Error " + statusCode + ": " + message + "\n");
-      },
-      "application/json" : function() {
-         res.send({ status : statusCode, message : message });
-      },
-      "application/xml" : function() {
-         res.end("<error><status>" + statusCode + "</status><message>" + message + "</message></error>\n");
-      }
-   };
+var isApi = function(req) {
+   return (S(req.url).startsWith("/api/")
+           ||
+           (
+           req.method.toLowerCase() == "post" &&
+           S(req.url).startsWith("/login")
+           )
+           ||
+           (
+           req.method.toLowerCase() == "get" &&
+           S(req.url).startsWith("/access-token")
+           )
+           ||
+           (
+           (req.method.toLowerCase() == "put" || req.method.toLowerCase() == "post") &&
+           S(req.url).startsWith("/password-reset")
+           )
+   );
+};
+
+var handleError = function(req, res, message, data, statusCode) {
+   if (isApi(req)) {
+      res.jsendServerError(message, data, statusCode);
+   }
+   else {
+      res.status(statusCode).render('error', {
+         layout : "error-layout",
+         title : "HTTP " + statusCode,
+         message : message
+      });
+   }
 };
 
 module.exports = {
-   http404 : function(req, res) {
-      log.info("In 404 error handler!");
+   http404 : function(req, res, next) {
+      log.error("In 404 error handler: " + req.url + " AND METHOD=" + req.method);
+
+      var message = "Resource not found";
       var statusCode = httpStatus.NOT_FOUND;
-      res.status(statusCode).format(getFormatObject(res, statusCode, "Resource not found"));
+
+      if (isApi(req)) {
+         res.jsendClientError(message, {url : req.url}, statusCode);
+      }
+      else {
+         res.status(statusCode).render('error', {
+            layout : "error-layout",
+            title : "HTTP " + statusCode,
+            message : message
+         });
+      }
    },
 
-   development : function(err, req, res, next) {
-      log.debug("In DEV error handler...");
-      log.error(err);
+   dev : function(err, req, res, next) {
+      log.debug("In DEV error handler: " + JSON.stringify(err, null, 3));
+      var message = err.message;
       var statusCode = err.status || httpStatus.INTERNAL_SERVER_ERROR;
-      res.status(statusCode).format(getFormatObject(res, statusCode, err.message));
+
+      handleError(req, res, message, err, statusCode);
    },
 
-   production : function(err, req, res, next) {
-      log.debug("In PROD error handler!" + err);
-      log.error(err);
+   prod : function(err, req, res, next) {
+      log.debug("In PROD error handler: " + JSON.stringify(err, null, 3));
+      var message = "Sorry, an unexpected error occurred";
       var statusCode = err.status || httpStatus.INTERNAL_SERVER_ERROR;
-      res.status(statusCode).format(getFormatObject(res, statusCode, "Sorry, an unexpected error occurred."));
+
+      handleError(req, res, message, null, statusCode);
    }
 };

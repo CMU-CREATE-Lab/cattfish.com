@@ -4,7 +4,7 @@ var ValidationError = require('../lib/errors').ValidationError;
 var RemoteError = require('../lib/errors').RemoteError;
 var DuplicateRecordError = require('../lib/errors').DuplicateRecordError;
 var httpStatus = require('http-status');
-var log = require('log4js').getLogger();
+var log = require('log4js').getLogger('cattfish:models:users');
 
 var CREATE_TABLE_QUERY = " CREATE TABLE IF NOT EXISTS `Users` ( " +
                          "`id` bigint(20) NOT NULL AUTO_INCREMENT, " +

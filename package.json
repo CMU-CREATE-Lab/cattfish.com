@@ -40,7 +40,9 @@
     "passport": "^0.2.1",
     "passport-http-bearer": "^1.0.1",
     "passport-local": "^1.0.0",
+    "run-mode": "^1.0.1",
     "serve-favicon": "^2.1.4",
+    "string": "^2.2.0",
     "superagent": "^0.18.2"
   },
   "devDependencies": {

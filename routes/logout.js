@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var log = require('log4js').getLogger();
+var log = require('log4js').getLogger('cattfish:routes:logout');
 
 module.exports = function(UserModel) {
 

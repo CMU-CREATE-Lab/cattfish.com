@@ -10,7 +10,7 @@ var ValidationError = require('../lib/errors').ValidationError;
 var RemoteError = require('../lib/errors').RemoteError;
 var DuplicateRecordError = require('../lib/errors').DuplicateRecordError;
 var httpStatus = require('http-status');
-var log = require('log4js').getLogger();
+var log = require('log4js').getLogger('cattfish:test');
 
 describe("cattfish.com", function() {
    var url = config.get("server:url");

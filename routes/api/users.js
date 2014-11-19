@@ -4,7 +4,7 @@ var config = require('../../config');
 var ValidationError = require('../../lib/errors').ValidationError;
 var DuplicateRecordError = require('../../lib/errors').DuplicateRecordError;
 var httpStatus = require('http-status');
-var log = require('log4js').getLogger();
+var log = require('log4js').getLogger('cattfish:routes:api:users');
 
 module.exports = function(UserModel) {
 

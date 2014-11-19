@@ -4,7 +4,7 @@ var config = require('../../config');
 var esdr = require('../../lib/esdr');
 var RemoteError = require('../../lib/errors').RemoteError;
 var httpStatus = require('http-status');
-var log = require('log4js').getLogger();
+var log = require('log4js').getLogger('cattfish:routes:api:user-verification');
 
 router.post('/',
             function(req, res, next) {

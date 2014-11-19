@@ -3,7 +3,7 @@ var router = express.Router();
 var passport = require('passport');
 var httpStatus = require('http-status');
 var computeTimeToRefreshAccessToken = require('../middleware/accessToken').computeTimeToRefreshAccessToken;
-var log = require('log4js').getLogger();
+var log = require('log4js').getLogger('cattfish:routes:login');
 
 router.get('/', function(req, res) {
    res.render('login', { title : "CATTfish: Login", section : "login"});
