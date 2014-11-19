@@ -3,8 +3,8 @@ To run these tests, do the following first:
 1) In mysql, execute the following to create the test database and cattfish user:
 
       CREATE DATABASE IF NOT EXISTS cattfish_test;
-      GRANT ALL PRIVILEGES ON cattfish_test.* To 'cattfish'@'localhost' IDENTIFIED BY 'password';
-      GRANT SELECT,INSERT,UPDATE,DELETE,CREATE ON cattfish_test.* TO 'cattfish'@'localhost';
+      GRANT ALL PRIVILEGES ON cattfish_test.* To 'cattfish_test'@'localhost' IDENTIFIED BY 'password';
+      GRANT SELECT,INSERT,UPDATE,DELETE,CREATE ON cattfish_test.* TO 'cattfish_test'@'localhost';
 
 2) Run the ESDR server in test mode, like this:
 

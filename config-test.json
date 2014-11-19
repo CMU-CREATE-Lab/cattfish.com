@@ -27,7 +27,7 @@
    "database" : {
       "host" : "localhost",
       "database" : "cattfish_test",
-      "username" : "cattfish",
+      "username" : "cattfish_test",
       "password" : "password",
       "pool" : {
          "connectionLimit" : 10
