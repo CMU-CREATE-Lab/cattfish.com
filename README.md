@@ -62,8 +62,8 @@ Development
 ===========
 To generate the CSS from the SCSS template, do:
 
-   npm run-script gen-css
+    npm run-script gen-css
 
 To compile the handlebars templates, do:
 
-   npm run-script gen-handlebars
+    npm run-script gen-handlebars
