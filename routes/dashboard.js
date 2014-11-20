@@ -8,7 +8,8 @@ router.get('/',
                          {
                             title : "CATTfish: Dashboard",
                             section : "dashboard",
-                            googleMapsApiKey : config.get("maps:apiKey")
+                            googleMapsApiKey : config.get("maps:apiKey"),
+                            cattfish_product_id : config.get("product:id")
                          });
            });
 

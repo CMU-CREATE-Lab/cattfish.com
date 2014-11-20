@@ -3,6 +3,7 @@
 <script src="{{esdrUrl}}/lib/bodytrack-grapher/org/bodytrack/grapher/MultiplotGrapher.js" type="text/javascript"></script>
 <script language="JavaScript" type="text/javascript">
    var esdr = null;
+   var PRODUCT_ID = '{{cattfish_product_id}}';
 
    var feeds = null;
    var selectedFeed = null;
@@ -21,7 +22,7 @@
 
          esdr = new org.cmucreatelab.esdr.ESDR(token);
 
-         esdr.feeds.find("?where=userId={{user.esdrUserId}}&orderBy=-lastUpload", // TODO: limit selected fields!
+         esdr.feeds.find("?where=userId={{user.esdrUserId}},productId="+PRODUCT_ID+"&orderBy=-lastUpload", // TODO: limit selected fields!
                          {
                             success : function(foundFeeds) {
                                feeds = foundFeeds.rows;
