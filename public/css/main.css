@@ -290,8 +290,8 @@ input[type="radio"], input[type="checkbox"] {
   #about_container .textlogo {
     position: relative;
     float: left;
-    margin-right: 19px;
-    width: 200px; }
+    margin-right: 20px;
+    width: 290px; }
     #about_container .textlogo img {
       width: 200px; }
   #about_container .textlogo:last-of-type {
