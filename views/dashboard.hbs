@@ -152,7 +152,7 @@
          grapher.addPlot(channelId,
                          theChannel,
                          function(level, offset, successCallback) {
-                            esdr.tiles.get(selectedFeed.apiKeyReadOnly, channelId, level, offset, {
+                            esdr.tiles.get(selectedFeed.id, selectedFeed.apiKeyReadOnly, channelId, level, offset, {
                                success : function(json) {
                                   successCallback(JSON.stringify(json));
                                },
