@@ -257,7 +257,8 @@ input[type="radio"], input[type="checkbox"] {
     padding-right: 15px;
     width: 309px; }
     #home_page #videos .video_thumbnail img {
-      margin-bottom: 10px; }
+      margin-bottom: 10px;
+      width: 309px; }
   #home_page #what_is {
     text-align: center;
     width: 650px; }
