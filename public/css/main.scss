@@ -117,6 +117,32 @@ a:hover, a:focus {
    margin-bottom: 20px;
 }
 
+.page_with_submenu_container {
+   position: relative;
+   margin: 0;
+
+   .table_left {
+      position: absolute;
+      width: 130px;
+      padding: 9px 0 0 30px;
+
+      .left_margin_menu_item {
+         margin-bottom: 20px
+      }
+   }
+
+   .table_right {
+      position: relative;
+      width: auto;
+      margin-left: $BODY_HORIZONTAL_MARGIN_WIDTH - 30px;
+      margin-right: $BODY_HORIZONTAL_MARGIN_WIDTH;
+      padding-left: 30px;
+      padding-bottom: 30px;
+      border-left: 1px solid #b0bac0;
+      min-height: 300px;
+   }
+}
+
 // =====================================================================================================================
 // Rotations
 // =====================================================================================================================
@@ -405,31 +431,6 @@ input[type="radio"], input[type="checkbox"] {
 // =====================================================================================================================
 // About Pages
 // =====================================================================================================================
-.page_with_submenu_container {
-   position: relative;
-   margin: 0;
-
-   .table_left {
-      position: absolute;
-      width: 130px;
-      padding: 9px 0 0 30px;
-
-      .left_margin_menu_item {
-         margin-bottom: 20px
-      }
-   }
-
-   .table_right {
-      position: relative;
-      width: auto;
-      margin-left: $BODY_HORIZONTAL_MARGIN_WIDTH - 30px;
-      margin-right: $BODY_HORIZONTAL_MARGIN_WIDTH;
-      padding-left: 30px;
-      padding-bottom: 30px;
-      border-left: 1px solid #b0bac0;
-      min-height: 300px;
-   }
-}
 
 .about_pages {
    .textlogo {
@@ -452,6 +453,23 @@ input[type="radio"], input[type="checkbox"] {
       }
    }
 }
+
+// =====================================================================================================================
+// Terms & Conditions Pages
+// =====================================================================================================================
+.terms_pages {
+   .question {
+      font-weight: bold;
+   }
+   .underline {
+      text-decoration: underline;
+   }
+   .underline_and_italics {
+      text-decoration: underline;
+      font-style: italic;
+   }
+}
+
 // =====================================================================================================================
 // Icons
 // =====================================================================================================================
@@ -529,7 +547,7 @@ input[type="radio"], input[type="checkbox"] {
 
       .account_cell {
          display: table-cell;
-         padding-right:5px;
+         padding-right: 5px;
       }
    }
 }

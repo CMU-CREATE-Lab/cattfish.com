@@ -90,6 +90,25 @@ a:hover, a:focus {
   font-size: normal !important;
   margin-bottom: 20px; }
 
+.page_with_submenu_container {
+  position: relative;
+  margin: 0; }
+  .page_with_submenu_container .table_left {
+    position: absolute;
+    width: 130px;
+    padding: 9px 0 0 30px; }
+    .page_with_submenu_container .table_left .left_margin_menu_item {
+      margin-bottom: 20px; }
+  .page_with_submenu_container .table_right {
+    position: relative;
+    width: auto;
+    margin-left: 160px;
+    margin-right: 190px;
+    padding-left: 30px;
+    padding-bottom: 30px;
+    border-left: 1px solid #b0bac0;
+    min-height: 300px; }
+
 .rotate_90 {
   transform: rotate(90deg);
   -ms-transform: rotate(90deg);
@@ -269,25 +288,6 @@ input[type="radio"], input[type="checkbox"] {
       margin-bottom: 10px;
       width: 309px; }
 
-.page_with_submenu_container {
-  position: relative;
-  margin: 0; }
-  .page_with_submenu_container .table_left {
-    position: absolute;
-    width: 130px;
-    padding: 9px 0 0 30px; }
-    .page_with_submenu_container .table_left .left_margin_menu_item {
-      margin-bottom: 20px; }
-  .page_with_submenu_container .table_right {
-    position: relative;
-    width: auto;
-    margin-left: 160px;
-    margin-right: 190px;
-    padding-left: 30px;
-    padding-bottom: 30px;
-    border-left: 1px solid #b0bac0;
-    min-height: 300px; }
-
 .about_pages .textlogo {
   position: relative;
   float: left;
@@ -299,6 +299,14 @@ input[type="radio"], input[type="checkbox"] {
   margin-right: 0; }
 .about_pages div.images img.right {
   float: right; }
+
+.terms_pages .question {
+  font-weight: bold; }
+.terms_pages .underline {
+  text-decoration: underline; }
+.terms_pages .underline_and_italics {
+  text-decoration: underline;
+  font-style: italic; }
 
 .checkmark_icon_container {
   width: 24px;

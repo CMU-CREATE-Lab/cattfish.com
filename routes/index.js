@@ -11,6 +11,8 @@ router.get('/', function(req, res) {
    }
 });
 
+//----------------------------------------------------------------------------------------------------------------------
+
 router.get('/about', function(req, res) {
    res.render('about', { title : "CATTfish: About", section : "about"});
 });
@@ -23,9 +25,35 @@ router.get('/about/partners', function(req, res) {
    res.render('partners', { title : "CATTfish: Partners", section : "about:partners"});
 });
 
+//----------------------------------------------------------------------------------------------------------------------
+
 router.get('/contact', function(req, res) {
    res.render('contact', { title : "CATTfish: Contact", section : "contact"});
 });
+
+//----------------------------------------------------------------------------------------------------------------------
+
+router.get('/terms', function(req, res) {
+   res.render('terms/terms-of-service', { title : "CATTfish: Terms of Service", section : "terms-of-service"});
+});
+
+router.get('/terms/eula', function(req, res) {
+   res.render('terms/eula', { title : "CATTfish: End User License Agreement", section : "terms:eula"});
+});
+
+router.get('/terms/privacy-statement', function(req, res) {
+   res.render('terms/privacy-statement', { title : "CATTfish: Privacy Statement", section : "terms:privacy-statement"});
+});
+
+router.get('/terms/sales-terms', function(req, res) {
+   res.render('terms/sales-terms', { title : "CATTfish: Sales Terms", section : "terms:sales-terms"});
+});
+
+router.get('/terms/privacy-policy', function(req, res) {
+   res.render('terms/privacy-policy', { title : "CATTfish: Privacy Policy", section : "terms:privacy-policy"});
+});
+
+//----------------------------------------------------------------------------------------------------------------------
 
 router.get('/data', function(req, res) {
    res.render('data', { title : "CATTfish: Data", section : "data"});
