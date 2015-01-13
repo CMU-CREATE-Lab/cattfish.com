@@ -11,8 +11,7 @@ body {
 
 @media (min-width: 1170px) {
   .main_container {
-    width: 1020px; }
- }
+    width: 1020px; } }
 
 .header_container {
   background: rgba(255, 255, 255, 0.8);
