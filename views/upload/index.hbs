@@ -1,4 +1,6 @@
 <script language="JavaScript" type="text/javascript">
+   var PRODUCT_ID = '{{cattfish_product_id}}';
+
    var accessToken = null;
    var esdr = null;
    var cattfish = null;
@@ -7,17 +9,86 @@
    var deviceId = null;
    var feeds = null;
    var selectedFeed = null;
-   var PRODUCT_ID = '{{cattfish_product_id}}';
+
+   var isRequestingDeletion = false;
+   var deleteDataTimeoutHandle = null;
+
+   var messageEventHandlers = {
+      'device-data-response' : function(source, data) {
+         if (data && data.device && data.data) {
+            cattfish = data;
+            prepareForUpload();
+         }
+         else {
+            showPanel('no_data_available_panel')
+         }
+      },
+
+      'erase-device-response' : handleEraseDeviceResponse
+   };
 
    window.addEventListener("message",
                            function(event) {
-                              console.log("###: Child got a message event from origin [" + event.origin + "]");
-                              if (event.data && event.data.device && event.data.data) {
-                                 cattfish = event.data;
-                                 doUpload();
+                              // handle the event
+                              if (event.data && event.data.eventType) {
+                                 var eventHandler = messageEventHandlers[event.data.eventType];
+                                 if (typeof eventHandler === 'function') {
+                                    eventHandler(event.source, event.data.data);
+                                 }
+                                 else {
+                                    console.log("Invalid event handler [" + event.data.eventType + "]");
+                                 }
+                              }
+                              else {
+                                 console.log("Unexpected event format");
                               }
                            },
                            false);
+
+   function sendMessage(eventType, data) {
+      window.top.postMessage({ eventType : eventType, data : data }, '*');
+   }
+
+   function sendDeleteRequest() {
+      $("#deletion_status").text("Please wait...");
+      showPanel('delete_data_panel');
+
+      // first set a 1 second timer that will flag a failure. We need this for the case where a user ejects the CATTfish
+      // before sending the deletion request.  In that case, the loadScript() call to read DELETE.JS will fail with an
+      // (uncatchable) net::ERR_FILE_NOT_FOUND error.  Since we can't catch it, we just have to rely on timing. If 1
+      // second elapses between when we make the request to erase the device and when this timeout triggers, then assume
+      // that there was a failure and just call handleEraseDeviceResponse and give it null data.
+      //
+      // On the other hand, if the erase device request succeeds, then handleEraseDeviceResponse() will get called
+      // before this timeout, and handleEraseDeviceResponse() will clear it, ensuring that only the successful call
+      // to handleEraseDeviceResponse() will be executed.
+      deleteDataTimeoutHandle = setTimeout(function() {
+         isRequestingDeletion = false;
+         handleEraseDeviceResponse(null, null);
+      }, 1000);
+
+      // tell the parent that I'm ready
+      sendMessage('erase-device-request');
+
+      return false;
+   }
+
+   function handleEraseDeviceResponse(source, data) {
+      var deletionStatusElement = $("#deletion_status");
+
+      // sendDeleteRequest() for details about this timeout
+      if (deleteDataTimeoutHandle) {
+         window.clearTimeout(deleteDataTimeoutHandle);
+         deleteDataTimeoutHandle = null;
+      }
+
+      if (data && data['wasDeleteSuccessful']) {
+         deletionStatusElement.text("OK, the CATTfish will delete its data after you eject it from your computer.");
+      }
+      else {
+         deletionStatusElement.text("Sorry, an error occurred while communicating with your CATTfish device. Please try again later.");
+      }
+   }
 
    $(document).ready(function() {
       accessToken = new com.cattfish.AccessToken();
@@ -29,15 +100,14 @@
             console.log("Done getting the token: " + token);
 
             // tell the parent that I'm ready
-            window.top.postMessage({isLoaded : true}, '*');
-
+            sendMessage('device-data-request');
          });
       }
    });
 
    function initializeMap() {
       var mapOptions = {
-         center : { lat : 36.81435205714916, lng : -93.35445347656253},
+         center : { lat : 36.81435205714916, lng : -93.35445347656253 },
          zoom : 3,
          streetViewControl : false,
          overviewMapControl : false
@@ -67,7 +137,7 @@
       }
    }
 
-   function doUpload() {
+   function prepareForUpload() {
       if (cattfish) {
          if (accessToken.get() == null) {
             console.log("Need login info!");
@@ -180,17 +250,14 @@
    }
 
    function getFeeds() {
-      console.log("Finding feeds for device ID [" + deviceId + "]");
       feeds = null;
       esdr.feeds.find("?where=deviceId=" + deviceId + "&orderBy=-lastUpload", // TODO: limit selected fields!
                       {
                          success : function(foundFeeds) {
                             feeds = foundFeeds.rows;
                             if (feeds.length > 0) {
-                               console.log("Found these feeds:");
                                var feedListItemTemplate = Handlebars.templates['feed_list_item'];
                                feeds.forEach(function(feed) {
-                                  console.log(feed);
                                   feed.lastUploadFormatted = (feed.minTimeSecs == null || feed.maxTimeSecs == null) ? "never" : new Date(feed.lastUpload).toLocaleDateString() + " at " + new Date(feed.lastUpload).toLocaleTimeString();
                                   var feedElement = $(feedListItemTemplate(feed));
                                   $("#existing_feeds").append(feedElement);
@@ -220,7 +287,7 @@
       console.log("in handleLoginSuccess(): got access token: " + loginResult.accessToken);
       $(".upload_panel").hide();
       accessToken.set(loginResult.accessToken);
-      doUpload();
+      prepareForUpload();
    }
 
    function handleLoginUnauthorized(messages) {
@@ -240,8 +307,6 @@
    }
 
    function uploadToFeed(targetFeed) {
-      console.log("Woohoo, about to upload to feed: " + JSON.stringify(targetFeed, null, 3));
-
       esdr.feeds.upload(targetFeed.apiKey,
                         {
                            channel_names : cattfish.data.fields,
@@ -303,7 +368,6 @@
    }
 
    function showChooseFeedPanel() {
-      console.log("In showChooseFeedPanel!");
       $("#choose_feed_panel");
 
       initializeMap();
@@ -362,7 +426,7 @@
                                                      }
                                                   },
                                                   errorHandler,
-                                                  {timeout : 8000});
+                                                  { timeout : 8000 });
       }
       return false;
    }
@@ -508,7 +572,31 @@
    </div>
    <div id="upload_complete_panel" class="content_container upload_panel">
       <div class="page_instructions">
-         Success! Your data is now ready to <a href="/dashboard" target="_top">view</a>.
+         <p>Success! Your data samples have finished uploading.</p>
+         <p>
+            Would you like to erase the data from your CATTfish? If you choose Yes, the CATTfish device will erase its
+            data after you eject it from your computer. Data which you have uploaded to cattfish.com will not be affected.
+         </p>
+         <div style="float:right">
+            <a href="/dashboard" target="_top">No, just view my data on cattfish.com</a>
+         </div>
+         <div>
+            <a href="javascript:sendDeleteRequest();">Yes, erase the data from my CATTfish</a>
+         </div>
+      </div>
+   </div>
+   <div id="delete_data_panel" class="content_container upload_panel">
+      <div class="page_instructions">
+         <div id="deletion_status"></div>
+         <div>
+            <p><a href="/dashboard" target="_top">View my data on cattfish.com</a></p>
+         </div>
+      </div>
+   </div>
+   <div id="no_data_available_panel" class="content_container upload_panel">
+      <div class="page_instructions">
+         <p>Your CATTfish has no new data to upload.</p>
+         <p>You can <a href="/dashboard" target="_top">view your previously-uploaded data</a>.</p>
       </div>
    </div>
 </div>

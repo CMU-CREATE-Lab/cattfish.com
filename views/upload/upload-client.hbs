@@ -47,7 +47,7 @@ else {
 
       var getDecimalNumberParts = function(num, expectedLengthOfMantissa) {
          num = String(num);   // make sure it's a string
-         var parts = {characteristic : 0, mantissa : 0};
+         var parts = { characteristic : 0, mantissa : 0 };
 
          if (num.indexOf('.') >= 0) {
             parts.characteristic = parseInt(num.substring(0, num.indexOf('.')));
@@ -136,22 +136,83 @@ else {
 
 var device = null;
 
+var CATTFISH_URL = "{{{cattfishUrl}}}";
+
+function loadScript(path, callback) {
+   try {
+      var script = document.createElement('script');
+      document.head.appendChild(script);
+      script.onload = callback;
+      script.src = path;
+   }
+   catch (e) {
+      console.log("Exception caught while trying to load the script [" + path + "]: " + e);
+   }
+}
+
+function sendMessage(source, eventType, data) {
+   source.postMessage({ eventType : eventType, data : data }, CATTFISH_URL);
+}
+
+var messageEventHandlers = {
+   "device-data-request" : function(source, data) {
+      sendMessage(source, 'device-data-response', (device == null ? null : device.toObj()));
+   },
+
+   "erase-device-request" : function(source, data) {
+      loadScript("DELETE.JS", function() {
+         if (typeof window['del1'] !== 'undefined') {
+            if (window['del1']) {
+               loadScript("CHECK.JS", function() {
+                  if (typeof window['del2'] !== 'undefined') {
+                     if (window['del2']) {
+                        sendMessage(source, 'erase-device-response', { wasDeleteSuccessful : true });
+                     }
+                     else {
+                        sendMessage(source, 'erase-device-response', {
+                           wasDeleteSuccessful : false,
+                           reason : "del2 is false"
+                        });
+                     }
+                  }
+                  else {
+                     sendMessage(source, 'erase-device-response', {
+                        wasDeleteSuccessful : false,
+                        reason : "del2 is undefined"
+                     });
+                  }
+               });
+            }
+            else {
+               sendMessage(source, 'erase-device-response', { wasDeleteSuccessful : false, reason : "del1 is false" });
+            }
+         }
+         else {
+            sendMessage(source, 'erase-device-response', { wasDeleteSuccessful : false, reason : "del1 is undefined" });
+         }
+      });
+   }
+};
+
 window.addEventListener("message",
                         function(event) {
-                           if (event.origin.indexOf("{{{cattfishUrl}}}") != 0) {
+                           if (event.origin.indexOf(CATTFISH_URL) != 0) {
                               console.log("Ignoring message from unexpected origin [" + event.origin + "]");
                               return;
                            }
 
-                           // if the framed content is loaded, then send it the device data
-                           if (device) {
-                              if (event.data && event.data.isLoaded) {
-                                 event.source.postMessage(device.toObj(), "{{{cattfishUrl}}}")
+                           // handle the event
+                           if (event.data && event.data.eventType) {
+                              var eventHandler = messageEventHandlers[event.data.eventType];
+                              if (typeof eventHandler === 'function') {
+                                 eventHandler(event.source, event.data.data);
+                              }
+                              else {
+                                 console.log("Invalid event handler [" + event.data.eventType + "]");
                               }
                            }
                            else {
-                              // TODO
-                              alert("No data!");
+                              console.log("Unexpected event format");
                            }
                         },
                         false);
