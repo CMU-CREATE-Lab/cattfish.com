@@ -320,6 +320,40 @@ input[type="radio"], input[type="checkbox"] {
   background: transparent url("../images/checkmark_white.png") no-repeat 0 0;
   background-size: 24px 19px; }
 
+#dashboard {
+  background: rgba(255, 255, 255, 0.8);
+  margin: 0 auto 40px auto;
+  padding: 70px 0 70px 0;
+  width: 1020px; }
+  #dashboard #menu_panel {
+    position: absolute;
+    width: 180px;
+    margin-top: 33px;
+    padding: 5px;
+    font-size: 12px; }
+    #dashboard #menu_panel .title {
+      font-size: 14px;
+      font-weight: bold; }
+    #dashboard #menu_panel #devices_and_feeds {
+      overflow-y: scroll; }
+      #dashboard #menu_panel #devices_and_feeds .device_and_feeds {
+        margin-top: 5px; }
+        #dashboard #menu_panel #devices_and_feeds .device_and_feeds .device {
+          font-weight: bold; }
+        #dashboard #menu_panel #devices_and_feeds .device_and_feeds .feed {
+          white-space: nowrap;
+          overflow: hidden; }
+          #dashboard #menu_panel #devices_and_feeds .device_and_feeds .feed label {
+            margin-left: 3px; }
+  #dashboard #content_area {
+    position: relative;
+    margin-left: 190px; }
+    #dashboard #content_area #map_area {
+      margin-top: 10px;
+      border: 1px solid black;
+      width: 809px;
+      height: 400px; }
+
 .device_list .device_list_item {
   border: 1px solid #1c1c1e;
   border-radius: 3px;

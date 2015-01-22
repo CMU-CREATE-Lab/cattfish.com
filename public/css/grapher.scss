@@ -1,3 +1,5 @@
+$LINK_COLOR: #428bca;
+
 .date_axis {
    height: 42px;
    z-index: 2;
@@ -16,4 +18,42 @@
    text-align: center;
    font-size: 8pt;
    height: auto;
+}
+
+#channel_switcher_panel {
+   font-size: 12px;
+   float: left;
+}
+
+.channel_link {
+   display: inline-block;
+   margin-right: 20px;
+
+   .selected {
+      cursor: default;
+      font-weight: bold;
+   }
+
+   .unselected {
+      cursor: pointer;
+      color: $LINK_COLOR;
+   }
+
+   a {
+      text-decoration: none;
+   }
+}
+
+#value_and_time {
+   display: inline-block;
+   text-align: left;
+   font-size: 12px;
+   float:left;
+   margin-right: 20px;
+}
+
+#autoScaleLock {
+   float: right;
+   font-size: 12px;
+   margin-right: 5px;
 }

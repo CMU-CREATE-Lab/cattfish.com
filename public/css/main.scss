@@ -457,6 +457,7 @@ input[type="radio"], input[type="checkbox"] {
 // =====================================================================================================================
 // Terms & Conditions Pages
 // =====================================================================================================================
+
 .terms_pages {
    .question {
       font-weight: bold;
@@ -486,6 +487,66 @@ input[type="radio"], input[type="checkbox"] {
    height: 19px;
    background: transparent url("../images/checkmark_white.png") no-repeat 0 0;
    background-size: 24px 19px;
+}
+
+// =====================================================================================================================
+// Dashboard
+// =====================================================================================================================
+
+$DASHBOARD_MENU_PANEL_WIDTH: 190px;
+$DASHBOARD_MENU_PANEL_PADDING: 5px;
+#dashboard {
+   background: $TRANSLUCENT_WHITE_BODY_BACKGROUND;
+   margin: 0 auto 40px auto;
+   padding: 70px 0 70px 0;
+   width: $BODY_WIDTH;
+
+   #menu_panel {
+      position: absolute;
+      width: $DASHBOARD_MENU_PANEL_WIDTH - (2*$DASHBOARD_MENU_PANEL_PADDING);
+      margin-top: 33px;
+      padding: $DASHBOARD_MENU_PANEL_PADDING;
+
+      font-size: 12px;
+
+      .title {
+         font-size: 14px;
+         font-weight: bold;
+      }
+
+      #devices_and_feeds {
+         overflow-y: scroll;
+
+         .device_and_feeds {
+            margin-top: 5px;
+
+            .device {
+               font-weight: bold;
+            }
+
+            .feed {
+               white-space: nowrap;
+               overflow: hidden;
+
+               label {
+                  margin-left: 3px;
+               }
+            }
+         }
+      }
+   }
+
+   #content_area {
+      position: relative;
+      margin-left: $DASHBOARD_MENU_PANEL_WIDTH;
+
+      #map_area {
+         margin-top:10px;
+         border: 1px solid black;
+         width: 809px;
+         height: 400px;
+      }
+   }
 }
 
 // =====================================================================================================================
