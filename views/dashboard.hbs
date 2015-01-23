@@ -4,14 +4,17 @@
 <script src="{{esdrUrl}}/lib/bodytrack-grapher/org/bodytrack/grapher/MultiplotGrapher.js" type="text/javascript"></script>
 <script src="/lib/canvas-layer/src/CanvasLayer.js" type="text/javascript"></script>
 <script language="JavaScript" type="text/javascript">
-   var esdr = null;
+   var DEVICE_PIXEL_RATIO = ('devicePixelRatio' in window && window.devicePixelRatio > 1) ? window.devicePixelRatio : 1;
+
    var PRODUCT_ID = '{{cattfish_product_id}}';
 
-   var TIMESTAMP_FORMAT = "YYYY-MM-DD HH:mm";
-   var DEVICE_PIXEL_RATIO = ('devicePixelRatio' in window && window.devicePixelRatio > 1) ? window.devicePixelRatio : 1;
+   var LIGHT_BLUE_COLOR = "#428bca";
+   var DARK_BLUE_COLOR = "#2e68a3";
    var POINT_RADIUS_HAS_DATA = 6;
    var POINT_RADIUS_NO_DATA = 4;
    var TWO_PI = 2 * Math.PI;
+
+   var esdr = null;
 
    var feedsById = {};
    var selectedFeed = null;
@@ -39,9 +42,6 @@
    };
 
    var markers = {};
-   var currentlySelectedMarkers = {};
-   var numCurrentlySelectedMarkers = 0;
-   var MAX_NUM_SELECTED_MARKERS = 1;
 
    var availablePlotColors = ["#990000", "#009900", "#000099", "#999900", "#6600ff"];
    var usedPlotColorsByDeviceId = {};
@@ -58,8 +58,6 @@
          esdr.devices.find("?where=userId={{user.esdrUserId}},productId=" + PRODUCT_ID + "&orderBy=name&fields=id,name",
                            {
                               success : function(foundDevices) {
-                                 // TODO:
-                                 console.log(JSON.stringify(foundDevices, null, 3));
                                  if (foundDevices && foundDevices.rows && foundDevices.rows.length > 0) {
                                     var devices = foundDevices.rows;
                                     // now load all the feeds
@@ -91,32 +89,11 @@
                                                                 $("#devices_and_feeds").append(deviceAndFeedsElement);
                                                              });
 
-                                                             $(".feed_checkbox").click(function(o) {
+                                                             // add the click handler for the checkboxes
+                                                             $(".feed_checkbox").click(function() {
                                                                 var feedId = $(this).val();
-                                                                if ($(this).is(':checked')) {
-                                                                   // uncheck all other feeds
-                                                                   $('.feed_checkbox').prop('checked', false);
-
-                                                                   // check this feed
-                                                                   $(this).prop('checked', true);
-
-                                                                   // remove the current feed from the grapher (if any)
-                                                                   removeFeedFromGrapher(selectedFeed);
-
-                                                                   // update the selected feed
-                                                                   selectedFeed = feedsById[feedId];
-
-                                                                   // update the grapher
-                                                                   addFeedToGrapher(selectedFeed);
-                                                                }
-                                                                else {
-                                                                   selectedFeed = null;
-                                                                   removeFeedFromGrapher(feedsById[feedId]);
-                                                                }
+                                                                setFeedSelected(feedId, $(this).is(':checked'));
                                                              });
-
-                                                             // make sure the selected feed is checked
-                                                             $("#feed_" + selectedFeed.id).prop('checked', true);
 
                                                              initializeMap();
                                                           }
@@ -206,15 +183,8 @@
             function(marker) {
                var id = marker['id'];
 
-               // if the selected marker is already selected, then remove it
-               if (currentlySelectedMarkers.hasOwnProperty(id)) {
-                  setMarkerSelected(id, currentlySelectedMarkers[id], false);
-               }
-               else {
-                  if (numCurrentlySelectedMarkers < MAX_NUM_SELECTED_MARKERS) {
-                     setMarkerSelected(id, marker, true);
-                  }
-               }
+               // if the marker for the selected feed is already selected, then remove it
+               setFeedSelected(id, !(selectedFeed && selectedFeed.id == id));
             },
             function() {
                // nothing to do
@@ -269,7 +239,7 @@
                 imageData.data[1] != 0 ||
                 imageData.data[2] != 0) {
 
-               // iterate over all the points to see which is closest to this pixel (TODO: make this smarter?)
+               // iterate over all the points to see which is closest to this pixel
                var mapBounds = map.getBounds();
                var bestPoint = null;
                var bestDistance = POINT_RADIUS_HAS_DATA;
@@ -328,8 +298,8 @@
    }
 
    function initializeMarkers() {
-      var getMarkerIdForFeed = function(feed){
-         return feed.userId + ".feed_" + feed.id;
+      var getMarkerIdForFeed = function(feed) {
+         return feed.id;
       };
 
       Object.keys(feedsById).forEach(function(feedId) {
@@ -339,8 +309,7 @@
       });
 
       // select the marker corresponding to the currently selected feed
-      var markerIdOfSelectedMarker = getMarkerIdForFeed(selectedFeed);
-      setMarkerSelected(markerIdOfSelectedMarker, markers[markerIdOfSelectedMarker], true);
+      setFeedSelected(selectedFeed.id, true);
    }
 
    function fitMapBoundsToMarkers() {
@@ -401,15 +370,16 @@
    function drawPoint(markerCoords, marker) {
       var isNoData = marker['value'] == null;
       var radius = (isNoData ? POINT_RADIUS_NO_DATA : POINT_RADIUS_HAS_DATA);
-      if (currentlySelectedMarkers.hasOwnProperty(marker['id'])) {
+      if (selectedFeed && selectedFeed.id == marker.id) {
          context.beginPath();
          context.arc(markerCoords.x, markerCoords.y, radius + 1, 0, TWO_PI, false);
          context.lineWidth = 2;
-         context.strokeStyle = '#2e68a3';
+         context.strokeStyle = LIGHT_BLUE_COLOR;
          context.stroke();
       }
 
-      drawCircle(markerCoords, radius, isNoData ? "rgba(10,10,10,0.6)" : getColorForValue(marker['value']));
+      drawCircle(markerCoords, radius, "rgba(10, 10, 10, 0.6)");
+      // TODO: drawCircle(markerCoords, radius, isNoData ? "rgba(10, 10, 10, 0.6)" : getColorForValue(marker['value']));
    }
 
    function drawCircle(centerPoint, radius, color) {
@@ -419,41 +389,13 @@
       context.fill();
    }
 
-   // Add a marker to the map and push to the array.
-   function addMarker(id, location) {
-      markers[id] = {
-         id : id,
-         location : location,
-         worldPoint : mapProjection.fromLatLngToPoint(location),
-         value : null
-      };
-   }
-
-   function setMarkerSelected(id, marker, isSelected) {
-
-      if (isSelected) {
-         currentlySelectedMarkers[id] = marker;
-      }
-      else {
-         delete currentlySelectedMarkers[id];
-      }
-      numCurrentlySelectedMarkers = numCurrentlySelectedMarkers + (isSelected ? 1 : -1);
-
-      renderMarkers();
-
-      // finally, add or remove the channel as appropriate
-      // TODO:
-      // (isSelected) ? loadChannel(id) : removeChannel(id);
-   }
-
-   function getColorForValue(value) {
-      //if (value) {
-      //   return getParticleConcentrationIndex(value)['color'];
-      //}
-      // TODO
-      return "rgba(255,126,0,0.6)";
-   }
-
+   //function getColorForValue(value) {
+   //   if (value) {
+   //      return getParticleConcentrationIndex(value)['color'];
+   //   }
+   //   return "rgba(255, 126, 0, 0.6)";
+   //}
+   //
    //function getParticleConcentrationIndex(value) {
    //   if (value <= PARTICLE_CONCENTRATION_INDEX[0]['max']) {
    //      return PARTICLE_CONCENTRATION_INDEX[0];
@@ -471,9 +413,45 @@
    //   return PARTICLE_CONCENTRATION_INDEX[PARTICLE_CONCENTRATION_INDEX.length - 1];
    //}
 
+   // Add a marker to the map and push to the array.
+   function addMarker(id, location) {
+      markers[id] = {
+         id : id,
+         location : location,
+         worldPoint : mapProjection.fromLatLngToPoint(location),
+         value : null
+      };
+   }
+
+   function setFeedSelected(feedId, isSelected) {
+      var feed = feedsById[feedId];
+
+      // remove the current feed from the grapher (if any)
+      removeFeedFromGrapher(selectedFeed);
+
+      // uncheck all checkboxes
+      $('.feed_checkbox').prop('checked', false);
+
+      if (isSelected) {
+         selectedFeed = feed;
+
+         // check the appropriate checkbox
+         $('#feed_checkbox_' + selectedFeed.id).prop('checked', true);
+
+         // update the grapher
+         addFeedToGrapher(selectedFeed);
+      }
+      else {
+         selectedFeed = null;
+      }
+
+      // update markers
+      renderMarkers();
+   }
+
    function removeFeedFromGrapher(feed) {
       if (feed) {
-         var plotId = "feed_" + feed.id;
+         var plotId = feed.id;
          plotContainer.removePlot(grapher.getPlot(plotId));
          grapher.removePlot(plotId);
 
@@ -508,8 +486,8 @@
             "time_type" : "utc",
             "style" : {
                "styles" : [
-                  { "type" : "line", "lineWidth" : 1, "show" : true, "color" : "#2e68a3" },
-                  { "type" : "circle", radius : 1, "lineWidth" : 1, "show" : true, "color" : "#2e68a3", fill : true }
+                  { "type" : "line", "lineWidth" : 1, "show" : true, "color" : DARK_BLUE_COLOR },
+                  { "type" : "circle", radius : 1, "lineWidth" : 1, "show" : true, "color" : DARK_BLUE_COLOR, fill : true }
                ],
                "highlight" : {
                   "lineWidth" : 1,
@@ -517,7 +495,7 @@
                      {
                         "show" : true,
                         "type" : "lollipop",
-                        "color" : "#000000",
+                        "color" : LIGHT_BLUE_COLOR,
                         "radius" : 0,
                         "lineWidth" : 1,
                         "fill" : false
@@ -527,13 +505,13 @@
                         radius : 3,
                         "lineWidth" : 0.5,
                         "show" : true,
-                        "color" : "#ff0000",
+                        "color" : LIGHT_BLUE_COLOR,
                         fill : false
                      },
                      {
                         "show" : true,
                         "type" : "value",
-                        "fillColor" : "#ff0000",
+                        "fillColor" : LIGHT_BLUE_COLOR,
                         "marginWidth" : 10,
                         "font" : "7pt Helvetica,Arial,Verdana,sans-serif",
                         "verticalOffset" : 7,
@@ -585,7 +563,7 @@
             });
          }
 
-         var plotId = "feed_" + feed.id;
+         var plotId = feed.id;
          grapher.addPlot(plotId,
                          theChannel,
                          function(level, offset, successCallback) {
@@ -615,8 +593,7 @@
                valueAndTimeElement.empty();
             }
             else {
-               //valueAndTimeElement.html(val.valueString + (channelUnits == null ? "" : " " + channelUnits) + " at " + val.dateString);
-               valueAndTimeElement.html(val.dateString);
+               valueAndTimeElement.html(val.valueString + (channelUnits == null ? "" : " " + channelUnits) + " at " + val.dateString);
             }
          });
 
@@ -701,7 +678,8 @@
          <p>Would you like to view the <a href="/data">public data</a> instead?</p>
       </div>
       <div id="has_no_feeds_panel" style="display:none">
-         <p>You have not yet uploaded any data from your CATTfish.  Once you upload<br>some data, you can explore it here.</p>
+         <p>You have not yet uploaded any data from your CATTfish. Once you upload<br>some data, you can explore it here.
+         </p>
          <p>Would you like to view the <a href="/data">public data</a> instead?</p>
       </div>
       <div id="grapher_container" class="noselect" style="display:none">
