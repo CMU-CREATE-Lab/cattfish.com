@@ -52,39 +52,29 @@ flow.series([
                // make sure our client entry exists in ESDR
                function(done) {
                   log.info("Making sure the client exists in ESDR...");
-                  esdr.createClient({
-                                       displayName : config.get("client:displayName"),
-                                       clientName : config.get("client:name"),
-                                       clientSecret : config.get("client:secret"),
-                                       isPublic : config.get("client:isPublic"),
-                                       email : config.get("client:email"),
-                                       verificationUrl : config.get("client:verificationToken:url"),
-                                       resetPasswordUrl : config.get("client:resetPasswordToken:url")
-                                    },
-                                    function(err, result) {
-                                       if (err) {
-                                          if (err instanceof RemoteError && err.data && err.data.code == httpStatus.CONFLICT) {
-                                             log.info("Client already exists in ESDR, no creation necessary.");
-                                             doesClientExist = true;
-                                          }
-                                          else {
-                                             return done(err);
-                                          }
-                                       }
-                                       else {
-                                          if (result.code == httpStatus.CREATED) {
-                                             log.info("Client successfully created in ESDR.");
-                                             doesClientExist = true;
-                                          }
-                                          else {
-                                             var msg = "Unexpected result code from ESDR when creating client: " + result.code;
-                                             log.error(msg);
-                                             return done(new Error(msg));
-                                          }
-                                       }
+                  esdr.findClient(config.get("client:name"),
+                                  function(err, result) {
+                                     if (err) {
+                                        return done(err);
+                                     }
+                                     else {
+                                        if (result.code == httpStatus.OK) {
+                                           if (result.data && result.data.rows && result.data.rows.length == 1) {
+                                              doesClientExist = true;
+                                           }
+                                           else {
+                                              log.error("Client [" + config.get("client:name") + "] not found in ESDR!");
+                                           }
+                                        }
+                                        else {
+                                           var msg = "Unexpected result code from ESDR when finding client: " + result.code;
+                                           log.error(msg);
+                                           return done(new Error(msg));
+                                        }
+                                     }
 
-                                       done();
-                                    });
+                                     done();
+                                  });
                },
 
                // now make sure the product exists in ESDR
