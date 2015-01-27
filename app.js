@@ -79,36 +79,27 @@ flow.series([
 
                // now make sure the product exists in ESDR
                function(done) {
-                  var setProductId = function(productId, callback) {
-                     //store the product ID in the config, so we can use it elsewhere
-                     config.set("product:id", productId);
-                     doesProductExist = true;
-                     callback();
-                  };
                   log.info("Making sure the CATTfish product exists in ESDR...");
-                  esdr.getProductId(config.get("product:name"), function(err, productId) {
-                     if (err) {
-                        if (err instanceof RemoteError && err.data && err.data.code == httpStatus.NOT_FOUND) {
-                           log.info("Product not found in ESDR, attempting to create it...");
-                           esdr.createProduct(config.get("product"),
-                                              function(err, createdProduct) {
-                                                 if (err) {
-                                                    return done(err);
-                                                 }
+                  esdr.getProductId(config.get("product:name"),
+                                    function(err, productId) {
+                                       if (err) {
+                                          if (err instanceof RemoteError && err.data && err.data.code == httpStatus.NOT_FOUND) {
+                                             log.error("Product not found in ESDR!");
+                                          }
+                                          else {
+                                             log.error("Unexpected error while trying to find the product in ESDR: " + JSON.stringify(err, null, 3));
+                                             return done(err);
+                                          }
+                                       }
+                                       else {
+                                          log.info("Product already exists in ESDR, no creation necessary.");
 
-                                                 log.info("Product successfully created in ESDR.");
-                                                 return setProductId(createdProduct.data.id, done);
-                                              });
-                        }
-                        else {
-                           return done(err);
-                        }
-                     }
-                     else {
-                        log.info("Product already exists in ESDR, no creation necessary.");
-                        setProductId(productId, done);
-                     }
-                  });
+                                          //store the product ID in the config, so we can use it elsewhere
+                                          config.set("product:id", productId);
+                                          doesProductExist = true;
+                                       }
+                                       done();
+                                    });
                }
 
             ],

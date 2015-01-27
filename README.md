@@ -40,6 +40,8 @@ Setup
 
         Again, make sure the user and password you specify matches those in `config-prod.json`.
 
+6. If necessary, create the CATTfish client and product in ESDR.  The CATTfish server verifies that they exist upon startup and will fail to start if they aren't found.
+
 Run
 ===
 
