@@ -47,31 +47,13 @@ describe("cattfish.com", function() {
    // make sure the database tables exist and, if so, wipe the tables clean
    before(function(initDone) {
       // make sure the client exists in ESDR
-      esdr.createClient({
-                           displayName : config.get("client:displayName"),
-                           clientName : config.get("client:name"),
-                           clientSecret : config.get("client:secret"),
-                           isPublic : config.get("client:isPublic"),
-                           email : config.get("client:email"),
-                           verificationUrl : config.get("client:verificationToken:url"),
-                           resetPasswordUrl : config.get("client:resetPasswordToken:url")
-                        },
+      esdr.findClient(config.get("client:name"),
                         function(err, result) {
                            if (err) {
-                              if (err instanceof RemoteError && err.data && err.data.code == httpStatus.CONFLICT) {
-                                 log.info("Client already exists in ESDR, no creation necessary.");
-                              }
-                              else {
-                                 throw err;
-                              }
+                              throw new Error("Error occurred while finding the CATTfish client in ESDR: " + JSON.stringify(err, null, 3));
                            }
                            else {
-                              if (result.code == httpStatus.CREATED) {
-                                 log.info("Client created in ESDR.");
-                              }
-                              else {
-                                 throw new Error("Unexpected result code from ESDR when creating client: " + result.code);
-                              }
+                              log.info("The client exists in ESDR.");
                            }
 
                            Database.create(function(err, theDatabase) {

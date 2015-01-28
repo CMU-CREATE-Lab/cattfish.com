@@ -1,5 +1,17 @@
 To run these tests, do the following first:
 
+0) Create the CATTfish OAuth2 client in ESDR with the following values:
+
+   {
+   "displayName" : "CATTfish",
+   "name" : "cattfish.com",
+   "secret" : "fish heads, roly poly fish heads, eat them up, yum!",
+   "email" : "admin@cattfish.com",
+   "isPublic" : true,
+   "resetPasswordToken" : "http://localhost:3334/password-reset/:resetPasswordToken",
+   "verificationToken" : "http://localhost:3334/verification/:verificationToken",
+   }
+
 1) In mysql, execute the following to create the test database and cattfish user:
 
       CREATE DATABASE IF NOT EXISTS cattfish_test;
