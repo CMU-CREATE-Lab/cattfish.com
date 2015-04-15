@@ -354,6 +354,42 @@ input[type="radio"], input[type="checkbox"] {
       width: 809px;
       height: 400px; }
 
+#public_data #grapher_bottom_toolbar {
+  margin-top: 5px; }
+#public_data #map_area {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  border: 1px solid black;
+  width: 619px;
+  height: 300px;
+  display: none; }
+#public_data #time_range_switcher_panel, #public_data #time_range_switcher_panel_placeholder {
+  display: none;
+  font-size: 12px;
+  margin-bottom: 5px; }
+#public_data #no_geolocation {
+  position: absolute;
+  width: 350px;
+  text-align: center;
+  padding: 2px;
+  top: 1px;
+  left: 50%;
+  margin: 0 auto 0 -175px;
+  background-color: rgba(255, 200, 200, 0.75);
+  display: none; }
+#public_data #autoScaleLock {
+  line-height: 24px; }
+#public_data #value_and_time {
+  position: absolute;
+  display: none;
+  top: 2px;
+  right: 2px;
+  background-color: rgba(255, 255, 255, 0.9);
+  margin: 2px;
+  padding: 2px;
+  font-size: 11px;
+  line-height: 11px; }
+
 .device_list .device_list_item {
   border: 1px solid #1c1c1e;
   border-radius: 3px;

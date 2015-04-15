@@ -12,10 +12,8 @@
    <script src="/js/form_utils.js" type="text/javascript"></script>
    <script src="/js/login.js" type="text/javascript"></script>
    <script src="/js/handlebars_templates.js" type="text/javascript"></script>
-   {{#isAuthenticated}}
-      <script src="/js/com/cattfish/AccessToken.js" type="text/javascript"></script>
-      <script src="{{esdrUrl}}/js/api/v1/org/cmucreatelab/esdr/ESDR.js" type="text/javascript"></script>
-   {{/isAuthenticated}}
+   <script src="/js/com/cattfish/AccessToken.js" type="text/javascript"></script>
+   <script src="{{esdrUrl}}/js/api/v1/org/cmucreatelab/esdr/ESDR.js" type="text/javascript"></script>
 </head>
 <body>
 {{> header}}

@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var config = require('../config');
 
 //======================================================================================================================
 
@@ -56,7 +57,12 @@ router.get('/terms/privacy-policy', function(req, res) {
 //----------------------------------------------------------------------------------------------------------------------
 
 router.get('/data', function(req, res) {
-   res.render('data', { title : "CATTfish: Data", section : "data"});
+   res.render('data', {
+      title : "CATTfish: Data",
+      section : "data",
+      googleMapsApiKey : config.get("maps:apiKey"),
+      cattfish_product_id : config.get("product:id")
+   });
 });
 
 router.get('/signup', function(req, res) {
