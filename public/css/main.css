@@ -3,7 +3,7 @@ body {
   font-weight: 400 !important;
   font-size: 16px !important;
   color: #1c1c1e;
-  background: #455f6a url('../images/background.jpg') no-repeat scroll 0 0;
+  background: #455f6a url("../images/background.jpg") no-repeat scroll 0 0;
   background-size: 100%;
   min-width: 1020px;
   margin: 0;
@@ -158,11 +158,14 @@ input[type="radio"], input[type="checkbox"] {
   border: 1px solid #1c1c1e;
   margin: 0;
   padding: 0; }
+
 #map_area .map_instructions {
   font-size: 12px !important;
   color: #666666; }
+
 #map_area #map_geolocation {
   font-size: 12px !important; }
+
 #map_area .map_geolocation_prompt {
   display: none; }
 
@@ -295,15 +298,19 @@ input[type="radio"], input[type="checkbox"] {
   width: 290px; }
   .about_pages .textlogo img {
     width: 200px; }
+
 .about_pages .textlogo:last-of-type {
   margin-right: 0; }
+
 .about_pages div.images img.right {
   float: right; }
 
 .terms_pages .question {
   font-weight: bold; }
+
 .terms_pages .underline {
   text-decoration: underline; }
+
 .terms_pages .underline_and_italics {
   text-decoration: underline;
   font-style: italic; }
@@ -356,6 +363,7 @@ input[type="radio"], input[type="checkbox"] {
 
 #public_data #grapher_bottom_toolbar {
   margin-top: 5px; }
+
 #public_data #map_area {
   margin-top: 10px;
   margin-bottom: 20px;
@@ -363,10 +371,12 @@ input[type="radio"], input[type="checkbox"] {
   width: 619px;
   height: 300px;
   display: none; }
+
 #public_data #time_range_switcher_panel, #public_data #time_range_switcher_panel_placeholder {
   display: none;
   font-size: 12px;
   margin-bottom: 5px; }
+
 #public_data #no_geolocation {
   position: absolute;
   width: 350px;
@@ -377,8 +387,10 @@ input[type="radio"], input[type="checkbox"] {
   margin: 0 auto 0 -175px;
   background-color: rgba(255, 200, 200, 0.75);
   display: none; }
+
 #public_data #autoScaleLock {
   line-height: 24px; }
+
 #public_data #value_and_time {
   position: absolute;
   display: none;
@@ -409,8 +421,10 @@ input[type="radio"], input[type="checkbox"] {
   padding: 10px;
   margin: 5px 0 5px 0;
   cursor: pointer; }
+
 .feed_list .feed_list_item:hover {
   border: 1px solid #428bca; }
+
 .feed_list .selected_feed {
   color: white;
   background-color: #428bca; }
