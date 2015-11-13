@@ -463,6 +463,42 @@
       }
    }
 
+   function isChannelInChannelSpecs(channelSpecs, channelName) {
+      if (channelSpecs) {
+         // deal with different versions of channelSpecs
+         var version = channelSpecs.version || -1;
+         switch (version) {
+            case 1:
+               return ("channels" in channelSpecs && channelName in channelSpecs['channels']);
+               break;
+            default:
+               return channelName in channelSpecs;
+         }
+      }
+
+      return false;
+   }
+
+   function getChannelPropertyFromChannelSpecs(channelSpecs, channelName, propertyName) {
+      if (channelSpecs) {
+         // deal with different versions of channelSpecs
+         var version = channelSpecs.version || 0;
+         switch (version) {
+            case 1:
+               if ("channels" in channelSpecs && channelName in channelSpecs['channels']) {
+                  return channelSpecs["channels"][channelName][propertyName];
+               }
+               break;
+            default:
+               if (channelName in channelSpecs) {
+                  return channelSpecs[channelName][propertyName];
+               }
+         }
+      }
+
+      return undefined;
+   }
+
    function addFeedToGrapher(feed, willPreserveDateAxis) {
       if (feed) {
          willPreserveDateAxis = !!willPreserveDateAxis;
@@ -523,10 +559,12 @@
          };
 
          // set the Y axis label
+         var channelUnits = null;
          var yAxisLabel = null;
-         if (feed['channelSpecs'] && feed['channelSpecs'][selectedChannelName]) {
-            var prettyName = feed['channelSpecs'][selectedChannelName]['prettyName'];
-            var units = feed['channelSpecs'][selectedChannelName]['units'];
+         var prettyName = selectedChannelName;
+         if (isChannelInChannelSpecs(feed['channelSpecs'], selectedChannelName)) {
+            prettyName = getChannelPropertyFromChannelSpecs(feed['channelSpecs'], selectedChannelName, 'prettyName');
+            var units = getChannelPropertyFromChannelSpecs(feed['channelSpecs'], selectedChannelName, 'units');
             if (prettyName) {
                yAxisLabel = prettyName;
             }
@@ -535,7 +573,10 @@
                yAxisLabel += " (" + units + ")";
             }
          }
-         $("#y_axis_label").html(yAxisLabel == null ? "" : yAxisLabel);
+         else {
+            yAxisLabel = selectedChannelName;
+         }
+         $("#y_axis_label").text(yAxisLabel == null ? "" : yAxisLabel);
 
          // render the links to change channels
          $("#channel_switcher_panel").empty();
@@ -546,7 +587,10 @@
             }
 
             availableChannels.forEach(function(channelName) {
-               var prettyChannelName = feed['channelSpecs'][channelName]['prettyName'];
+               var prettyChannelName = channelName;
+               if (isChannelInChannelSpecs(feed['channelSpecs'], channelName)) {
+                  prettyChannelName = getChannelPropertyFromChannelSpecs(feed['channelSpecs'], channelName, 'prettyName');
+               }
                var selectionStateClass = (channelName == selectedChannelName) ? 'selected' : 'unselected';
                var element = $('<div class="channel_link"><span class="' + selectionStateClass + '">' + prettyChannelName + '</span></div>');
 
@@ -593,7 +637,7 @@
                valueAndTimeElement.empty();
             }
             else {
-               valueAndTimeElement.html(val.valueString + (channelUnits == null ? "" : " " + channelUnits) + " at " + val.dateString);
+               valueAndTimeElement.text(val.valueString + (channelUnits == null ? "" : " " + channelUnits) + " at " + val.dateString);
             }
          });
 
